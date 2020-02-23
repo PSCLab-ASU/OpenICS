@@ -2,6 +2,10 @@ import numpy as np
 import torch
 from torch import Tensor
 
+"""We'll implement this when we get LearnedDAMP.py and 
+TrainLearnedDAMP.py implemented in torch, 
+I think ldamp will be a wrapper function for trainlearneddamp"""
+
 
 def ldamp(
     sensing="gaussian",
