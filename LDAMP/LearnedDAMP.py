@@ -2,6 +2,8 @@ import numpy as np
 import math
 from scipy.stats import truncnorm
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 from torch.distributions.normal import Normal
 
 
@@ -307,25 +309,25 @@ def DnCNN_outer_wrapper(r, rvar, theta, tie, iter, training=False, LayerbyLayer=
 
 
 ## Denoiser Wrapper that computes divergence
-def DnCNN_wrapper(r, rvar, theta_thislayer, training=False, LayerbyLayer=True):
+def DnCNN_wrapper(r, rvar, theta_thislayer, dncnn, dncnnWrapper, training=False, LayerbyLayer=True):
     """
     Call a black-box denoiser and compute a Monte Carlo estimate of dx/dr
     """
-    xhat = DnCNN(r, rvar, theta_thislayer, training=training)
+
+    xhat = dncnn.forward(r)
     r_abs = torch.abs(r)
-    # There's no way this is correct...
-    epsilon = torch.max(
-        torch.ones(r_abs.shape[0]) * 0.001 * torch.max(r_abs, dim=0),
-        torch.ones(r_abs.shape[0]) * 0.00001,
-    )
-    eta = Normal(torch.tensor([0.0]), torch.tensor([1.0])).rsample(r.shape)
-    r_perturbed = r + torch.matmul(eta, epsilon)
-    xhat_perturbed = DnCNN(
-        r_perturbed, rvar, theta_thislayer, training=training
-    )  # Avoid computing gradients wrt this use of theta_thislayer
-    eta_dx = torch.matmul(
-        eta, xhat_perturbed - xhat
-    )  # Want element-wise multiplication
+
+    r_absColumnWise = torch.max(r_abs, dim=0)[0]
+    
+    epsilon = torch.max(r_absColumnWise*0.001, torch.ones(r_absColumnWise.shape)*0.00001)
+
+    eta = torch.normal(0,1,r.shape)#Normal(torch.tensor([0.0]), torch.tensor([1.0])).rsample(r.shape)
+
+    r_perturbed = r + torch.mul(eta, epsilon)
+
+    xhat_perturbed = dncnnWrapper.forward(r_perturbed)
+
+    eta_dx = torch.mul(eta, xhat_perturbed - xhat)  # Want element-wise multiplication
     mean_eta_dx = torch.mean(eta_dx, dim=0)
     dxdrMC = torch.div(mean_eta_dx, epsilon)
     # if not LayerbyLayer:
@@ -335,61 +337,38 @@ def DnCNN_wrapper(r, rvar, theta_thislayer, training=False, LayerbyLayer=True):
     return (xhat, dxdrMC)
 
 
+class DnCNN(nn.Module):
+        def __init__(self):
+            super(DnCNN, self).__init__()
+            #self.pad = torch.nn.ZeroPad2d((0,1,0,1))
+            self.conv0 = nn.Conv2d(1, 64,kernel_size = 3, stride=1,padding=1)
+            self.layers = nn.ModuleList()
+
+            for i in range(1,n_DnCNN_layers-1):              
+                #pad = torch.nn.ZeroPad2d((0,1,0,1)) 
+                conv = nn.Conv2d(64,64, kernel_size = 3, stride=1,padding=1)
+                batchnorm = nn.BatchNorm2d(64) #training
+                #self.layers.add_module(pad)
+                self.layers.add_module("conv"+str(i), conv)
+                self.layers.add_module("batch"+str(i), batchnorm)
+            self.convLast = nn.Conv2d(64, 1,kernel_size = 3, stride=1,padding=1)
+        def forward(self, r):
+            r = torch.t(r)
+            orig_Shape = r.shape
+            shape4D = [-1, channel_img, width_img, height_img]#shape4D = [-1, height_img, width_img, channel_img]
+            r = torch.reshape(r, shape4D)  # reshaping input
+            #print("input shape:" + str(r.shape))
+            x = F.relu(self.conv0(r))
+            #print(x.shape)
+            for i, l in enumerate(self.layers): 
+                #x = self.pad(x)
+                x = l(x)
+                #print(x.shape)
+            x = F.relu(self.convLast(x))
+            x_hat = r-x
+            x_hat = torch.t(torch.reshape(x_hat, orig_Shape))
+            return x_hat
 ## Create Denoiser Model
-def DnCNN(r, rvar, theta_thislayer, training=False):
-    # Reuse will always be true, thus init_vars_DnCNN must be called within the appropriate namescope before DnCNN can be used
-    ##r is n x batch_size, where in this case n would be height_img*width_img*channel_img
-    # rvar is unused within DnCNN. It may have been used to select which sets of weights and biases to use.
-    weights = theta_thislayer[0]
-    # biases=theta_thislayer[1]
-
-    r = torch.t(r)
-    orig_Shape = r.shape
-    shape4D = [-1, height_img, width_img, channel_img]
-    r = torch.reshape(r, shape4D)  # reshaping input
-    layers = [torch.Tensor()] * n_DnCNN_layers
-
-    #############  First Layer ###############
-    # Conv + Relu
-    conv_out = torch.nn.Conv2d(
-        r.shape[3],
-        weights[0].shape[3],
-        kernel_size=(weights[0].shape[0], weights[0].shape[1]),
-        stride=[1, 1, 1, 1],
-    )
-    relu = torch.nn.ReLU()
-    layers[0] = relu(conv_out(r))
-
-    #############  2nd to 2nd to Last Layer ###############
-    # Conv + BN + Relu
-    for i in range(1, n_DnCNN_layers - 1):
-        conv_out = torch.nn.Conv2d(
-            layers[i - 1].shape[3],
-            weights[i].shape[3],
-            kernel_size=(weights[i].shape[0], weights[i].shape[1]),
-            stride=[1, 1, 1, 1],
-        )  # + biases[i]
-        batch_out = torch.nn.BatchNorm2d(layers[i - 1].shape[1])
-        layers[i] = relu(batch_out(conv_out(layers[i - 1])))
-
-    #############  Last Layer ###############
-    # Conv
-    conv_out = torch.nn.Conv2d(
-        layers[n_DnCNN_layers - 2].shape[3],
-        weights[n_DnCNN_layers - 1].shape[3],
-        kernel_size=(
-            weights[n_DnCNN_layers - 1].shape[0],
-            weights[n_DnCNN_layers - 1].shape[1],
-        ),
-        stride=[1, 1, 1, 1],
-    )
-
-    layers[n_DnCNN_layers - 1] = conv_out(layers[n_DnCNN_layers - 2])
-
-    x_hat = r - layers[n_DnCNN_layers - 1]
-    x_hat = torch.t(torch.reshape(x_hat, orig_Shape))
-    return x_hat
-
 
 ## Create training data from images, with tf and function handles
 def GenerateNoisyCSData_handles(x, A_handle, sigma_w, A_params):
