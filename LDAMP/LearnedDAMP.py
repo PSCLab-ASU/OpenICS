@@ -3,9 +3,10 @@ import math
 from scipy.stats import truncnorm
 import torch
 import torch.nn as nn
+import torch.nn.init as init
 import torch.nn.functional as F
 from torch.distributions.normal import Normal
-
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def SetNetworkParams(
     new_height_img,
@@ -319,9 +320,9 @@ def DnCNN_wrapper(r, rvar, theta_thislayer, dncnn, dncnnWrapper, training=False,
 
     r_absColumnWise = torch.max(r_abs, dim=0)[0]
     
-    epsilon = torch.max(r_absColumnWise*0.001, torch.ones(r_absColumnWise.shape)*0.00001)
+    epsilon = torch.max(r_absColumnWise*0.001, torch.ones(r_absColumnWise.shape).to(device)*0.00001)
 
-    eta = torch.normal(0,1,r.shape)#Normal(torch.tensor([0.0]), torch.tensor([1.0])).rsample(r.shape)
+    eta = torch.normal(0,1,r.shape).to(device)#Normal(torch.tensor([0.0]), torch.tensor([1.0])).rsample(r.shape)
 
     r_perturbed = r + torch.mul(eta, epsilon)
 
@@ -338,7 +339,7 @@ def DnCNN_wrapper(r, rvar, theta_thislayer, dncnn, dncnnWrapper, training=False,
 
 
 class DnCNN(nn.Module):
-        def __init__(self):
+        def __init__(self, init_mu, init_sigma):
             super(DnCNN, self).__init__()
             #self.pad = torch.nn.ZeroPad2d((0,1,0,1))
             self.conv0 = nn.Conv2d(1, 64,kernel_size = 3, stride=1,padding=1)
@@ -352,6 +353,7 @@ class DnCNN(nn.Module):
                 self.layers.add_module("conv"+str(i), conv)
                 self.layers.add_module("batch"+str(i), batchnorm)
             self.convLast = nn.Conv2d(64, 1,kernel_size = 3, stride=1,padding=1)
+            self._initialize_weights(init_mu, init_sigma)
         def forward(self, r):
             r = torch.t(r)
             orig_Shape = r.shape
@@ -362,12 +364,19 @@ class DnCNN(nn.Module):
             #print(x.shape)
             for i, l in enumerate(self.layers): 
                 #x = self.pad(x)
+                #print(i)
                 x = l(x)
                 #print(x.shape)
             x = F.relu(self.convLast(x))
             x_hat = r-x
             x_hat = torch.t(torch.reshape(x_hat, orig_Shape))
             return x_hat
+        def _initialize_weights(self,init_mu, init_sigma):
+            for m in self.modules():
+                if isinstance(m, nn.Conv2d):
+                    init.normal_(m.weight,init_mu,init_sigma)
+                elif isinstance(m, nn.BatchNorm2d):
+                    init.normal_(m.weight, init_mu, init_sigma)
 ## Create Denoiser Model
 
 ## Create training data from images, with tf and function handles
@@ -388,7 +397,7 @@ def GenerateNoisyCSData(x, A, sigma_w):
 def AddNoise(clean, sigma):
     noise_vec = sigma * torch.distributions.Normal(0, 1).rsample(
         sample_shape=clean.shape
-    )
+    ).to(device)
     noisy = clean + noise_vec
     noisy = torch.reshape(noisy, clean.shape)
     return noisy

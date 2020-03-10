@@ -9,7 +9,7 @@ import time
 import LearnedDAMP as LDAMP
 from matplotlib import pyplot as plt
 import h5py
-
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--debug",
@@ -94,7 +94,7 @@ LDAMP.ListNetworkParameters()
 #sigma_w_tf = tf.placeholder(tf.float32)
 #x_true = tf.placeholder(tf.float32, [n, BATCH_SIZE])
 def test(training_tf, sigma_w_tf, x_true,dncnn, dncnnWrapper):
-    y_measured = LDAMP.AddNoise(x_true,sigma_w_tf)
+    y_measured = LDAMP.AddNoise(x_true,sigma_w_tf).to(device)
     theta_dncnn=LDAMP.init_vars_DnCNN(init_mu, init_sigma)
     [x_hat, div_overN] = LDAMP.DnCNN_wrapper(y_measured,None,theta_dncnn,dncnn,dncnnWrapper,training=training_tf)
     return [x_hat, div_overN, y_measured]
@@ -135,55 +135,42 @@ x_val = np.transpose(np.reshape(val_images, (-1, channel_img * height_img * widt
 
 ## Train the Model
 for learning_rate in learning_rates:
-    dncnn = LDAMP.DnCNN()
-    dncnnWrapper = LDAMP.DnCNN()
+    dncnn = LDAMP.DnCNN(init_mu,init_sigma).to(device)
     lossfn = nn.MSELoss()
-    optimizer = optim.Adam(dncnnWrapper.parameters(), lr =learning_rate)#optimizer0 = tf.train.AdamOptimizer(learning_rate=learning_rate) # Train all the variables
-    #update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-    #with tf.control_dependencies(update_ops):
-        # Ensures that we execute the update_ops before performing the train_step. Allows us to update averages w/in BN
-    #optimizer.zero_grad() #optimizer = optimizer0.minimize(cost)
-
-    #outputs = net(x_train)
-    #loss = cost(outputs, labels)
-    #loss.backward()
-
-
-    #saver_best = tf.train.Saver()  # defaults to saving all variables
-    #saver_dict={}
-    #with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-    #    sess.run(tf.global_variables_initializer())#Seems to be necessary for the batch normalization layers for some reason.
-
-        # if FLAGS.debug:
-        #     sess = tf_debug.LocalCLIDebugWrapperSession(sess)
-        #     sess.add_tensor_filter("has_inf_or_nan", tf_debug.has_inf_or_nan)
+    
+    optimizer = optim.Adam(dncnn.parameters(), lr =learning_rate)#optimizer0 = tf.train.AdamOptimizer(learning_rate=learning_rate) # Train all the variables
 
     start_time = time.time()
-        ###SAVER CODE 1
     
     print("Training ...")
     print()
     if __name__ == '__main__':
-        #save_name = LDAMP.GenDnCNNFilename(sigma_w_min,sigma_w_max,useSURE=useSURE)
+        save_name = LDAMP.GenDnCNNFilename(sigma_w_min,sigma_w_max,useSURE=useSURE)
+        
         #save_name_chckpt = save_name + ".ckpt"
         val_values = []
         print("Initial Weights Validation Value:")
         rand_inds = np.random.choice(len(val_images), n_Val_Images, replace=False)
         start_time = time.time()
         for offset in range(0, n_Val_Images - BATCH_SIZE + 1, BATCH_SIZE):  # Subtract batch size-1 to avoid eerrors when len(train_images) is not a multiple of the batch size
-            end = offset + BATCH_SIZE
-
-            batch_x_val = x_val[:, rand_inds[offset:end]]
-            sigma_w_thisBatch = sigma_w_min + np.random.rand() * (sigma_w_max - sigma_w_min)
-
-            [x_hat,div_overN, y_measured] = test(False, sigma_w_thisBatch, torch.from_numpy(batch_x_val), dncnn,dncnnWrapper)
-            # Run optimization.
-            loss_val = lossFunction(batch_x_val,div_overN,y_measured,sigma_w_thisBatch)     #sess.run(cost, feed_dict={x_true: batch_x_val, sigma_w_tf: sigma_w_thisBatch, training_tf:False})
-            val_values.append(loss_val)
+            with torch.no_grad():
+                end = offset + BATCH_SIZE
+            
+                batch_x_val = x_val[:, rand_inds[offset:end]]
+                sigma_w_thisBatch = sigma_w_min + np.random.rand() * (sigma_w_max - sigma_w_min)
+            
+                x_true = torch.from_numpy(batch_x_val).to(device)
+                y_measured = LDAMP.AddNoise(x_true,sigma_w_thisBatch)
+                x_hat = dncnn.forward(y_measured)
+                #[x_hat,div_overN, y_measured] = test(False, sigma_w_thisBatch, torch.from_numpy(batch_x_val), dncnn,dncnnWrapper)
+                # Run optimization.
+                loss_val = lossfn(x_hat, x_true)#lossFunction(batch_x_val,div_overN,y_measured,sigma_w_thisBatch)     #sess.run(cost, feed_dict={x_true: batch_x_val, sigma_w_tf: sigma_w_thisBatch, training_tf:False})
+                val_values.append(loss_val.item())
+                #print(loss_val)
         time_taken = time.time() - start_time
         print(np.mean(val_values))
         best_val_error = np.mean(val_values)
-        #best_sess = sess
+        best_dncnn = dncnn
         print("********************")
         #save_path = saver_best.save(best_sess, save_name_chckpt)
         #print("Initial session model saved in file: %s" % save_path)
@@ -201,9 +188,16 @@ for learning_rate in learning_rates:
                 batch_x_train = x_train[:, rand_inds[offset:end]]
                 sigma_w_thisBatch = sigma_w_min+np.random.rand()*(sigma_w_max-sigma_w_min)
 
+                x_true = torch.from_numpy(batch_x_train).to(device)
+                y_measured = LDAMP.AddNoise(x_true,sigma_w_thisBatch)
+                x_hat = dncnn.forward(y_measured)
                 # Run optimization.
-                _, loss_val = sess.run([optimizer,cost], feed_dict={x_true: batch_x_train, sigma_w_tf: sigma_w_thisBatch, training_tf:True})#Feed dict names should match with the placeholders
-                train_values.append(loss_val)
+                loss_val = lossfn(x_hat, x_true)
+                loss_val.backward()
+                optimizer.step()
+                train_values.append(loss_val.item())
+            
+            
             time_taken = time.time() - start_time
             print(np.mean(train_values))
             val_values = []
@@ -211,23 +205,30 @@ for learning_rate in learning_rates:
             rand_inds = np.random.choice(len(val_images), n_Val_Images, replace=False)
             start_time = time.time()
             for offset in range(0, n_Val_Images-BATCH_SIZE+1, BATCH_SIZE):#Subtract batch size-1 to avoid eerrors when len(train_images) is not a multiple of the batch size
-                end = offset + BATCH_SIZE
+                with torch.no_grad():
+                    end = offset + BATCH_SIZE
 
-                batch_x_val = x_val[:, rand_inds[offset:end]]
-                sigma_w_thisBatch = sigma_w_min + np.random.rand() * (sigma_w_max - sigma_w_min)
+                    batch_x_val = x_val[:, rand_inds[offset:end]]
+                    sigma_w_thisBatch = sigma_w_min + np.random.rand() * (sigma_w_max - sigma_w_min)
 
-                # Run optimization.
-                loss_val = sess.run(cost, feed_dict={x_true: batch_x_val, sigma_w_tf: sigma_w_thisBatch, training_tf:False})
-                val_values.append(loss_val)
+                    # Run optimization.
+                    x_true = torch.from_numpy(batch_x_val).to(device)
+                    y_measured = LDAMP.AddNoise(x_true,sigma_w_thisBatch)
+                    x_hat = dncnn.forward(y_measured)
+                    #[x_hat,div_overN, y_measured] = test(False, sigma_w_thisBatch, torch.from_numpy(batch_x_val), dncnn,dncnnWrapper)
+                    # Run optimization.
+                    loss_val = lossfn(x_hat, x_true)#lossFunction(batch_x_val,div_overN,y_measured,sigma_w_thisBatch)     #sess.run(cost, feed_dict={x_true: batch_x_val, sigma_w_tf: sigma_w_thisBatch, training_tf:False})
+                    val_values.append(loss_val.item())
             time_taken = time.time() - start_time
             print(np.mean(val_values))
             if(np.mean(val_values) < best_val_error):
                 failed_epochs=0
                 best_val_error = np.mean(val_values)
-                best_sess = sess
+                best_dncnn = dncnn
                 print("********************")
-                save_path = saver_best.save(best_sess, save_name_chckpt)
-                print("Best session model saved in file: %s" % save_path)
+                torch.save(dncnn.state_dict(), "savedmodels/best.pth")
+                #save_path = saver_best.save(save_name, save_name_chckpt)
+                print("Best session model saved")
             else:
                 failed_epochs=failed_epochs+1
             print("********************")

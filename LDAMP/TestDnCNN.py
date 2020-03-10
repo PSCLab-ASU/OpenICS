@@ -1,14 +1,11 @@
-__author__ = 'cmetzler&alimousavi'
-
 import numpy as np
 import argparse
 import torch
 import time
 import LearnedDAMP as LDAMP
-from tensorflow.python import debug as tf_debug
 from matplotlib import pyplot as plt
 import h5py
-
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 ## Network Parameters
 height_img = 256
 width_img = 256
@@ -34,7 +31,6 @@ init_sigma = 0.1
 train_start_time=time.time()
 
 ## Clear all the old variables, tensors, etc.
-tf.reset_default_graph()
 
 LDAMP.SetNetworkParams(new_height_img=height_img, new_width_img=width_img, new_channel_img=channel_img, \
                        new_filter_height=filter_height, new_filter_width=filter_width, new_num_filters=num_filters, \
@@ -44,18 +40,6 @@ LDAMP.SetNetworkParams(new_height_img=height_img, new_width_img=width_img, new_c
 LDAMP.ListNetworkParameters()
 
 
-
-# tf Graph input
-x_true = tf.placeholder(tf.float32, [n, BATCH_SIZE])
-
-## Construct the measurement model and handles/placeholders
-y_measured = LDAMP.AddNoise(x_true,sigma_w)
-
-## Initialize the variable theta which stores the weights and biases
-theta_dncnn=LDAMP.init_vars_DnCNN(init_mu, init_sigma)
-
-## Construct the reconstruction model
-x_hat = LDAMP.DnCNN(y_measured,None,theta_dncnn,training=False)
 
 LDAMP.CountParameters()
 
@@ -69,60 +53,24 @@ test_images = np.load(test_im_name)
 test_images=test_images[:,0,:,:]
 assert (len(test_images)>=BATCH_SIZE), "Requested too much Test data"
 
-x_test = np.transpose( np.reshape(test_images[0:BATCH_SIZE], (BATCH_SIZE, height_img * width_img * channel_img)))
-with tf.Session() as sess:
-    y_test=sess.run(y_measured,feed_dict={x_true: x_test})
-
-## Train the Model
-saver = tf.train.Saver()  # defaults to saving all variables
-saver_dict={}
-with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-    # if 255.*sigma_w<10.:
-    #     sigma_w_min=0.
-    #     sigma_w_max=10.
-    # elif 255.*sigma_w<20.:
-    #     sigma_w_min=10.
-    #     sigma_w_max=20.
-    # elif 255.*sigma_w < 40.:
-    #     sigma_w_min = 20.
-    #     sigma_w_max = 40.
-    # elif 255.*sigma_w < 60.:
-    #     sigma_w_min = 40.
-    #     sigma_w_max = 60.
-    # elif 255.*sigma_w < 80.:
-    #     sigma_w_min = 60.
-    #     sigma_w_max = 80.
-    # elif 255.*sigma_w < 100.:
-    #     sigma_w_min = 80.
-    #     sigma_w_max = 100.
-    # elif 255.*sigma_w < 150.:
-    #     sigma_w_min = 100.
-    #     sigma_w_max = 150.
-    # elif 255.*sigma_w < 300.:
-    #     sigma_w_min = 150.
-    #     sigma_w_max = 300.
-    # else:
-    #     sigma_w_min = 300.
-    #     sigma_w_max = 500.
-    sigma_w_min=sigma_w*255.
-    sigma_w_max=sigma_w*255.
-
-    save_name = LDAMP.GenDnCNNFilename(sigma_w_min/255.,sigma_w_max/255.,useSURE=useSURE)
-    save_name_chckpt = save_name + ".ckpt"
-    saver.restore(sess, save_name_chckpt)
-
+with torch.no_grad():
+    dncnn = LDAMP.DnCNN(init_mu,init_sigma).to(device)
+    dncnn.load_state_dict(torch.load("savedmodels/best.pth"))
+    x_test = torch.from_numpy(np.transpose(np.reshape(test_images[0:BATCH_SIZE], (BATCH_SIZE, height_img * width_img * channel_img)))).to(device).float()
+    y_test= LDAMP.AddNoise(x_test,sigma_w)
+    print('TYPE', x_test.type())
     print("Reconstructing Signal")
     start_time = time.time()
-    [reconstructed_test_images]= sess.run([x_hat], feed_dict={y_measured: y_test})
+    reconstructed_test_images = dncnn.forward(y_test)
     time_taken=time.time()-start_time
-    fig1 = plt.figure()
-    plt.imshow(np.transpose(np.reshape(x_test[:, 0], (height_img, width_img))), interpolation='nearest', cmap='gray')
-    plt.show()
-    fig2 = plt.figure()
-    plt.imshow(np.transpose(np.reshape(y_test[:, 0], (height_img, width_img))), interpolation='nearest', cmap='gray')
-    plt.show()
-    fig3 = plt.figure()
-    plt.imshow(np.transpose(np.reshape(reconstructed_test_images[:, 0], (height_img, width_img))), interpolation='nearest', cmap='gray')
-    plt.show()
-    [_,_,PSNR]=LDAMP.EvalError_np(x_test[:, 0],reconstructed_test_images[:, 0])
-    print(" PSNR: " ,PSNR)
+fig1 = plt.figure()
+plt.imshow(np.transpose(np.reshape(x_test[:, 0].to("cpu"), (height_img, width_img))), interpolation='nearest', cmap='gray')
+plt.show()
+fig2 = plt.figure()
+plt.imshow(np.transpose(np.reshape(y_test[:, 0].to("cpu"), (height_img, width_img))), interpolation='nearest', cmap='gray')
+plt.show()
+fig3 = plt.figure()
+plt.imshow(np.transpose(np.reshape(reconstructed_test_images[:, 0].to("cpu"), (height_img, width_img))), interpolation='nearest', cmap='gray')
+plt.show()
+[_,_,PSNR]=LDAMP.EvalError(x_test[:, 0].to("cpu"),reconstructed_test_images[:, 0].to("cpu"))
+print(" PSNR: " ,PSNR)
