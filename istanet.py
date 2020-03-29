@@ -64,8 +64,11 @@ class ISTANetModel(torch.nn.Module):
         self.fcs = nn.ModuleList(onelayer)
 
     def forward(self, Phix, Phi, Qinit):
+        print("PHIX IN MODEL", Phix.size(), "PHI SIZE IN MODEL", Phi.size())
 
         PhiTPhi = torch.mm(torch.transpose(Phi, 0, 1), Phi)
+        print("PHIX BEFORE BREAKING", Phix.size(), "PHI BEFORE BREAKING", Phi.size())
+
         PhiTb = torch.mm(Phix, Phi)
 
         x = torch.mm(Phix, torch.transpose(Qinit, 0, 1))

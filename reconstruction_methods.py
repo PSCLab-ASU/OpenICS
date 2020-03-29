@@ -73,7 +73,12 @@ class ISTANet:
                     batch_x = batch_x.to(self.device)
                     print("PHI SIZE AT MULT:", self.Phi.size())
                     Phix = torch.mm(batch_x, torch.transpose(self.Phi, 0, 1))
-                    print("PHI SIZE AFTER MULT:", self.Phi.size())
+                    print(
+                        "PHIX AT CREATION",
+                        Phix.size(),
+                        "PHI SIZE AFTER MULT:",
+                        self.Phi.size(),
+                    )
                     [x_output, loss_layers_sym] = self.model(Phix, self.Phi, self.Qinit)
 
                     # Compute and print loss
