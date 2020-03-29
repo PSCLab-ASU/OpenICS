@@ -45,6 +45,7 @@ class ISTANet:
         Phi_input = Phi_data["phi"]
         Phi = torch.from_numpy(Phi_input).type(torch.FloatTensor)
         self.Phi = Phi.to(self.device)
+        print(self.Phi.size())
 
         # setup qinit
         Training_data_Name = "Training_Data.mat"
