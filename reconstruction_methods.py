@@ -40,7 +40,6 @@ class ISTANet:
         )
 
         # Phi is their sampling matrix, should this be involved in the sensing methods section instead?
-        # TODO: Load sampling matrix
         Phi_data = sio.loadmat(f"models/phi_0_{self.specifics['cs_ratio']}_1089.mat")
         Phi_input = Phi_data["phi"]
         Phi = torch.from_numpy(Phi_input).type(torch.FloatTensor)
@@ -48,7 +47,6 @@ class ISTANet:
 
         # setup qinit
         Training_data_Name = "Training_Data.mat"
-        # TODO: insert training_data.mat
         Training_data = sio.loadmat("models/Training_Data.mat")
         Training_labels = Training_data["labels"]
 

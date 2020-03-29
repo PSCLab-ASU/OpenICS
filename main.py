@@ -46,7 +46,7 @@ def main(
     reconstruction_method = rms.reconstruction_method(reconstruction, specifics)
     # put result of the parameters into specifics.
     reconstruction_method.initialize(dset, sensing_method)
-    reconstruction_method.run()
+    reconstruction_method.run("training")
 
 
 if __name__ == "__main__":
