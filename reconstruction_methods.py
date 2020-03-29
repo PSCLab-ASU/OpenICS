@@ -49,7 +49,7 @@ class ISTANet:
         # setup qinit
         Training_data_Name = "Training_Data.mat"
         # TODO: insert training_data.mat
-        Training_data = sio.loadmat("models/Training_data.mat")
+        Training_data = sio.loadmat("models/Training_Data.mat")
         Training_labels = Training_data["labels"]
 
         X_data = Training_labels.transpose()
