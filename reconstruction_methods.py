@@ -45,7 +45,7 @@ class ISTANet:
         Phi_input = Phi_data["phi"]
         Phi = torch.from_numpy(Phi_input).type(torch.FloatTensor)
         self.Phi = Phi.to(self.device)
-        print(self.Phi.size())
+        # print(self.Phi.size())
 
         # setup qinit
         Training_data_Name = "Training_Data.mat"
@@ -71,7 +71,9 @@ class ISTANet:
                 for data in self.sensing:
                     batch_x = data
                     batch_x = batch_x.to(self.device)
+                    print("PHI SIZE AT MULT:", self.Phi.size())
                     Phix = torch.mm(batch_x, torch.transpose(self.Phi, 0, 1))
+                    print("PHI SIZE AFTER MULT:", self.Phi.size())
                     [x_output, loss_layers_sym] = self.model(Phix, self.Phi, self.Qinit)
 
                     # Compute and print loss
