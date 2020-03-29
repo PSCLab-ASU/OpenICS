@@ -55,7 +55,7 @@ if __name__ == "__main__":
         "ISTANet",
         "training",
         "False",
-        "Training_Data.mat",
+        "models/Training_Data.mat",
         1,
         0,
         0,
