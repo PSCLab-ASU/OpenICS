@@ -24,11 +24,12 @@ class ISTANet:
         self.Phi = None
         self.Qinit = None
 
-    def initialize(self, dataset, sensing):
+    # def initialize(self, dataset, sensing):
+    def initialize(self, sensing):
         # do the preparation for the running.
         # init optimizers if training
         # testing is one time forward
-        self.dataset = dataset
+        # self.dataset = dataset
         self.sensing = sensing
 
         self.model = nn.DataParallel(self.model)
@@ -66,7 +67,7 @@ class ISTANet:
                 )
 
             for epoch in range(start_epoch + 1, end_epoch + 1):
-                for data in self.dataset:
+                for data in self.sensing:
                     batch_x = data
                     batch_x = batch_x.to(self.device)
                     Phix = torch.mm(batch_x, torch.transpose(self.Phi, 0, 1))

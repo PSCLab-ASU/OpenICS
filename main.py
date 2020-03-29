@@ -45,7 +45,7 @@ def main(
     sensing_method = sms.sensing_method(sensing, dset, m, specifics)
     reconstruction_method = rms.reconstruction_method(reconstruction, specifics)
     # put result of the parameters into specifics.
-    reconstruction_method.initialize(dset, sensing_method)
+    reconstruction_method.initialize(sensing_method)
     reconstruction_method.run("training")
 
 
