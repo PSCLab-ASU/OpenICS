@@ -34,10 +34,9 @@ def main(
             "learning_rate": 1e-4,
             "start_epoch": 0,
             "end_epoch": 200,
-            "cs_ratio": 0.25
+            "cs_ratio": 25,
         }
-        m = n * specifics["cs_ratio"]
-
+        m = n * specifics["cs_ratio"] / 100
 
     dset = utils.generate_dataset(
         dataset, "mat", input_channel, input_width, input_height, stage
@@ -51,4 +50,23 @@ def main(
 
 
 if __name__ == "__main__":
-    main(0, "ISTANet", 0, "True", 0, 0, 0, 0, 0, 0, 0)
+    main(
+        "Gaussian",
+        "ISTANet",
+        "training",
+        "False",
+        "Training_Data.mat",
+        1,
+        0,
+        0,
+        0,
+        0,
+        {
+            "batch_size": 64,
+            "layer_num": 9,
+            "learning_rate": 1e-4,
+            "start_epoch": 0,
+            "end_epoch": 200,
+            "cs_ratio": 25,
+        },
+    )
