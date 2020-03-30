@@ -79,7 +79,7 @@ class ISTANet:
                         "PHI SIZE AFTER MULT:",
                         self.Phi.size(),
                     )
-                    [x_output, loss_layers_sym] = self.model(Phix, self.Phi, self.Qinit)
+                    [x_output, loss_layers_sym] = self.model.forward(Phix, self.Phi, self.Qinit)
 
                     # Compute and print loss
                     loss_discrepancy = torch.mean(torch.pow(x_output - batch_x, 2))
