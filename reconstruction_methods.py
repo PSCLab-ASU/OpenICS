@@ -17,7 +17,7 @@ class ISTANet:
         # do the initialization of the network with given parameters.
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.specifics = specifics
-        self.model = ISTANetModel(specifics["layer_num"])
+        self.model = None
         self.optimizer = None
         self.dataset = None
         self.sensing = None
@@ -32,7 +32,7 @@ class ISTANet:
         # self.dataset = dataset
         self.sensing = sensing
 
-        self.model = nn.DataParallel(self.model)
+        self.model = ISTANetModel(self.specifics["layer_num"])
         if torch.cuda.is_available():
             self.model = self.model.to(self.device)
 
@@ -71,14 +71,14 @@ class ISTANet:
                 for data in self.sensing:
                     batch_x = data
                     batch_x = batch_x.to(self.device)
-                    print("PHI SIZE AT MULT:", self.Phi.size())
+                    # print("PHI SIZE AT MULT:", self.Phi.size())
                     Phix = torch.mm(batch_x, torch.transpose(self.Phi, 0, 1))
-                    print(
-                        "PHIX AT CREATION",
-                        Phix.size(),
-                        "PHI SIZE AFTER MULT:",
-                        self.Phi.size(),
-                    )
+                    # print(
+                    #     "PHIX AT CREATION",
+                    #     Phix.size(),
+                    #     "PHI SIZE AFTER MULT:",
+                    #     self.Phi.size(),
+                    # )
                     [x_output, loss_layers_sym] = self.model.forward(Phix, self.Phi, self.Qinit)
 
                     # Compute and print loss

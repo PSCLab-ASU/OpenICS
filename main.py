@@ -1,7 +1,9 @@
+import os
 import reconstruction_methods as rms
 import utils
 import sensing_methods as sms
 
+os.environ["CUDA_VISIBLE_DEVICES"] = 0
 
 def main(
     sensing,
