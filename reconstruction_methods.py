@@ -57,6 +57,8 @@ class ISTANet:
         Y_YT = np.dot(Y_data, Y_data.transpose())
         X_YT = np.dot(X_data, Y_data.transpose())
         self.Qinit = np.dot(X_YT, np.linalg.inv(Y_YT))
+        self.Qinit = torch.from_numpy(self.Qinit).type(torch.FloatTensor)
+        self.Qinit = self.Qinit.to(self.device)
 
     def run(self, stage):
         if stage == "training":
