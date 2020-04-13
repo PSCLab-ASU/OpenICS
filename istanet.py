@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import init
-# import torchvision
 
 # Define ISTA-Net Block
 class BasicBlock(torch.nn.Module):
