@@ -146,6 +146,8 @@ class ISTANet:
                 for img_no in range(ImgNum):
                     imgName = filepaths[img_no]
 
+                    print(imgName)
+
                     Img = cv2.imread(imgName, 1)
 
                     Img_yuv = cv2.cvtColor(Img, cv2.COLOR_BGR2YCrCb)
