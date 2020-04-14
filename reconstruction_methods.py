@@ -128,7 +128,7 @@ class ISTANet:
         elif stage == "testing":
             self.model.load_state_dict(
                 torch.load(
-                    f"models/istanet_params_{self.specifics['epoch_number']}.pkl"
+                    f"models/istanet_params_{self.specifics['epoch_num']}.pkl"
                 )
             )
 
