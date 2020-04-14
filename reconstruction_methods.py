@@ -126,9 +126,10 @@ class ISTANet:
                             self.model.state_dict(), f"models/net_params_{epoch}.pkl"
                         )  # save only the parameters
         elif stage == "testing":
+            print(self.specifics)
             self.model.load_state_dict(
                 torch.load(
-                    f"models/istanet_params_{self.specifics['epoch_num']}.pkl"
+                    f"models/net_params_{self.specifics['epoch_num']}.pkl"
                 )
             )
 
