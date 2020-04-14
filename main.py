@@ -39,6 +39,7 @@ def main(
             "end_epoch": 200,
             "cs_ratio": 25,
             "epoch_num": 200,
+            "test_image_number": 11
         }
         m = n * specifics["cs_ratio"] / 100
 
