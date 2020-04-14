@@ -42,11 +42,15 @@ def main(
         }
         m = n * specifics["cs_ratio"] / 100
 
-    dset = utils.generate_dataset(
-        dataset, "mat", input_channel, input_width, input_height, stage
-    )
+    if stage == "training":
+        dset = utils.generate_dataset(
+            dataset, "mat", input_channel, input_width, input_height, stage
+        )
 
-    sensing_method = sms.sensing_method(sensing, dset, m, specifics)
+        sensing_method = sms.sensing_method(sensing, dset, m, specifics)
+    else:
+        # TODO: make utils method for reading tiffs.
+        sensing_method = None
     reconstruction_method = rms.reconstruction_method(reconstruction, specifics)
     # put result of the parameters into specifics.
     reconstruction_method.initialize(sensing_method)
