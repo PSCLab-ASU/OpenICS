@@ -134,7 +134,7 @@ class ISTANet:
             )
 
             print("CS Reconstruction Start")
-            filepaths = glob.glob(f"data/{self.dataset}/*.tif")
+            filepaths = glob.glob(f"data/{self.specifics['test_data']}/*.tif")
 
             result_dir = "results"
 

@@ -38,7 +38,8 @@ def main(
             "start_epoch": 0,
             "end_epoch": 200,
             "cs_ratio": 25,
-            "epoch_num": 200
+            "epoch_num": 200,
+            "test_data": "Set11"
         }
         m = n * specifics["cs_ratio"] / 100
 
