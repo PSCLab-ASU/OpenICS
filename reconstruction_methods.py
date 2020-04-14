@@ -158,6 +158,8 @@ class ISTANet:
 
                     Img_output = Icol
 
+                    print("got to start")
+
                     start = time()
 
                     batch_x = torch.from_numpy(Img_output)
@@ -169,6 +171,8 @@ class ISTANet:
                     [x_output, loss_layers_sym] = self.model(Phix, self.Phi, self.Qinit)
 
                     end = time()
+
+                    print("got to end")
 
                     Prediction_value = x_output.cpu().data.numpy()
 
