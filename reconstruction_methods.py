@@ -143,7 +143,7 @@ class ISTANet:
             SSIM_All = np.zeros([1, ImgNum], dtype=np.float32)
 
             with torch.no_grad():
-                for img_no in range(self.specifics["test_image_number"]):
+                for img_no in range(ImgNum):
                     imgName = filepaths[img_no]
 
                     Img = cv2.imread(imgName, 1)
