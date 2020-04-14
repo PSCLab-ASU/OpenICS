@@ -5,6 +5,7 @@ import sensing_methods as sms
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
+
 def main(
     sensing,
     reconstruction,
@@ -57,7 +58,7 @@ if __name__ == "__main__":
         "Gaussian",
         "ISTANet",
         "testing",
-        "False",
+        "True",
         "models/Training_Data.mat",
         1,
         0,
