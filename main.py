@@ -49,14 +49,14 @@ def main(
     reconstruction_method = rms.reconstruction_method(reconstruction, specifics)
     # put result of the parameters into specifics.
     reconstruction_method.initialize(sensing_method)
-    reconstruction_method.run("training")
+    reconstruction_method.run(stage)
 
 
 if __name__ == "__main__":
     main(
         "Gaussian",
         "ISTANet",
-        "training",
+        "testing",
         "False",
         "models/Training_Data.mat",
         1,
