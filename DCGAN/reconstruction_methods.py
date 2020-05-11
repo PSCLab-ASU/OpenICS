@@ -1,11 +1,12 @@
 import numpy as np
 import scipy.io as sio
 import torch
-from torch import nn
+import torch.optim as optim
 import cv2
 from time import time
 import glob
 from istanet import ISTANetModel
+from dcgan import DCGANGenerator, DCGANDiscriminator, weights_init
 from skimage.measure import compare_ssim as ssim
 from utils import rgb2ycbcr, ycbcr2rgb, imread_CS_py, img2col_py, col2im_CS_py, psnr
 
@@ -17,7 +18,7 @@ def reconstruction_method(reconstruction, specifics):
         return ISTANet(specifics)
 
 
-class ISTANet:
+class Method:
     def __init__(self, specifics):
         # do the initialization of the network with given parameters.
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -28,6 +29,39 @@ class ISTANet:
         self.sensing = None
         self.Phi = None
         self.Qinit = None
+
+
+class DCGAN(Method):
+    def __init__(self, specifics):
+        super().__init__(specifics)
+        self.generator = None
+        self.discriminator = None
+        self.optimizer_g = None
+        self.optimizer_d = None
+        # Establish convention for real and fake labels during training
+        self.real_label = 1
+        self.fake_label = 0
+
+    def initialize(self, sensing):
+        self.sensing = sensing
+        # 64 is the size of the images
+        self.generator = DCGANGenerator(100, 64, 3).to(self.device)
+        self.generator.apply(weights_init)
+        self.discriminator = DCGANDiscriminator(3, 64).to(self.device)
+        self.discriminator.apply(weights_init)
+        self.optimizer_d = optim.Adam(self.discriminator.parameters(), lr=0.0002, betas=(0.5, 0.999))
+        self.optimizer_g = optim.Adam(self.generator.parameters(), lr=0.0002, betas=(0.5, 0.999))
+
+    def run(self, stage):
+        if stage == "training":
+            # train
+            pass
+        elif stage == "testing":
+            # test
+            pass
+
+
+class ISTANet(Method):
 
     # def initialize(self, dataset, sensing):
     def initialize(self, sensing):
@@ -110,14 +144,14 @@ class ISTANet:
                     self.optimizer.step()
 
                     output_data = (
-                        "[%02d/%02d] Total Loss: %.4f, Discrepancy Loss: %.4f,  Constraint Loss: %.4f\n"
-                        % (
-                            epoch,
-                            end_epoch,
-                            loss_all.item(),
-                            loss_discrepancy.item(),
-                            loss_constraint,
-                        )
+                            "[%02d/%02d] Total Loss: %.4f, Discrepancy Loss: %.4f,  Constraint Loss: %.4f\n"
+                            % (
+                                epoch,
+                                end_epoch,
+                                loss_all.item(),
+                                loss_discrepancy.item(),
+                                loss_constraint,
+                            )
                     )
                     print(output_data)
 
@@ -128,9 +162,7 @@ class ISTANet:
         elif stage == "testing":
             print(self.specifics)
             self.model.load_state_dict(
-                torch.load(
-                    f"models/net_params_{self.specifics['epoch_num']}.pkl"
-                )
+                torch.load(f"models/net_params_{self.specifics['epoch_num']}.pkl")
             )
 
             print("CS Reconstruction Start")
@@ -226,14 +258,14 @@ class ISTANet:
 
             print("\n")
             output_data = (
-                "CS ratio is %d, Avg PSNR/SSIM for %s is %.2f/%.4f, Epoch number of model is %d \n"
-                % (
-                    self.specifics["cs_ratio"],
-                    self.dataset,
-                    np.mean(PSNR_All),
-                    np.mean(SSIM_All),
-                    self.specifics["epoch_num"],
-                )
+                    "CS ratio is %d, Avg PSNR/SSIM for %s is %.2f/%.4f, Epoch number of model is %d \n"
+                    % (
+                        self.specifics["cs_ratio"],
+                        self.dataset,
+                        np.mean(PSNR_All),
+                        np.mean(SSIM_All),
+                        self.specifics["epoch_num"],
+                    )
             )
             print(output_data)
 

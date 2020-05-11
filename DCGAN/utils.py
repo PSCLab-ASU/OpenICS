@@ -3,6 +3,8 @@ import math
 import scipy.io as sio
 import numpy as np
 from torch.utils.data import Dataset
+import torchvision.datasets as dset
+import torchvision.transforms as transforms
 
 
 class RandomDataset(Dataset):
@@ -28,6 +30,31 @@ def generate_dataset(dataset, type, input_channel, input_width, input_height, st
         data = sio.loadmat(dataset)
         labels = data["labels"]
         return RandomDataset(labels, nrtrain)
+    elif type == "jpeg":
+
+        # Number of workers for dataloader
+        workers = 2
+
+        # Batch size during training
+        batch_size = 128
+
+        # Spatial size of training images. All images will be resized to this
+        #   size using a transformer.
+        image_size = (input_width, input_height)
+
+        # We can use an image folder dataset the way we have it setup.
+        # Create the dataset
+        return dset.ImageFolder(
+            root=dataset,
+            transform=transforms.Compose(
+                [
+                    transforms.Resize(image_size),
+                    transforms.CenterCrop(image_size),
+                    transforms.ToTensor(),
+                    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                ]
+            ),
+        )
 
 
 def rgb2ycbcr(rgb):

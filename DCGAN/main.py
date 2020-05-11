@@ -1,7 +1,7 @@
 import os
 import reconstruction_methods as rms
 import utils
-import sensing_methods as sms
+from sensing_methods import Sensor
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
@@ -39,7 +39,7 @@ def main(
             "end_epoch": 200,
             "cs_ratio": 25,
             "epoch_num": 200,
-            "test_data": "Set11"
+            "test_data": "Set11",
         }
         m = n * specifics["cs_ratio"] / 100
 
@@ -48,7 +48,9 @@ def main(
             dataset, "mat", input_channel, input_width, input_height, stage
         )
 
-        sensing_method = sms.sensing_method(sensing, dset, m, specifics)
+        sensing_method = Sensor(
+            sensing, reconstruction, specifics, m, n
+        ).sensing_method(dset)
     else:
         # TODO: make utils method for reading tiffs.
         sensing_method = None
