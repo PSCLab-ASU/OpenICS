@@ -22,19 +22,20 @@ class LDAMP_wrapper():
     def run(self, stage):
         if (stage == 'training'):
             # pre-process training data
-            x_true = np.load(self.dset)
+            x_true = self.dset
             y_measured = self.sensing_method(x_true) # returns noisy measurements (no noise if testing)
             # torch.save(LDAMP, './savedModels/ldamp1')
+            return 1
 
         elif (stage == 'testing'):
             # pre-process training data
-            x_test = np.load(self.dataset)
-            y_measured = self.sense(x_test) # returns noisy measurements (no noise if testing)
+            x_test = self.dset
+            y_measured = self.sensing_method(x_test) # returns noisy measurements (no noise if testing)
             self.LDAMPnet = torch.load('./savedModels/ldamp1') # load the model you want to test
             self.LDAMPnet.eval()
             x_hat = self.LDAMPnet(y_measured)
 
-        return x_hat
+            return x_hat
 
 class LearnedDAMP(nn.Module):
     def __init__(self, specifics):
@@ -62,7 +63,7 @@ class LearnedDAMP(nn.Module):
         self.m = specifics["m"]
         self.n = specifics["n"]
         self.BATCH_SIZE = specifics["BATCH_SIZE"]
-        self.n_DAMP_layers = specifics["n_DAMP_layers"]
+        self.n_DAMP_layers = specifics["max_n_DAMP_layers"]
         self.A_val = utils.generateAVal(self.m,self.n)
         self.z = 0 # used in the LDAMP calculation between layers
 

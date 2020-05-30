@@ -2,6 +2,7 @@ import reconstruction_methods as rms
 import utils
 import sensing_methods as sms
 import numpy as np
+import torch
 
 def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,input_height,m,n,specifics):
     if default=="True":
@@ -70,13 +71,13 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
             }
             if(not (stage == 'testing')):
                 print('stage "' + stage + '" cannot be recognized. Stage must be either testing or training. Default will be used (testing)')
-    else:
-        dset=utils.generate_dataset(dataset,input_channel,input_width,input_height,stage)
-        sensing_method=sms.sensing_method(sensing,m,specifics,n=input_channel*input_width*input_height)
-        reconstruction_method=rms.reconstruction_method(reconstruction,specifics)
-        # put result of the parameters into specifics.
-        reconstruction_method.initialize(dset,sensing_method,specifics)
-        reconstruction_method.run(stage)
+
+    dset=utils.generate_dataset(dataset,input_channel,input_width,input_height,stage)
+    sensing_method=sms.sensing_method(sensing,m,specifics,n=input_channel*input_width*input_height)
+    reconstruction_method=rms.reconstruction_method(reconstruction,specifics)
+    # put result of the parameters into specifics.
+    reconstruction_method.initialize(dset,sensing_method,specifics)
+    reconstruction_method.run(stage)
         
 if __name__ == "__main__":
     main(
