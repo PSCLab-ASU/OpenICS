@@ -3,7 +3,7 @@ import torchvision
 import numpy as np
 
 
-def sensing_method(sensing,m,specifics,n):
+def sensing_method(sensing,specifics,m,n):
     # a function which returns a sensing method with given parameters. a sensing method is a subclass of nn.Module
     sigma_w = specifics["sigma_w"]
     if(not (sensing == "Gaussian")):
@@ -12,10 +12,10 @@ def sensing_method(sensing,m,specifics,n):
     A_val = np.float32(1.0 / np.sqrt(m) * np.random.randn(m, n))
     def sense(x):
         y = torch.matmul(torch.Tensor(A_val), x)
-        noisy_data = AddNoise(y, sigma_w)
-        return y
+        noisy_data = addNoise(y, sigma_w)
+        return noisy_data
 
-    def AddNoise(clean, sigma):
+    def addNoise(clean, sigma):
         clean = torch.tensor(clean)
         noise_vec = torch.rand(clean.shape)
         noise_vec = sigma * np.reshape(noise_vec, newshape=clean.shape)

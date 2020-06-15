@@ -9,7 +9,7 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
         sensing = "Gaussian"
         reconstruction = "LearnedDAMP"
         stage = stage
-        dataset = './TrainingData/TrainingData_patch' # './TrainingData/ValidationData_patch'
+        dataset = dataset # './TrainingData/ValidationData_patch'
         input_channel = 1
         input_width = 40
         input_height = 40
@@ -29,7 +29,7 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
                 "max_Epoch_Fails": 3, # How many training epochs to run without improvement in the validation error
                 "ResumeTraining": False, # Load weights from a network you've already trained a little
                 "LayerbyLayer": False,  # default is false which means train end-to-end
-                "learning_rates": [0.001, 0.0001],# , 0.00001],
+                "learning_rate": 0.0001, # [0.001, 0.0001], 0.00001],
                 "EPOCHS": 50,
                 "n_Train_Images": 128 * 1600, # 128*3000
                 "n_Val_Images": 10000, # 10000#Must be less than 21504
@@ -73,7 +73,7 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
                 print('stage "' + stage + '" cannot be recognized. Stage must be either testing or training. Default will be used (testing)')
 
     dset=utils.generate_dataset(dataset,input_channel,input_width,input_height,stage)
-    sensing_method=sms.sensing_method(sensing,m,specifics,n=input_channel*input_width*input_height)
+    sensing_method=sms.sensing_method(sensing,specifics, m, n=input_channel*input_width*input_height)
     reconstruction_method=rms.reconstruction_method(reconstruction,specifics)
     # put result of the parameters into specifics.
     reconstruction_method.initialize(dset,sensing_method,specifics)

@@ -9,33 +9,54 @@ import utils
 def reconstruction_method(reconstruction,specifics):
     # a function to return the reconstruction method with given parameters. It's a class with two methods: initialize and run.
     if(reconstruction == 'LearnedDAMP' or reconstruction == 'LDAMP'):
-        ldamp_wrap = LDAMP_wrapper()
+        ldamp_wrap = LDAMP_wrapper(specifics)
         return ldamp_wrap
 
 class LDAMP_wrapper():
+    def __init__(self, specifics):
+        self.name = 'LearnedDAMP'
+        self.specifics = specifics
+
     def initialize(self, dset,sensing_method,specifics):
         self.dset = dset
         self.sensing_method = sensing_method
-        self.specifics = specifics
-        self.LDAMPnet = LearnedDAMP(specifics)
+        self.net = LearnedDAMP(specifics)
+        self.dataset=dset
+        self.sensing=sensing_method
+        self.traindataloader = torch.utils.data.DataLoader(self.dataset.train(),
+                                                  batch_size=self.specifics["BATCH_SIZE"], shuffle=True, num_workers=2)
+        self.testdataloader=torch.utils.data.DataLoader(self.dataset.test(),
+                                                  batch_size=self.specifics["BATCH_SIZE"], shuffle=True, num_workers=2)
+        self.optimizer=torch.optim.Adam(self.net.parameters(), lr=self.specifics['learning_rate'])
+        self.loss_f=torch.nn.MSELoss(reduction='mean')
 
     def run(self, stage):
         if (stage == 'training'):
-            # pre-process training data
-            x_true = self.dset
-            y_measured = self.sensing_method(x_true) # returns noisy measurements (no noise if testing)
+            for epoch in range(self.specifics["EPOCHS"]):
+                for img, _ in iter(self.traindataloader):
+                    img = img.cuda()
+                    self.optimizer.zero_grad()
+                    measurement = self.sensing(img)
+                    img_hat = self.net(measurement)
+                    loss = self.loss_f(img_hat, img)
+                    loss.backward()
+                    self.optimizer.step()
             # torch.save(LDAMP, './savedModels/ldamp1')
             return 1
 
         elif (stage == 'testing'):
-            # pre-process training data
-            x_test = self.dset
-            y_measured = self.sensing_method(x_test) # returns noisy measurements (no noise if testing)
-            self.LDAMPnet = torch.load('./savedModels/ldamp1') # load the model you want to test
-            self.LDAMPnet.eval()
-            x_hat = self.LDAMPnet(y_measured)
-
-            return x_hat
+            # self.net = torch.load('./savedModels/ldamp1') # load the model you want to test
+            with torch.no_grad():
+                self.net.eval()
+                val_psnrs = []
+                for img, _ in iter(self.testdataloader):
+                    img = img.cuda()
+                    measurement = self.sensing(img)
+                    img_hat = self.net(measurement)
+                    val_psnrs.append(utils.compute_average_psnr(img.cpu(), img_hat.detach().cpu()))
+                val_psnr = sum(val_psnrs) / len(val_psnrs)
+                print("average test psnr:" + str(val_psnr))
+            return 1
 
 class LearnedDAMP(nn.Module):
     def __init__(self, specifics):
