@@ -9,7 +9,7 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
         sensing = "Gaussian"
         reconstruction = "CSGAN"
         stage = stage
-        dataset = '.\exampleLocation' # location of dataset
+        dataset = dataset # '.\exampleLocation' # location of dataset
 
         # dset = torch.load(dataset)
         # cifar10
@@ -36,7 +36,12 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
             'gen_lr': 2e-4,
             'run_real_data_metrics': False,
             'run_sample_metrics': True,
-            'input_channel': input_channel
+            'input_channel': input_channel,
+            'discrEPOCHS': 2,
+            'genEPOCHS': 2,
+            'gradient_desc_iter': 10000,
+            'm': m,
+            'n': n
         }
 
 

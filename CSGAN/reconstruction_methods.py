@@ -1,6 +1,8 @@
 import torch
 import torchvision
 from torch import nn
+import torch.optim as optim
+import utils
 
 
 def reconstruction_method(reconstruction,specifics):
@@ -11,6 +13,10 @@ def reconstruction_method(reconstruction,specifics):
 
 class csgan():
     def __init__(self, specifics):
+        self.rname='cs-gan'
+        self.specifics=specifics
+
+    def initialize(self,dset,sensing_method,specifics):
         """Constructs the module.
 
         Args:
@@ -24,26 +30,18 @@ class csgan():
           optimisation_cost_weight: a float, how much to penalise the distance of z
             moved by latent optimisation.
         """
-
-        self._discriminator = MLPMetricNet()
-        self._generator = MLPGeneratorNet()
-        self._loss = torch.nn.MSELoss()
+        self.discriminator = MLPMetricNet()
+        self.generator = MLPGeneratorNet()
+        self.discLoss = nn.CrossEntropyLoss()
+        self.genLoss = nn.CrossEntropyLoss()
         self.num_z_iters = specifics['num_z_iters']
         self.z_project_method = specifics['z_project_method']
         self.z_step_size = specifics['z_step_size']
         self.batch_size = specifics['batch_size']
         self.gen_lr = specifics['gen_lr']
-
-    def initialize(self,dset,sensing_method,specifics):
-        # do the preparation for the running.
         self.sensing_method = sensing_method
         self.dataset = dset
-
-    def run(self, stage):
-        # run the training/testing. print the result.
-        if (stage == 'training'):
-            # pre-process training data
-            train_loader = torch.utils.data.DataLoader(
+        self.train_loader = torch.utils.data.DataLoader(
                 torchvision.datasets.MNIST('/files/', train=True, download=True,
                                            transform=torchvision.transforms.Compose([
                                                torchvision.transforms.ToTensor(),
@@ -52,33 +50,80 @@ class csgan():
                                            ])),
                 batch_size=self.batch_size, shuffle=True)
 
+    def run(self, stage):
+        # run the training/testing. print the result.
+        if (stage == 'training'):
+            # pre-process training data
             x_true = self.dataset
-            # the discriminator is equivalent to the sensing method in cs_gans
-            y_measured = self._discriminator(x_true)
+            y_measured = self.discriminator(x_true)
+            discrOptimizer = optim.SGD(self.generator.parameters(), lr=self.gen_lr)
+            genOptimizer = optim.SGD(self.generator.parameters(), lr=self.gen_lr)
+            for iter in range(self.specifics['num_training_iterations']):
+                # Train discriminator
+                for param in self.generator.parameters(): # freeze the generator
+                    param.requires_grad = False
+                for epoch in range(self.specifics["discrEPOCHS"]):
+                    for i, (img, label) in enumerate(self.train_loader):
+                        # real data
+                        discrOptimizer.zero_grad()
+                        measurement = self.sensing_method(img)
+                        prediction = self.discriminator(measurement)
+                        discLoss = self.discLoss(prediction, torch.ones((prediction[:, 0]).shape))
+                        discLoss.backward()
+                        discrOptimizer.step()
 
-            import torch.optim as optim
-            # create your optimizer
-            genOptimizer = optim.SGD(self._generator.parameters(), lr=self.gen_lr)
-            for batch_idx, (y_measured, x_true) in enumerate(train_loader):
-                genOptimizer.zero_grad()  # zero the gradient buffers
-                output = self._generator(y_measured)  # forward operation is called, get the output by putting it through current net
-                loss = self._loss(output, x_true)  # calculate the loss from however we defined it (in this case criterion is a nn.MSELoss() object) ex. difference between output and target
-                loss.backward()  # calculate the gradients of the loss, which ones contributed most to the discrepency of the output and target
-                genOptimizer.step()  # Does the update, which is just the for loop above that erfroms f.data.sub_(f.grad.data * learning_rate) on each parameter of net
+                        # fake data
+                        discrOptimizer.zero_grad()
+                        fake_img = self.generator(utils.addNoise(torch.randn(img.size())), .1/.255)
+                        measurement = self.sensing_method(fake_img)
+                        prediction = self.discriminator(measurement)
+                        discLoss = self.discLoss(prediction, torch.ones((prediction[:, 0]).shape))
+                        discLoss.backward()
+                        discrOptimizer.step()
+                for param in self.generator.parameters(): # unfreeze the generator
+                    param.requires_grad = True
 
-                discOut = self._discriminator(output)
+                # Train generator
+                for param in self.discriminator.parameters(): # freeze the discriminator
+                    param.requires_grad = False
+                for epoch in range(self.specifics["genEPOCHS"]):
+                    for i, (img, label) in enumerate(self.train_loader):
+                        genOptimizer.zero_grad()
+                        fake_img = self.generator(utils.addNoise(torch.randn(img.size())), .1/.255)
+                        measurement = self.sensing_method(fake_img)
+                        prediction = self.discriminator(measurement)
+                        genLoss = self.genLoss(prediction, torch.ones((prediction[:, 0]).shape))
+                        genLoss.backward()
+                        genOptimizer.step()
+                for param in self.discriminator.parameters(): # unfreeze the discriminator
+                    param.requires_grad = True
+
             print("TODO: display results")
             return 1
 
+        # TODO how will we be testing the cs_gan
         elif (stage == 'testing'):
             # pre-process training data
-            x_test = self.dataset
-            y_measured = self.sensing_method(x_test)
-            self.generator = torch.load('./savedModels/csgan1')  # load the model you want to test
-            self.generator.eval()
-            x_hat = self.generator(y_measured)
+            with torch.no_grad():
+                self.generator.eval()
+                val_psnrs = []
+                step_size = .0001
+                A = torch.randn(self.specifics['m'], self.specifics['n'])
+                for img, _ in iter(self.train_loader):
+                    # x = img.cuda()
+                    # z0 = torch.zeros(img.shape())
+                    # y = A(x)
+                    # x_hat = self.generator(z0)
+                    #
+                    # for iter in self.specifics['gradient_desc_iter']:  # gradient descent
+                    #     expression = self.generator(z0) - y
+                    #     x_hat = x_hat - step_size * A.transpose.matmul(expression)
 
-            return x_hat
+                    # img_hat = x_hat
+                    val_psnrs.append(utils.compute_average_psnr(img.cpu(), img_hat.detach().cpu()))
+                val_psnr = sum(val_psnrs) / len(val_psnrs)
+                print("average test psnr:" + str(val_psnr))
+            return 1
 
 
 # not used in testing, only used in training
