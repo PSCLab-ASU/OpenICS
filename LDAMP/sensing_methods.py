@@ -11,7 +11,7 @@ def sensing_method(sensing,specifics,m,n):
 
     A_val = np.float32(1.0 / np.sqrt(m) * np.random.randn(m, n))
     def sense(x):
-        y = torch.matmul(torch.Tensor(A_val), x)
+        y = torch.matmul(torch.Tensor(A_val).cuda(), torch.t(x.type(torch.FloatTensor).cuda()))
         noisy_data = addNoise(y, sigma_w)
         return noisy_data
 
@@ -19,7 +19,7 @@ def sensing_method(sensing,specifics,m,n):
         clean = torch.tensor(clean)
         noise_vec = torch.rand(clean.shape)
         noise_vec = sigma * np.reshape(noise_vec, newshape=clean.shape)
-        noisy = clean + noise_vec
+        noisy = clean + noise_vec.cuda()
         return noisy
 
     return sense
