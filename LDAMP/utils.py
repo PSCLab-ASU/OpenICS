@@ -24,18 +24,16 @@ class NumpyDataset(Dataset):
 
 # class ImagesDataset(Dataset):
 #     def __init__(self, root, transform=None):
-#         self.root = root
+#         self.dset = np.load(root, mode=r)
 #         self.transform = transform
 #
 #     def __len__(self):
-#         dset = np.load(self.root)
-#         return len(dset)
+#         return len(self.dset)
 #
 #     def __getitem__(self, idx):
-#         dset = np.load(self.root)
 #         if self.transform:
-#             dset = self.transform(dset)
-#         return dset[idx]
+#             self.dset = self.transform(self.dset)
+#         return self.dset[idx]
 
 def generate_dataset(dataset,input_channel,input_width,input_height,stage,specifics):
     # a function to generate the corresponding dataset with given parameters. return an instance of the dataset class.
@@ -45,32 +43,32 @@ def generate_dataset(dataset,input_channel,input_width,input_height,stage,specif
     # pre processing
     elif(type(dataset) == str):
         if(stage == "training" or dataset == "bsd500"):
-            images = glob.glob(dataset + "/*.bmp")
-            dataset = []
-            num_of_imgs = 0
-            for image in images:
-                with open(image, 'rb') as file:
-                    num_of_imgs += 1
-                    if(num_of_imgs % 1000 == 0):
-                        print("Processed " + str(num_of_imgs) + " images")
-                    img = Image.open(file)
-                    np_img = np.array(img)
-                    dataset.append(np_img)
-                    if (num_of_imgs == specifics["n_Train_Images"] or num_of_imgs == 1000):
-                        break;
+        #     images = glob.glob(dataset + "/*.bmp")
+        #     dataset = []
+        #     num_of_imgs = 0
+        #     for image in images:
+        #         with open(image, 'rb') as file:
+        #             num_of_imgs += 1
+        #             if(num_of_imgs % 1000 == 0):
+        #                 print("Processed " + str(num_of_imgs) + " images")
+        #             img = Image.open(file)
+        #             np_img = np.array(img)
+        #             dataset.append(np_img)
+        #             if (num_of_imgs - 1 == specifics["n_Train_Images"]):
+        #                 break;
+        #
+        #     dataset = np.array(dataset)
+        #     location_and_name = 'Data/BSD500Custom/BSD500FIRST' + str(num_of_imgs - 1) + ".npy"
+        #     np.save(location_and_name, dataset)
 
-            dataset = np.array(dataset)
-            np.save('Data/BSD500Custom/BSD500FIRST' + str(num_of_imgs) + ".npy", dataset)
-            # dataset = torch.tensor(dataset)
-            # print(dataset.shape)
-            # yields (torch.Size([1000, 64, 64, 3]))
-
-            dset = NumpyDataset(dataset)
-            preprosdset = resize(dset, (num_of_imgs - 1, 64, 64), anti_aliasing=True)
+            location_and_name = 'Data/BSD500Custom/BSD500FIRST' + str(specifics["n_Train_Images"]) + ".npy"
+            dset = NumpyDataset(location_and_name)
+            preprosdset = dset[:, 0, :, :].astype(float)
+            preprosdset = resize(preprosdset, (specifics["n_Train_Images"], 64, 64), mode='reflect')#, anti_aliasing=True, mode='reflect')
         elif(stage == "testing"):
             dset = NumpyDataset(dataset)
             preprosdset = dset[:,0,:,:].astype(float)
-            preprosdset = resize(preprosdset, (7, 64, 64), anti_aliasing=True)
+            preprosdset = resize(preprosdset, (7, 64, 64), mode='reflect') #, anti_aliasing=True, mode='reflect')
 
         # print(preprosdset.shape)
         preprosdset = np.transpose(np.reshape(preprosdset, (input_channel * input_width * input_height, -1)))

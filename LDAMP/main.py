@@ -31,10 +31,10 @@ def main(sensing, reconstruction, stage, default, dataset, input_channel, input_
                 "ResumeTraining": False,  # Load weights from a network you've already trained a little
                 "LayerbyLayer": False,  # default is false which means train end-to-end
                 "learning_rate": 0.0001,  # [0.001, 0.0001], 0.00001],
-                "EPOCHS": 50,
-                "n_Train_Images": 128 * 1600,  # 128*3000
+                "EPOCHS": 1, # 50,
+                "n_Train_Images": 200000, # 128 * 1600,  # 128*3000
                 "n_Val_Images": 10000,  # 10000#Must be less than 21504
-                "BATCH_SIZE": 1, # 128,
+                "BATCH_SIZE": 100, # 128,
                 "InitWeightsMethod": "denoiser",
                 "BATCH_SIZE_LBLFALSE": 16,
                 "loss_func": "MSE",
@@ -50,13 +50,12 @@ def main(sensing, reconstruction, stage, default, dataset, input_channel, input_
             }
         else:
             specifics = {
-                # "alg": "DAMP", # only worried about LDAMP
                 "tie_weights": False,
                 "filter_height": 3,
                 "filter_width": 3,
                 "num_filters": 64,
                 "n_DnCNN_layers": 16,
-                "max_n_DAMP_layers": 10,
+                "max_n_DAMP_layers": 2, # 10,
                 "BATCH_SIZE": 1,
                 # Using a batch size larger than 1 will hurt the denoiser by denoiser trained network because it will use an average noise level, rather than a noise level specific to each image
                 "n_Test_Images": 5,
@@ -90,7 +89,7 @@ if __name__ == "__main__":
         "training",
         "True",
         "/storage-t1/temp/bsd500patch/data",
-        # "/home/mkweste1/LDAMP final/Data/TrainingData/StandardTestData_256Res.npy",
+        # "/home/user/mkweste1/LDAMP final/Data/TrainingData/StandardTestData_256Res.npy",
         1,
         40,
         40,

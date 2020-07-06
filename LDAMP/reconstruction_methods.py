@@ -28,8 +28,9 @@ class LDAMP_wrapper():
     def run(self, stage):
         if (stage == 'training'):
             self.optimizer = torch.optim.Adam(self.net.parameters(), lr=self.specifics['learning_rate'])
-            self.loss_f = torch.nn.MSELoss(reduction='mean')
+            self.loss_f = torch.nn.MSELoss(reduction='elementwise_mean') #use 'mean' for torch versions after 1.0.0
             for epoch in range(self.specifics["EPOCHS"]):
+                print("Beginning EPOCH " + str(epoch) + "...")
                 count = 0
                 for img in self.dataloader:
                     print("Processing batch " + str(count) + "...")
@@ -37,15 +38,16 @@ class LDAMP_wrapper():
                     self.optimizer.zero_grad()
                     measurement = self.sensing_method(img)
                     img_hat = self.net(measurement)
-                    loss = self.loss_f(img_hat, img)
+                    loss = self.loss_f(img_hat, torch.t(img.type(torch.FloatTensor).cpu()))
                     loss.backward()
                     self.optimizer.step()
                     count += 1
-            # torch.save(LDAMP, './savedModels/ldamp1')
+            torch.save(self.net, './LDAMP saved models/customLDAMP' + str(self.specifics["n_Train_Images"]))
 
         elif (stage == 'testing'):
             # self.net = torch.load('./savedModels/ldamp1') # load the model you want to test
             with torch.no_grad():
+                self.net = torch.load('./LDAMP saved models/customLDAMP10000')
                 self.net.eval()
                 val_psnrs = []
                 count = 0
@@ -64,6 +66,7 @@ class LearnedDAMP(nn.Module):
         super(LearnedDAMP, self).__init__()
 
         # instantiate carry-over variables
+        self.specifics = specifics
         self.m = specifics["m"]
         self.n = specifics["n"]
         self.BATCH_SIZE = specifics["BATCH_SIZE"]
@@ -82,25 +85,9 @@ class LearnedDAMP(nn.Module):
             self.layers.add_module("batch" + str(i), batchnorm)
         self.convLast = nn.Conv2d(64, 1, kernel_size=3, stride=1, padding=1)
 
-        def dncnnForward(r):
-            channel_img = specifics["input_channel"]
-            width_img = specifics["input_width"]
-            height_img = specifics["input_height"]
-
-            r = torch.t(r)
-            orig_Shape = r.shape
-            shape4D = [-1, channel_img, width_img, height_img]  # shape4D = [-1, height_img, width_img, channel_img]
-            r = torch.reshape(r, shape4D)
-            x = F.relu(self.conv0(r))
-            for i, l in enumerate(self.layers):
-                x = l(x)
-            x = F.relu(self.convLast(x))
-            x_hat = r - x
-            x_hat = torch.t(torch.reshape(x_hat, orig_Shape))
-            return x_hat
-        self.dncnnForward = dncnnForward
 
     def forward(self, y_measured):
+        # self.dncnnForward
         self.z = y_measured
         xhat = torch.zeros([self.n, self.BATCH_SIZE], dtype=torch.float32)
         for iter in range(self.n_DAMP_layers):  # n_DAMP_layers should be 10, this is the number of denoiser layers
@@ -121,3 +108,20 @@ class LearnedDAMP(nn.Module):
             self.z = y_measured - utils.A_handle(self.A_val, xhat).cuda()
             self.z = self.z + (float(self.n) / float(self.m) * dxdr * self.z)
         return xhat
+
+    def dncnnForward(self, r):
+        channel_img = self.specifics["input_channel"]
+        width_img = self.specifics["input_width"]
+        height_img = self.specifics["input_height"]
+
+        r = torch.t(r)
+        orig_Shape = r.shape
+        shape4D = [-1, channel_img, width_img, height_img]  # shape4D = [-1, height_img, width_img, channel_img]
+        r = torch.reshape(r, shape4D)
+        x = F.relu(self.conv0(r))
+        for i, l in enumerate(self.layers):
+            x = l(x)
+        x = F.relu(self.convLast(x))
+        x_hat = r - x
+        x_hat = torch.t(torch.reshape(x_hat, orig_Shape))
+        return x_hat
