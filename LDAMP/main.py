@@ -11,7 +11,7 @@ def main(sensing, reconstruction, stage, default, dataset, input_channel, input_
         reconstruction = "LearnedDAMP"
         stage = stage
         dataset = dataset  # './TrainingData/ValidationData_patch'
-        input_channel = 1
+        input_channel = 3
         input_width = 64 # original paper was 40
         input_height = 64 # original paper was 40
         n = input_channel * input_width * input_height
@@ -25,16 +25,16 @@ def main(sensing, reconstruction, stage, default, dataset, input_channel, input_
                 "filter_width": 3,
                 "num_filters": 64,
                 "n_DnCNN_layers": 16,
-                "max_n_DAMP_layers": 10,
+                "max_n_DAMP_layers": 2,
                 "start_layer": 1,
                 "max_Epoch_Fails": 3,  # How many training epochs to run without improvement in the validation error
                 "ResumeTraining": False,  # Load weights from a network you've already trained a little
                 "LayerbyLayer": False,  # default is false which means train end-to-end
-                "learning_rate": 0.0001,  # [0.001, 0.0001], 0.00001],
+                "learning_rate": 0.00001,  # [0.001, 0.0001], 0.00001],
                 "EPOCHS": 1, # 50,
-                "n_Train_Images": 200000, # 128 * 1600,  # 128*3000
-                "n_Val_Images": 10000,  # 10000#Must be less than 21504
-                "BATCH_SIZE": 100, # 128,
+                "n_train_images": 75000,#15000, # 128 * 1600,  # 128*3000
+                "n_val_images": 10000,  # 10000#Must be less than 21504
+                "BATCH_SIZE": 100, # 18,
                 "InitWeightsMethod": "denoiser",
                 "BATCH_SIZE_LBLFALSE": 16,
                 "loss_func": "MSE",
@@ -55,10 +55,10 @@ def main(sensing, reconstruction, stage, default, dataset, input_channel, input_
                 "filter_width": 3,
                 "num_filters": 64,
                 "n_DnCNN_layers": 16,
-                "max_n_DAMP_layers": 2, # 10,
+                "max_n_DAMP_layers": 4,# 10,
                 "BATCH_SIZE": 1,
                 # Using a batch size larger than 1 will hurt the denoiser by denoiser trained network because it will use an average noise level, rather than a noise level specific to each image
-                "n_Test_Images": 5,
+                "n_test_images": 5,
                 "sampling_rate_test": .2,  # The sampling rate used for testing
                 "sampling_rate_train": .2,  # The sampling rate that was used for training
                 "sigma_w": 0.,
@@ -75,7 +75,7 @@ def main(sensing, reconstruction, stage, default, dataset, input_channel, input_
                     'stage "' + stage + '" cannot be recognized. Stage must be either testing or training. Default will be used (testing)')
 
     dset = utils.generate_dataset(dataset, input_channel, input_width, input_height, stage, specifics=specifics)
-    sensing_method = sms.sensing_method(sensing, specifics, m, n=input_channel * input_width * input_height)
+    sensing_method = sms.sensing_method(sensing, specifics, m, n=n)
     reconstruction_method = rms.reconstruction_method(reconstruction, specifics)
     # put result of the parameters into specifics.
     reconstruction_method.initialize(dset, sensing_method, specifics)
@@ -90,6 +90,7 @@ if __name__ == "__main__":
         "True",
         "/storage-t1/temp/bsd500patch/data",
         # "/home/user/mkweste1/LDAMP final/Data/TrainingData/StandardTestData_256Res.npy",
+        # "/home/user/mkweste1/LDAMP final/Data/BSD500Custom/BSD500FIRST75000.npy",
         1,
         40,
         40,
