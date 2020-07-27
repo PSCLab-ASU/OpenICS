@@ -1,14 +1,14 @@
 import torch
-import torchvision
 from torch import nn
-import torch.nn.functional as F
 import utils
 import matplotlib.pyplot as plt
 import numpy as np
-from skimage.transform import resize
+import testNet
+import scipy.linalg as la
+
+
 
 def reconstruction_method(reconstruction,specifics):
-    # a function to return the reconstruction method with given parameters. It's a class with two methods: initialize and run.
     if(reconstruction == 'LearnedDAMP' or reconstruction == 'LDAMP'):
         ldamp_wrap = LDAMP_wrapper(specifics)
         return ldamp_wrap
@@ -29,13 +29,17 @@ class LDAMP_wrapper():
         self.dset = dset
         self.sensing_method = sensing_method
         self.net = LearnedDAMP(specifics=specifics)
-        # print(self.net)
+        if(specifics["resume"]):
+            self.net.load_state_dict(torch.load(specifics["load_network"]))
+        # self.net = testNet.testLearnedDAMP(specifics=specifics)
+
         self.n_train_images = self.specifics['n_train_images']
         self.n_val_images = self.specifics["n_val_images"]
+        self.previously_trained = self.specifics["previously_trained"]
         self.dataloader = torch.utils.data.DataLoader(self.dset[self.n_val_images:self.n_train_images],
-                                                  batch_size=self.specifics["BATCH_SIZE"], shuffle=True, num_workers=2)
+                                                  batch_size=self.specifics["BATCH_SIZE"], shuffle=False, num_workers=2)
         self.testdataloader=torch.utils.data.DataLoader(self.dset[:self.n_val_images],
-                                                  batch_size=self.specifics["BATCH_SIZE"], shuffle=True, num_workers=2)
+                                                  batch_size=self.specifics["BATCH_SIZE"], shuffle=False, num_workers=2)
         self.loss_f = torch.nn.MSELoss(reduction='mean')  # use 'mean' for torch versions after 1.0.0
 
         params = list(self.net.parameters())
@@ -48,59 +52,46 @@ class LDAMP_wrapper():
             for epoch in range(self.specifics["EPOCHS"]):
                 print("Beginning EPOCH " + str(epoch) + "...")
                 for i, img in enumerate(self.dataloader):
-                    print("Processing batch " + str(i) + "...")
+                    print("Processing batch " + str(i + self.previously_trained / self.BATCH_SIZE) + "...")
 
                     # zero gradients
                     self.optimizer.zero_grad()
 
                     # set up inputs
                     A_val = self.sensing_method.returnSensingMatrix()
-                    A_val = A_val.detach()
-                    shape = (self.input_channel * self.input_width * self.input_height, self.BATCH_SIZE)
-                    img = np.reshape(img, shape)
-                    measurementMaybe = torch.matmul(A_val, img.type(torch.FloatTensor).cuda())
 
-                    shape = (self.BATCH_SIZE, self.input_channel * self.input_width * self.input_height)
-                    img = np.reshape(img, shape)
+                    img = img.reshape((self.BATCH_SIZE, self.input_channel * self.input_width * self.input_height))
                     img = img.type(torch.float).cuda()
-
                     measurement = self.sensing_method(img)
-                    shape = (self.m, self.BATCH_SIZE)#(self.input_channel, self.m, self.BATCH_SIZE)
-                    measurement = np.reshape(measurement.cpu().detach().numpy(), shape)
-                    measurement = torch.Tensor(measurement)
-
-                    measurement = measurementMaybe
-                    print(measurement)
+                    measurement = measurement.reshape((self.m, self.BATCH_SIZE))
 
                     # forward function
-                    img_hat = self.net(measurement, A_val) # (y, z, A matrix) the z is overwritten so doesn't matter what it is
+                    img_hat = self.net(measurement, A_val)
+                    # img_hat = self.net(measurement, A_val, A_val_inv)
                     img_hat = torch.reshape(img_hat, img.shape)
 
                     # calculate loss and backpropogate
-                    img = img.type(torch.FloatTensor).cpu()
-                    loss = self.loss_f(img_hat, img) #torch.t(img.type(torch.FloatTensor).cpu()))
+                    img = img.type(torch.FloatTensor)
+                    loss = self.loss_f(img_hat, img)
                     loss.backward()
                     self.optimizer.step()
 
-                    # display some errors
-                    _, _, error = utils.EvalError(img_hat, img)
+                    # display errors
+                    _, error = utils.EvalError(img_hat, img)
                     history.append(error)
-                    print('error (previous is left, most recent is right): ')
-                    if (len(history) > 1):
-                        print(history[len(history) - 2], history[len(history) - 1])
-                    else:
-                        print(history)
+                    print("MSE Loss: " + str(loss))
+                    print("PSNR Loss: " + str(error))
                     print
 
-                    if (i % 50 == 0):
-                        print("")
+                    # print graphs
+                    if (i % 10 == 0):
                         print("printing graphs...")
 
                         io = img.cpu().numpy()
                         shape = (self.BATCH_SIZE, self.input_width, self.input_height, self.input_channel)
                         sample = np.reshape(io, shape)
                         print(sample.shape)
-                        sample = sample[0, :, :, :] / 255
+                        sample = sample[0, :, :, :]
                         if (self.input_channel == 1):
                             sample = sample[:, :, 0]
                             plt.imshow(sample, cmap='gray')
@@ -121,29 +112,33 @@ class LDAMP_wrapper():
                         plt.show()
                         print
 
-            torch.save(self.net, './LDAMP saved models/customLDAMP' + str(self.n_train_images))
+                    currentNumImgs = (i + 1) * self.BATCH_SIZE + self.previously_trained
+                    if currentNumImgs % 10000 == 0:
+                        torch.save(self.net.state_dict(), './LDAMP saved models/quickSaveLDAMPdict' + str(currentNumImgs))
+            torch.save(self.net.state_dict(), './LDAMP saved models/completedLDAMPdict' + str(self.n_train_images))
+
         elif (stage == 'testing'):
             with torch.no_grad():
-                self.net = torch.load('./LDAMP saved models/customLDAMP75000')
+                self.net.load_state_dict(torch.load(self.specifics["load_network"]))
                 self.net.eval()
                 history = []
-                # val_psnrs = []
                 for i, img in enumerate(self.testdataloader):
                     print("Processing batch " + str(i) + "...")
                     A_val = self.sensing_method.returnSensingMatrix()
                     A_val = A_val.detach()
 
-                    shape = (self.BATCH_SIZE, self.input_channel, self.input_width * self.input_height)
+                    shape = (self.BATCH_SIZE, self.input_channel * self.input_width * self.input_height)
                     img = np.reshape(img, shape)
                     img = img.type(torch.float).cuda()
                     measurement = self.sensing_method(img)
-                    img_hat = self.net(measurement, torch.zeros(measurement.shape), A_val)
+                    measurement = measurement.reshape((self.m, self.BATCH_SIZE))
+                    img_hat = self.net(measurement, A_val)
 
-                    _, _, error = utils.EvalError(img_hat, img)
+                    _, error = utils.EvalError(img_hat, img) # return mse_thisiter, psnr_thisiter
                     history.append(error)
 
                     # display the original image
-                    sample = (np.reshape(img, (self.input_width, self.input_height)))
+                    sample = (np.reshape(img.cpu(), (self.input_width, self.input_height)))
                     if (self.input_channel == 1):
                         plt.imshow(sample, cmap='gray')
                     elif (self.input_channel == 3):
@@ -157,9 +152,6 @@ class LDAMP_wrapper():
                     plt.imshow(sample, cmap='gray')
                     plt.show()
 
-                    # val_psnrs.append(utils.compute_average_psnr(img.cpu().double(), img_hat.detach().cpu().double()))
-                # val_psnr = sum(val_psnrs) / len(val_psnrs)
-                # print("average test psnr (higher is better): " + str(val_psnr))
                 psnrs = sum(history) / len(history)
                 print("average test psnr my own: " + str(psnrs))
 
@@ -179,12 +171,11 @@ class LearnedDAMP(nn.Module):
         z = y_measured
         xhat = torch.zeros([self.n, self.BATCH_SIZE], dtype=torch.float32)
         for i, l in enumerate(self.layers):
-            print("\tLayer " + str(i))
+            print("\tDAMP Layer " + str(i))
             (next_xhat, next_z) = l(xhat, z, A_val, y_measured)
             z = next_z
             xhat = next_xhat
         return xhat
-
 
 class LearnedDAMPLayer(nn.Module):
     def __init__(self, specifics):
@@ -201,62 +192,22 @@ class LearnedDAMPLayer(nn.Module):
         self.n_DAMP_layers = specifics["max_n_DAMP_layers"]
         self.DnCNN_wrapper = DnCNN_wrapper(specifics=specifics)
 
-        # self.A_val = utils.generateAVal(self.m,self.n)
-        # self.z = 0 # used in the LDAMP calculation between layers
-
-        # self.MSE_history = []  # Will be a list of n_DAMP_layers+1 lists, each sublist will be of size BATCH_SIZE
-        # self.NMSE_history = []
-        # self.PSNR_history = []
-
     def forward(self, xhat, z, A_val, y_measured):
         z = z.cpu()
-        # self.A_val = A_val
-        # self.z = y_measured
-        # xhat = torch.zeros([self.n, self.BATCH_SIZE], dtype=torch.float32)
-
-        # sample = np.reshape(x_true.detach().cpu(), (self.specifics["input_width"], self.specifics["input_height"], self.specifics["BATCH_SIZE"]))
-        # print(sample[:, :])
-
-        # for i in range(self.n_DAMP_layers):  # self.layers, this is the number of AMP layers
-        #     print("DAMP Layer " + str(i) + "...")
-        r_addme = utils.At_handle(A_val, z)
-        r = xhat + r_addme#torch.add(xhat, utils.At_handle(self.A_val,self.z))
-        # r = torch.t(r)
-
-        # sample = np.reshape(r.detach().cpu(), (self.specifics["input_width"], self.specifics["input_height"], self.specifics["BATCH_SIZE"]))
-        # print(self.z.size())
-        # print(self.z)
-
+        r = xhat + utils.At_handle(A_val, z) # z = y_measured = matmul(A_vals, xhat)
         (xhat, dxdr) = self.DnCNN_wrapper(r)
-        # xhat = torch.t(xhat)
+
         z = y_measured - utils.A_handle(A_val, xhat).cuda()
-        # print(dxdr.shape)
-        # print(z.shape)
-        # z_addme = (float(self.n) / float(self.m) * dxdr * z.cuda())
-        # z = z.cuda() + z_addme
-        # print(xhat)
-        # (MSE_thisiter, NMSE_thisiter, PSNR_thisiter) = utils.EvalError(xhat, x_true)
-        # # print(PSNR_thisiter)
-        # self.MSE_history.append(MSE_thisiter)
-        # self.NMSE_history.append(NMSE_thisiter)
-        # self.PSNR_history.append(PSNR_thisiter)
-
-        return xhat, z#, self.MSE_history, self.NMSE_history, self.PSNR_history
-
+        z = z + (float(1)/ float(self.m) * dxdr * z.cuda()) #TODO SIGNIFICANT CHANGE HERE
+        return xhat, z
 
 class DnCNN_wrapper(nn.Module):
-    """
-        Denoiser wrapper to compute divergence
-    """
-
     def __init__(self, specifics):
         super(DnCNN_wrapper, self).__init__()
         self.DnCNN = DnCNN(specifics=specifics)
 
     def forward(self, r):
         xhat = self.DnCNN(r)
-        # sample = np.reshape(xhat.detach().cpu(), (self.specifics["input_width"], self.specifics["input_height"], self.specifics["BATCH_SIZE"]))
-        # print(sample[:, :])
 
         r_abs = torch.abs(r)
         r_absColumnWise = torch.max(r_abs, dim=0)  # gives a tuple ([max of each row] , [index of where it was found]) # reduce on dim=0 to get rid of n and leave BATCH_SIZE
@@ -264,13 +215,11 @@ class DnCNN_wrapper(nn.Module):
         eta = torch.empty(r.shape).normal_(mean=0, std=1)
         r_perturbed = r + torch.mul(eta, epsilon)
         xhat_perturbed = self.DnCNN(r_perturbed.detach())
-        # print(torch.mean(xhat_perturbed - xhat))
         eta_dx = torch.mul(eta, xhat_perturbed - xhat)  # Want element-wise multiplication
         mean_eta_dx = torch.mean(eta_dx, dim=0)
-        # print(torch.mean(mean_eta_dx))
         dxdr = torch.div(mean_eta_dx, epsilon).cuda()
-        # dxdr.detach()
-        # print(torch.mean(dxdr))
+        dxdr.detach() # turn off gradient calculation
+
         return xhat, dxdr
 
 class DnCNN(nn.Module):
