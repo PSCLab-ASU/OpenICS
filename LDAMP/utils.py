@@ -29,7 +29,7 @@ def generate_dataset(dataset,input_channel,input_width,input_height,stage,specif
         numpyDataset = numpyDataset[:n_val_images, :, :, :].astype(float)
     elif(resume):
         n_train_images = specifics['n_train_images']
-        numpyDataset = numpyDataset[previously_trained:n_train_images, :, :, :].astype(float)
+        numpyDataset = numpyDataset[:n_train_images, :, :, :].astype(float)
     else:
         n_train_images = specifics['n_train_images']
         numpyDataset = numpyDataset[:n_train_images, :, :, :].astype(float)
@@ -40,8 +40,6 @@ def generate_dataset(dataset,input_channel,input_width,input_height,stage,specif
     return torchDataset
 
 def A_handle(A_val, x):
-    A_val = A_val.cpu()
-    x = torch.Tensor(x)
     r = torch.matmul(A_val, x)
     return r
 
@@ -49,8 +47,8 @@ def At_handle(A_val, z): # A^H * z
     # A_val = A_val.cpu()
     # A_val = A_val.detach().numpy()
     # A_val = A_val.T.conj()#torch.t(A_val) # for an all-real matrix A.T.conj() is the same as A.T
-    # A_val = torch.Tensor(A_val)
-    # r = torch.matmul(A_vals, z)
+    # A_val = torch.Tensor(A_val).cuda()
+    # r = torch.matmul(A_val, z)
 
     # TODO SIGNIFICANT CHANGE HERE
     # original backward operator was conj(A_val).transpose
@@ -61,8 +59,8 @@ def At_handle(A_val, z): # A^H * z
     return r
 
 def EvalError(x_hat,x_true):
-    x_hat = torch.Tensor(x_hat).clone()
-    x_true = x_true.cpu().clone()
+    x_hat = x_hat
+    x_true = x_true
     mse=((x_hat-x_true)**2).mean()
     mse_thisiter=mse
     psnr_thisiter=10.*torch.log(1.0/mse)/np.log(10.)

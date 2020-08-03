@@ -26,10 +26,10 @@ def main(sensing, reconstruction, stage, default, dataset, input_channel, input_
                 "n_DnCNN_layers": 16,
                 "max_n_DAMP_layers": 10,
                 "learning_rate": 0.00001,
-                "EPOCHS": 1, # 50,
-                "n_train_images": 1100000,
+                "EPOCHS": 50, # 50,
+                "n_train_images": 1103872, #1103872
                 "n_val_images": 10000,
-                "BATCH_SIZE": 100,
+                "BATCH_SIZE": 128,
                 "loss_func": "MSE",
                 "sampling_rate": sampling_rate,  # The sampling rate that was used for training
                 "sigma_w": 1. / 255.,  # Noise std
@@ -41,6 +41,7 @@ def main(sensing, reconstruction, stage, default, dataset, input_channel, input_
                 "resume": False,
                 "resuming_network": '',
                 "previously_trained": 0,
+                "fileName": "LDAMPFirst"
             }
         else:
             specifics = {
@@ -62,6 +63,7 @@ def main(sensing, reconstruction, stage, default, dataset, input_channel, input_
                 "resume": False,
                 "load_network": '',
                 "previously_trained": 0,
+                "fileName": "LDAMPFirst"
             }
 
     dset = utils.generate_dataset(dataset, input_channel, input_width, input_height, stage, specifics=specifics)
@@ -91,10 +93,10 @@ if __name__ == "__main__":
             "n_DnCNN_layers": 16,
             "max_n_DAMP_layers": 10,
             "learning_rate": 0.0001,
-            "EPOCHS": 1,  # 50,
-            "n_train_images": 1100000,
+            "EPOCHS": 50,  # 50,
+            "n_train_images": 256*200,#1103872,
             "n_val_images": 100,
-            "BATCH_SIZE": 100,  # 18,
+            "BATCH_SIZE": 16,  # 18,
             "loss_func": "MSE",
             "sampling_rate": 320,
             "sigma_w": 1. / 255.,  # Noise std
@@ -103,8 +105,9 @@ if __name__ == "__main__":
             "input_channel": 1,
             "input_width": 40,
             "input_height": 40,
-            "load_network": './LDAMP saved models/quickSaveLDAMPdict10000',
-            "resume": True,
-            "previously_trained": 10000,
+            "load_network": './LDAMP saved models/quickSaveLDAMPResumed5519360',
+            "resume": False,
+            "previously_trained": 0,
+            "fileName": "LDAMPLayerByLayer"
         },
     )
