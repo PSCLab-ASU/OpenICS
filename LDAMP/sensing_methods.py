@@ -8,21 +8,23 @@ else:
     device = torch.device('cpu')
 
 def sensing_method(sensing,specifics,m,n):
-    from_Numpy_matrix = np.float32(1.0 / np.sqrt(m) * np.random.randn(m, n))
-    sense = random_sensing(specifics, from_Numpy_matrix)
+    sense = random_sensing(specifics)
     return sense
 
 class random_sensing(nn.Module):
-    def __init__(self, specifics, from_Numpy_matrix):
+    def __init__(self, specifics):
         super(random_sensing, self).__init__()
         self.n = specifics["n"]
         self.m = specifics["m"]
         self.sigma = specifics["sigma_w"]
-        sensing_matrix = from_Numpy_matrix[:self.m, :self.n]
-
-        self.sm = torch.from_numpy(sensing_matrix).to(device)
         self.s1 = nn.Linear(self.n, self.m, bias=False)
-        self.s1.weight.data = self.sm[0:self.m, :self.n]
+        self.from_Numpy_matrix = 0
+        self.sm = 0
+
+    def generateNewMatrix(self):
+        self.from_Numpy_matrix = np.float32(1.0 / np.sqrt(self.m) * np.random.randn(self.m, self.n))
+        self.sm = torch.from_numpy(self.from_Numpy_matrix).to(device)
+        self.s1.weight.data = self.sm
 
     def forward(self, x):
         r = self.s1(x)
@@ -32,8 +34,6 @@ class random_sensing(nn.Module):
 
     def returnSensingMatrix(self):
         return self.sm
-
-
 
 class original_sensing():
     def __init__(self, specifics, from_Numpy_matrix):

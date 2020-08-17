@@ -24,7 +24,7 @@ def main(sensing, reconstruction, stage, default, dataset, input_channel, input_
                 "filter_width": 3,# kernel size
                 "num_filters": 64, # channel size, in dncnn
                 "n_DnCNN_layers": 16,
-                "max_n_DAMP_layers": 10,
+                "max_n_DAMP_layers": 1,
                 "learning_rate": 0.00001,
                 "EPOCHS": 50, # 50,
                 "n_train_images": 1103872, #1103872
@@ -90,13 +90,13 @@ if __name__ == "__main__":
             "filter_height": 3,  # kernel size
             "filter_width": 3,  # kernel size
             "num_filters": 64,  # channel size
-            "n_DnCNN_layers": 16,
-            "max_n_DAMP_layers": 10,
+            "n_DnCNN_layers": 16, #tf code: 16 paper: 20
+            "max_n_DAMP_layers": 10, #tf_code: 10 paper: 10
             "learning_rate": 0.0001,
-            "EPOCHS": 50,  # 50,
-            "n_train_images": 256*200,#1103872,
-            "n_val_images": 100,
-            "BATCH_SIZE": 16,  # 18,
+            "EPOCHS": 50,
+            "n_train_images": 128*1600,#1103872,
+            "n_val_images": 1000,
+            "BATCH_SIZE": 64,  # 18,
             "loss_func": "MSE",
             "sampling_rate": 320,
             "sigma_w": 1. / 255.,  # Noise std
@@ -105,9 +105,8 @@ if __name__ == "__main__":
             "input_channel": 1,
             "input_width": 40,
             "input_height": 40,
-            "load_network": './LDAMP saved models/quickSaveLDAMPResumed5519360',
+            "load_network": './LDAMP saved models/quickSaveLDAMP10Layer7372800', #resumeing from 36 EPOCHS with newly generated sensing matrices now
             "resume": False,
-            "previously_trained": 0,
-            "fileName": "LDAMPLayerByLayer"
+            "fileName": "LDAMP"
         },
     )

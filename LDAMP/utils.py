@@ -1,3 +1,4 @@
+import skimage.measure as skmeasure
 import torch
 import numpy as np
 from torch.utils.data import Dataset
@@ -20,7 +21,6 @@ class NumpyDataset(Dataset):
         return self.dset[idx]
 
 def generate_dataset(dataset,input_channel,input_width,input_height,stage,specifics):
-    previously_trained = specifics["previously_trained"]
     resume = specifics["resume"]
 
     numpyDataset = np.load(dataset)
@@ -35,7 +35,6 @@ def generate_dataset(dataset,input_channel,input_width,input_height,stage,specif
         numpyDataset = numpyDataset[:n_train_images, :, :, :].astype(float)
 
     numpyDataset = np.reshape(numpyDataset, (-1, input_channel * input_width * input_height))
-
     torchDataset = NumpyDataset(numpyDataset)
     return torchDataset
 
@@ -59,12 +58,11 @@ def At_handle(A_val, z): # A^H * z
     return r
 
 def EvalError(x_hat,x_true):
-    x_hat = x_hat
-    x_true = x_true
     mse=((x_hat-x_true)**2).mean()
-    mse_thisiter=mse
-    psnr_thisiter=10.*torch.log(1.0/mse)/np.log(10.)
-    return mse_thisiter, psnr_thisiter
+    psnrs = [skmeasure.compare_psnr(x_hat[i], x_true[i], data_range=1.0) for i in range(x_hat.shape[0])]
+    psnr = sum(psnrs) / len(psnrs)
+
+    return mse, psnr
 
 
 """

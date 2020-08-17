@@ -2,8 +2,6 @@ import torch
 from torch import nn
 import utils
 import matplotlib.pyplot as plt
-import numpy as np
-import testNet
 import scipy.linalg as la
 
 if torch.cuda.is_available():
@@ -35,19 +33,17 @@ class LDAMP_wrapper():
         self.n_train_images = self.specifics['n_train_images']
         self.n_val_images = self.specifics["n_val_images"]
         self.EPOCHS = self.specifics["EPOCHS"]
-        self.previously_trained = self.specifics["previously_trained"]
         self.usersName = specifics["fileName"]
+        self.num_layeres = specifics["max_n_DAMP_layers"]
+        self.num_dncnn = specifics["n_DnCNN_layers"]
 
         # set up network and inputs
         self.dset = dset
         self.sensing_method = sensing_method
-        self.A_val = self.sensing_method.returnSensingMatrix().requires_grad_(False).to(device)
-        self.A_val_pinv = torch.Tensor(la.pinv(self.A_val.cpu())).requires_grad_(False).to(device)
-        self.net = LearnedDAMP(specifics=specifics, A_val=self.A_val, A_val_pinv=self.A_val_pinv).to(device)
+        self.net = LearnedDAMP(specifics=specifics).to(device) #, A_val=self.A_val, A_val_pinv=self.A_val_pinv
         if(specifics["resume"]):
             self.net.load_state_dict(torch.load(specifics["load_network"]))
 
-        # self.net = testNet.testLearnedDAMP(specifics=specifics)
         self.dataloader = torch.utils.data.DataLoader(self.dset,
                                                   batch_size=self.specifics["BATCH_SIZE"], shuffle=True, num_workers=2)
         self.testdataloader=torch.utils.data.DataLoader(self.dset[:self.n_val_images],
@@ -69,12 +65,18 @@ class LDAMP_wrapper():
                         break;
                     # zero gradients
                     self.optimizer.zero_grad()
+
+                    # prepare inputs
                     img = img.type(torch.float).to(device)
-                    # img = img.reshape((self.BATCH_SIZE, self.input_channel * self.input_width * self.input_height))
+                    self.sensing_method.generateNewMatrix()
+                    A_val = self.sensing_method.returnSensingMatrix().requires_grad_(False).to(device)
+                    A_val_pinv = torch.Tensor(la.pinv(A_val.cpu())).requires_grad_(False).to(device)
                     measurement = self.sensing_method(img)
+                    z = measurement.t()
+                    xhat = torch.zeros([self.n, self.BATCH_SIZE], dtype=torch.float32).to(device)
 
                     # forward function
-                    img_hat = self.net(measurement)
+                    img_hat = self.net(xhat, z, A_val, A_val_pinv, measurement.t())
                     img_hat = torch.reshape(img_hat, img.shape)
 
                     # calculate loss and backpropogate
@@ -84,24 +86,28 @@ class LDAMP_wrapper():
 
                     # print graphs error and graphs
                     if (i % 100 == 0):
-                        currentNumImgs = (i + 1) * self.BATCH_SIZE + epoch * self.n_train_images + self.previously_trained
-                        mse_error, psnr = utils.EvalError(img_hat, img)
+                        x_hat = img_hat.cpu().detach().numpy()
+                        x_true = img.cpu().detach().numpy()
+                        mse_error, psnr = utils.EvalError(x_hat=x_hat, x_true=x_true)
+                        print("Processed " + str(i) + " batches"
+                              + " MSE Loss: " + "%.4f" % mse_error#.clone().cpu().detach_().numpy()
+                              + " PSNR: " + "%.4f" % psnr)#.clone().cpu().detach_().numpy())
+                        mseData.append(mse_error)
+                        psnrData.append(psnr)
 
-                        print("Processed " + str(currentNumImgs) + " images"
-                              + " MSE Loss: " + "%.4f" % mse_error.clone().cpu().detach_().numpy()
-                              + " PSNR: " + "%.4f" % psnr.clone().cpu().detach_().numpy())
-                        mseData.append(mse_error.clone().cpu().detach_().numpy())
-                        psnrData.append(psnr.clone().cpu().detach_().numpy())
                 print("**QUICKSAVE**")
-                currentNumImgs = (epoch+1) * self.n_train_images + self.previously_trained
-                torch.save(self.net.state_dict(), './LDAMP saved models/quickSave' + self.usersName + str(currentNumImgs))
-            torch.save(self.net.state_dict(), './LDAMP saved models/completed' + self.usersName + str(self.n_train_images))
+                name = 'quickSave' + self.usersName + "_" + str(self.num_layeres) + "DAMPLayers" + str(self.num_dncnn) + "DNCNNLayers" + "_EPOCH" + str(epoch)
+                if(epoch+1 == self.EPOCHS):
+                    name = 'completed' + self.usersName + "_" + str(self.num_layeres) + "DAMPLayers" + str(self.num_dncnn) + "DNCNNLayers"
+                torch.save(self.net.state_dict(), './LDAMP saved models/' + name)
+                print("Saved as " + name)
+
             plt.plot(mseData)
-            plt.xlabel('Epoch')
+            plt.xlabel('Batch (in hundreds)')
             plt.ylabel('MSE loss')
             plt.show()
             plt.plot(psnrData)
-            plt.xlabel('Epoch')
+            plt.xlabel('Batch (in hundreds)')
             plt.ylabel('PSNR')
             plt.show()
 
@@ -111,14 +117,18 @@ class LDAMP_wrapper():
                 self.net.eval()
                 history = []
                 for i, img in enumerate(self.testdataloader):
+                    if (img.shape[0] % self.BATCH_SIZE != 0):
+                        break;
                     print("Processing batch " + str(i) + "...")
 
                     img = img.type(torch.float).to(device)
                     measurement = self.sensing_method(img)
 
                     # forward function
-                    img_hat = self.net(measurement)
-                    img_hat = torch.reshape(img_hat, img.shape)
+                    for i in range(5):
+                        img_hat = self.net(measurement)
+                        img_hat = torch.reshape(img_hat, img.shape)
+                        measurement = self.sensing_method(img_hat)
 
                     mse_error, psnr = utils.EvalError(img_hat, img)
                     history.append(psnr)
@@ -126,26 +136,22 @@ class LDAMP_wrapper():
                 print("average test psnr my own: " + str(psnrs))
 
 class LearnedDAMP(nn.Module):
-    def __init__(self, specifics, A_val, A_val_pinv):
+    def __init__(self, specifics):
         super(LearnedDAMP, self).__init__()
         self.name = 'LearnedDAMP'
         self.specifics = specifics
         self.n = self.specifics["n"]
         self.m = self.specifics["m"]
         self.BATCH_SIZE = self.specifics["BATCH_SIZE"]
-        self.A_val = A_val
-        self.A_val_pinv = A_val_pinv
+        # self.A_val = A_val
+        # self.A_val_pinv = A_val_pinv
         self.layers = nn.Sequential().to(device)
         for i in range(self.specifics["max_n_DAMP_layers"]):
             self.layers.add_module("Layer" + str(i),LearnedDAMPLayer(specifics))
 
-    def forward(self, y_measured):
-        y_measured = y_measured.t()
-        z = y_measured
-        xhat = torch.zeros([self.n, self.BATCH_SIZE], dtype=torch.float32).to(device)
+    def forward(self, xhat, z, A_val, A_val_pinv, y_measured):
         for i, l in enumerate(self.layers):
-            # print("\tDAMP Layer " + str(i))
-            (next_xhat, next_z) = l(xhat, z, self.A_val, self.A_val_pinv, y_measured)
+            (next_xhat, next_z) = l(xhat, z, A_val, A_val_pinv, y_measured)
             z = next_z
             xhat = next_xhat
         return xhat
@@ -170,7 +176,7 @@ class LearnedDAMPLayer(nn.Module):
         (xhat, dxdr) = self.DnCNN_wrapper(r)
 
         z = y_measured - utils.A_handle(A_val, xhat).to(device)
-        z = z + (float(1)/ float(self.m) * dxdr * z.to(device)) #TODO SIGNIFICANT CHANGE HERE
+        z = z + (float(1)/ float(self.m) * dxdr * z.to(device))
         return xhat, z
 
 class DnCNN_wrapper(nn.Module):
