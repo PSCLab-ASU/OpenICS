@@ -77,7 +77,7 @@ if __name__ == "__main__":
     main(
         "Gaussian", # sensing type
         "LearnedDAMP", # model type
-        "training", # stage
+        "testing", # stage
         False, # default
         '/home/user/mkweste1/LDAMP final/Data/TrainingData/TrainingData_patch40.npy', # dataset
         # "/home/user/mkweste1/LDAMP final/Data/TrainingData/StandardTestData_256Res.npy",
@@ -105,7 +105,8 @@ if __name__ == "__main__":
             "input_channel": 1,
             "input_width": 40,
             "input_height": 40,
-            "load_network": './LDAMP saved models/quickSaveLDAMP10Layer7372800', #resumeing from 36 EPOCHS with newly generated sensing matrices now
+            "load_network": './LDAMP saved models/quickSaveLDAMP_10DAMPLayers16DNCNNLayers_EPOCH23',
+            "load_sMatrix": './Sensing Matrices/LDAMP_10DAMPLayers16DNCNNLayersSNSMTRX.npy',
             "resume": False,
             "fileName": "LDAMP"
         },

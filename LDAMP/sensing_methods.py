@@ -21,7 +21,7 @@ class random_sensing(nn.Module):
         self.from_Numpy_matrix = 0
         self.sm = 0
 
-    def generateNewMatrix(self):
+        # initial sensing matrix
         self.from_Numpy_matrix = np.float32(1.0 / np.sqrt(self.m) * np.random.randn(self.m, self.n))
         self.sm = torch.from_numpy(self.from_Numpy_matrix).to(device)
         self.s1.weight.data = self.sm
@@ -32,8 +32,18 @@ class random_sensing(nn.Module):
         r = r + noise
         return r
 
+    def generateNewMatrix(self):
+        self.from_Numpy_matrix = np.float32(1.0 / np.sqrt(self.m) * np.random.randn(self.m, self.n))
+        self.sm = torch.from_numpy(self.from_Numpy_matrix).to(device)
+        self.s1.weight.data = self.sm
+
     def returnSensingMatrix(self):
         return self.sm
+
+    def setSensingMatrix(self, A_val):
+        self.from_Numpy_matrix = A_val
+        self.sm = torch.from_numpy(self.from_Numpy_matrix).to(device)
+        self.s1.weight.data = self.sm
 
 class original_sensing():
     def __init__(self, specifics, from_Numpy_matrix):

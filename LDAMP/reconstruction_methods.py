@@ -3,6 +3,7 @@ from torch import nn
 import utils
 import matplotlib.pyplot as plt
 import scipy.linalg as la
+import numpy as np
 
 if torch.cuda.is_available():
     print("Detected " + str(torch.cuda.device_count()) + " GPU(s)!")
@@ -68,7 +69,7 @@ class LDAMP_wrapper():
 
                     # prepare inputs
                     img = img.type(torch.float).to(device)
-                    self.sensing_method.generateNewMatrix()
+                    #self.sensing_method.generateNewMatrix()
                     A_val = self.sensing_method.returnSensingMatrix().requires_grad_(False).to(device)
                     A_val_pinv = torch.Tensor(la.pinv(A_val.cpu())).requires_grad_(False).to(device)
                     measurement = self.sensing_method(img)
@@ -96,11 +97,17 @@ class LDAMP_wrapper():
                         psnrData.append(psnr)
 
                 print("**QUICKSAVE**")
+
                 name = 'quickSave' + self.usersName + "_" + str(self.num_layeres) + "DAMPLayers" + str(self.num_dncnn) + "DNCNNLayers" + "_EPOCH" + str(epoch)
                 if(epoch+1 == self.EPOCHS):
                     name = 'completed' + self.usersName + "_" + str(self.num_layeres) + "DAMPLayers" + str(self.num_dncnn) + "DNCNNLayers"
                 torch.save(self.net.state_dict(), './LDAMP saved models/' + name)
-                print("Saved as " + name)
+                print("Network saved as " + name)
+
+                name = self.usersName + "_" + str(self.num_layeres) + "DAMPLayers" + str(self.num_dncnn) + "DNCNNLayers"
+                np.save('./Sensing Matrices/' + name + 'SNSMTRX', A_val.cpu())
+                print("Matrix saved as " + name)
+
 
             plt.plot(mseData)
             plt.xlabel('Batch (in hundreds)')
@@ -121,16 +128,22 @@ class LDAMP_wrapper():
                         break;
                     print("Processing batch " + str(i) + "...")
 
+                    # prepare variables
                     img = img.type(torch.float).to(device)
+                    self.sensing_method.setSensingMatrix(np.load(self.specifics["load_sMatrix"]))
+                    A_val = self.sensing_method.returnSensingMatrix().requires_grad_(False).to(device)
+                    A_val_pinv = torch.Tensor(la.pinv(A_val.cpu())).requires_grad_(False).to(device)
                     measurement = self.sensing_method(img)
+                    z = measurement.t()
+                    xhat = torch.zeros([self.n, self.BATCH_SIZE], dtype=torch.float32).to(device)
 
                     # forward function
-                    for i in range(5):
-                        img_hat = self.net(measurement)
-                        img_hat = torch.reshape(img_hat, img.shape)
-                        measurement = self.sensing_method(img_hat)
+                    img_hat = self.net(xhat, z, A_val, A_val_pinv, measurement.t())
+                    img_hat = torch.reshape(img_hat, img.shape)
 
-                    mse_error, psnr = utils.EvalError(img_hat, img)
+                    x_hat = img_hat.cpu().detach().numpy()
+                    x_true = img.cpu().detach().numpy()
+                    mse_error, psnr = utils.EvalError(x_hat=x_hat, x_true=x_true)
                     history.append(psnr)
                 psnrs = sum(history) / len(history)
                 print("average test psnr my own: " + str(psnrs))
