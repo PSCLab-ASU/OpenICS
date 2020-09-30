@@ -1,0 +1,126 @@
+% reconstruction_l1.m
+% 
+% Uses L1 reconstruction methods from l1-magic toolbox.
+% 
+% Usage: x_hat = reconstruction_l1(x, y, input_width, input_height, A, At, specifics)
+%
+% x - nx1 vector, original signal
+%
+% y - mx1 vector, observations
+%
+% input_width - Width of the original image
+%
+% input_height - Height of the original image
+%
+% A - Function handle to sensing method
+%
+% At - Function handle to transposed sensing method
+%
+% specifics - Map that must contain at least the following arguments:
+%
+%   constraint - The constraint to use. 'eq', 'qc', 'dantzig', or 'decode'.
+%       Default: 'eq'
+%
+%   pdtol - The tolerance of the primal-dual algorithm, which terminates
+%           when duality gap <= pdtol. Applied on all constraints except
+%           'qc'.
+%       Default: 1e-3
+%
+%   pdmaxiter - The max iterations of primal-dual algorithm. Applied on all
+%               constraints except 'qc'.
+%       Default: 50
+%
+%   cgtol - The tolerance of the Conjugated Gradients algorithm.
+%       Default: 1e-8
+%
+%   cgmaxiter - The max iterations of CG.
+%       Default: 200
+%
+%   epsilon - The constraint relaxation parameter, AKA allowed error. Only
+%             applied on 'qc' and 'dantzig' constraints.
+%       Default: 5e-3
+%
+%   lbtol - The tolerance of the log-barrier algorithm, which terminates
+%           when duality gap <= lbtol. Only applied on 'qc' constraint.
+%       Default: 1e-3
+%
+%   mu - Factor by which to increase the barrier constant per iteration.
+%        Only applied on 'qc' constraint.
+%       Default: 10
+%
+%   normalization - Whether the image should be normalized. May help make
+%                   the image sparser and improve reconstruction accuracy.
+%       Default: false
+%
+
+function x_hat = reconstruction_l1(x, y, input_width, input_height, A, At, specifics)
+    error("ERROR: L1 methods not currently fully integrated into the toolbox!");
+
+    % set default values
+    if ~isKey(specifics, 'constraint')
+        specifics('constraint') = 'eq';
+    end
+    
+    if ~isKey(specifics, 'cgtol')
+        specifics('cgtol') = 1e-8;
+    end
+    
+    if ~isKey(specifics, 'cgmaxiter')
+        specifics('cgmaxiter') = 200;
+    end
+    
+    if ~isKey(specifics, 'normalization')
+        specifics('normalization') = false;
+    end
+    
+    % 'qc' and 'dantzig' constraints require an epsilon argument
+    if strcmp(specifics('constraint'), 'qc') || strcmp(specifics('constraint'), 'dantzig') && ~isKey(specifics, 'epsilon')
+        specifics('epsilon') = 5e-3;
+    end
+    
+    % 'qc' constraint requires lbtol and mu arguments
+    if strcmp(specifics('constraint'), 'qc')
+        if ~isKey(specifics, 'lbtol')
+            specifics('lbtol') = 1e-3;
+        end
+
+        if ~isKey(specifics, 'mu')
+            specifics('mu') = 10;
+        end
+    else
+    % other constraints require pdtol and pdmaxiter arguments
+        if ~isKey(specifics, 'pdtol')
+            specifics('pdtol') = 1e-3;
+        end
+
+        if ~isKey(specifics, 'pdmaxiter')
+            specifics('pdmaxiter') = 50;
+        end
+    end
+    
+    % apply normalization to image
+    if specifics('normalization')
+        x_norm = norm(x(:));
+        x = x / x_norm;
+        x_mean = mean(x(:));
+        x = x - x_mean;
+        y = A(x(:));
+    end
+    
+    x0 = At(y);
+
+    if strcmp(specifics('constraint'), 'eq')
+        xp = l1eq_pd(x0, A, At, y, specifics('pdtol'), specifics('pdmaxiter'), specifics('cgtol'), specifics('cgmaxiter'));
+    elseif strcmp(specifics('constraint'), 'qc')
+    elseif strcmp(specifics('constraint'), 'dantzig')
+    elseif strcmp(specifics('constraint'), 'decode')
+    end
+    
+    x_hat = xp;
+    
+    % invert normalization
+    if specifics('normalization')
+        x_hat = x_hat + x_mean;
+        x_hat = x_hat * x_norm;
+    end
+end
