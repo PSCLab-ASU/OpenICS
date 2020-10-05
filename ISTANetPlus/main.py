@@ -44,7 +44,7 @@ if __name__ == "__main__":
     m = 1089
     n = 272 # ratio_dict = {1: 10, 4: 43, 10: 109, 25: 272, 30: 327, 40: 436, 50: 545}
     dataset = 'Training_Data.mat'
-    stage = 'testing'
+    stage = 'training'
     main(
         "random",
         "ISTANetPlus",
