@@ -4,6 +4,8 @@
 import tensorflow as tf
 import numpy as np
 import time
+from matplotlib import pyplot as plt
+import random
 import sensing_methods
 import utils
 import os
@@ -66,6 +68,7 @@ def CountParameters():
 class LDAMP_wrapper():
     def __init__(self,specifics):
         #Global variables
+        self.specifics = specifics
         self.height_img = specifics['height_img']
         self.width_img = specifics['width_img']
         self.channel_img = specifics['channel_img']
@@ -104,13 +107,12 @@ class LDAMP_wrapper():
         self.InitWeightsMethod = specifics['InitWeightsMethod']
         self.EPOCHS = specifics['EPOCHS']
         self.max_Epoch_Fails = specifics['max_Epoch_Fails']
-        self.stage = specifics['stage']
         self.validation_patch = specifics['validation_patch']
         self.training_patch = specifics['training_patch']
 
-    def initialize(self,dataset,sensing):
+    def initialize(self,dataset,sensing, stage):
         # do the preparation for the running.
-        aliruhhaw = 1
+        self.stage = stage
     def run(self):
         start_layer = self.start_layer
         max_n_DAMP_layers = self.max_n_DAMP_layers
@@ -137,181 +139,138 @@ class LDAMP_wrapper():
         train_start_time = time.time()
         print('Denoiser by Denoiser: ', self.DenoiserbyDenoiser)
         if(self.DenoiserbyDenoiser):
-            if loss_func == 'SURE':
-                useSURE = True
-            else:
-                useSURE = False
+            if(stage == "training"):
+                if loss_func == 'SURE':
+                    useSURE = True
+                else:
+                    useSURE = False
 
-            ## Problem Parameters
-            sigma_w_min = sigma_w_min / 255.  # Noise std
-            sigma_w_max = sigma_w_max / 255.  # Noise std
-            n = self.channel_img * self.height_img * self.width_img
+                ## Problem Parameters
+                sigma_w_min = sigma_w_min / 255.  # Noise std
+                sigma_w_max = sigma_w_max / 255.  # Noise std
+                n = self.channel_img * self.height_img * self.width_img
 
-            # Parameters to to initalize weights. Won't be used if old weights are loaded
-            init_mu = 0
-            init_sigma = 0.1
-            ## Clear all the old variables, tensors, etc.
-            tf.reset_default_graph()
-            SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img,
-                             new_channel_img=self.channel_img,
-                             new_filter_height=self.filter_height, new_filter_width=self.filter_width,
-                             new_num_filters=self.num_filters,
-                             new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=None,
-                             new_sampling_rate=None,
-                             new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=None, new_n=self.n, new_m=None,
-                             new_training=True)
-            sensing_methods.SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img,
-                                             new_channel_img=self.channel_img,
-                                             new_filter_height=self.filter_height, new_filter_width=self.filter_width,
-                                             new_num_filters=self.num_filters,
-                                             new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=None,
-                                             new_sampling_rate=None,
-                                             new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=None, new_n=self.n,
-                                             new_m=None, new_training=True)
-            utils.SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img,
-                                   new_channel_img=self.channel_img,
-                                   new_filter_height=self.filter_height, new_filter_width=self.filter_width,
-                                   new_num_filters=self.num_filters,
-                                   new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=None,
-                                   new_sampling_rate=None,
-                                   new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=None, new_n=self.n, new_m=None,
-                                   new_training=True)
-            ListNetworkParameters()
+                # Parameters to to initalize weights. Won't be used if old weights are loaded
+                init_mu = 0
+                init_sigma = 0.1
+                ## Clear all the old variables, tensors, etc.
+                tf.reset_default_graph()
+                SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img,
+                                 new_channel_img=self.channel_img,
+                                 new_filter_height=self.filter_height, new_filter_width=self.filter_width,
+                                 new_num_filters=self.num_filters,
+                                 new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=None,
+                                 new_sampling_rate=None,
+                                 new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=None, new_n=self.n, new_m=None,
+                                 new_training=True)
+                sensing_methods.SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img,
+                                                 new_channel_img=self.channel_img,
+                                                 new_filter_height=self.filter_height, new_filter_width=self.filter_width,
+                                                 new_num_filters=self.num_filters,
+                                                 new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=None,
+                                                 new_sampling_rate=None,
+                                                 new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=None, new_n=self.n,
+                                                 new_m=None, new_training=True)
+                utils.SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img,
+                                       new_channel_img=self.channel_img,
+                                       new_filter_height=self.filter_height, new_filter_width=self.filter_width,
+                                       new_num_filters=self.num_filters,
+                                       new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=None,
+                                       new_sampling_rate=None,
+                                       new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=None, new_n=self.n, new_m=None,
+                                       new_training=True)
+                ListNetworkParameters()
 
-            # tf Graph input
-            training_tf = tf.placeholder(tf.bool, name='training')
-            sigma_w_tf = tf.placeholder(tf.float32)
-            x_true = tf.placeholder(tf.float32, [n, BATCH_SIZE])
+                # tf Graph input
+                training_tf = tf.placeholder(tf.bool, name='training')
+                sigma_w_tf = tf.placeholder(tf.float32)
+                x_true = tf.placeholder(tf.float32, [n, BATCH_SIZE])
 
-            ## Construct the measurement model and handles/placeholders
-            y_measured = utils.AddNoise(x_true, sigma_w_tf)
+                ## Construct the measurement model and handles/placeholders
+                y_measured = utils.AddNoise(x_true, sigma_w_tf)
 
-            ## Initialize the variable theta which stores the weights and biases
-            theta_dncnn = init_vars_DnCNN(init_mu, init_sigma)
+                ## Initialize the variable theta which stores the weights and biases
+                theta_dncnn = init_vars_DnCNN(init_mu, init_sigma)
 
-            ## Construct the reconstruction model
-            # x_hat = LDAMP.DnCNN(y_measured,None,theta_dncnn,training=training_tf)
-            [x_hat, div_overN] = DnCNN_wrapper(y_measured, None, theta_dncnn, training=training_tf)
+                ## Construct the reconstruction model
+                # x_hat = LDAMP.DnCNN(y_measured,None,theta_dncnn,training=training_tf)
+                [x_hat, div_overN] = DnCNN_wrapper(y_measured, None, theta_dncnn, training=training_tf)
 
-            ## Define loss and optimizer
+                ## Define loss and optimizer
 
-            nfp = np.float32(height_img * width_img)
-            if useSURE:
-                cost = utils.MCSURE_loss(x_hat, div_overN, y_measured, sigma_w_tf)
-            else:
-                cost = tf.nn.l2_loss(x_true - x_hat) * 1. / nfp
+                nfp = np.float32(height_img * width_img)
+                if useSURE:
+                    cost = utils.MCSURE_loss(x_hat, div_overN, y_measured, sigma_w_tf)
+                else:
+                    cost = tf.nn.l2_loss(x_true - x_hat) * 1. / nfp
 
-            CountParameters()
+                CountParameters()
 
-            ## Load and Preprocess Training Data
-            # Training data was generated by GeneratingTrainingImages.m and ConvertImagestoNpyArrays.py
-            train_images = np.load(training_patch + str(height_img) + '.npy')
-            train_images = train_images[range(n_Train_Images), 0, :, :]
-            assert (len(train_images) >= n_Train_Images), "Requested too much training data"
+                ## Load and Preprocess Training Data
+                # Training data was generated by GeneratingTrainingImages.m and ConvertImagestoNpyArrays.py
+                train_images = np.load(training_patch + str(height_img) + '.npy')
+                train_images = train_images[range(n_Train_Images), 0, :, :]
+                assert (len(train_images) >= n_Train_Images), "Requested too much training data"
 
-            val_images = np.load(validation_patch + str(height_img) + '.npy')
-            val_images = val_images[:, 0, :, :]
-            assert (len(val_images) >= n_Val_Images), "Requested too much validation data"
+                val_images = np.load(validation_patch + str(height_img) + '.npy')
+                val_images = val_images[:, 0, :, :]
+                assert (len(val_images) >= n_Val_Images), "Requested too much validation data"
 
-            x_train = np.transpose(np.reshape(train_images, (-1, channel_img * height_img * width_img)))
-            x_val = np.transpose(np.reshape(val_images, (-1, channel_img * height_img * width_img)))
+                x_train = np.transpose(np.reshape(train_images, (-1, channel_img * height_img * width_img)))
+                x_val = np.transpose(np.reshape(val_images, (-1, channel_img * height_img * width_img)))
 
-            ## Train the Model
-            for learning_rate in learning_rates:
-                optimizer0 = tf.train.AdamOptimizer(learning_rate=learning_rate)  # Train all the variables
-                update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-                with tf.control_dependencies(update_ops):
-                    # Ensures that we execute the update_ops before performing the train_step. Allows us to update averages w/in BN
-                    optimizer = optimizer0.minimize(cost)
+                ## Train the Model
+                for learning_rate in learning_rates:
+                    optimizer0 = tf.train.AdamOptimizer(learning_rate=learning_rate)  # Train all the variables
+                    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+                    with tf.control_dependencies(update_ops):
+                        # Ensures that we execute the update_ops before performing the train_step. Allows us to update averages w/in BN
+                        optimizer = optimizer0.minimize(cost)
 
-                saver_best = tf.train.Saver()  # defaults to saving all variables
-                saver_dict = {}
-                with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-                    sess.run(
-                        tf.global_variables_initializer())  # Seems to be necessary for the batch normalization layers for some reason.
+                    saver_best = tf.train.Saver()  # defaults to saving all variables
+                    saver_dict = {}
+                    with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+                        sess.run(
+                            tf.global_variables_initializer())  # Seems to be necessary for the batch normalization layers for some reason.
 
-                    # if FLAGS.debug:
-                    #     sess = tf_debug.LocalCLIDebugWrapperSession(sess)
-                    #     sess.add_tensor_filter("has_inf_or_nan", tf_debug.has_inf_or_nan)
+                        # if FLAGS.debug:
+                        #     sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+                        #     sess.add_tensor_filter("has_inf_or_nan", tf_debug.has_inf_or_nan)
 
-                    start_time = time.time()
-                    print("Load Initial Weights ...")
-                    if ResumeTraining or learning_rate != learning_rates[0]:
-                        ##Load previous values for the weights and BNs
-                        saver_initvars_name_chckpt = utils.GenDnCNNFilename(sigma_w_min, sigma_w_max,useSURE=useSURE) + ".ckpt"
-                        for l in range(0, n_DnCNN_layers):
-                            saver_dict.update({"l" + str(l) + "/w": theta_dncnn[0][l]})
-                        for l in range(1, n_DnCNN_layers - 1):  # Associate variance, means, and beta
-                            gamma_name = "l" + str(l) + "/BN/gamma:0"
-                            beta_name = "l" + str(l) + "/BN/beta:0"
-                            var_name = "l" + str(l) + "/BN/moving_variance:0"
-                            mean_name = "l" + str(l) + "/BN/moving_mean:0"
-                            gamma = [v for v in tf.global_variables() if v.name == gamma_name][0]
-                            beta = [v for v in tf.global_variables() if v.name == beta_name][0]
-                            moving_variance = [v for v in tf.global_variables() if v.name == var_name][0]
-                            moving_mean = [v for v in tf.global_variables() if v.name == mean_name][0]
-                            saver_dict.update({"l" + str(l) + "/BN/gamma": gamma})
-                            saver_dict.update({"l" + str(l) + "/BN/beta": beta})
-                            saver_dict.update({"l" + str(l) + "/BN/moving_variance": moving_variance})
-                            saver_dict.update({"l" + str(l) + "/BN/moving_mean": moving_mean})
-                        saver_initvars = tf.train.Saver(saver_dict)
-                        saver_initvars.restore(sess, saver_initvars_name_chckpt)
-                        # saver_initvars = tf.train.Saver()
-                        # saver_initvars.restore(sess, saver_initvars_name_chckpt)
-                    else:
-                        pass
-                    time_taken = time.time() - start_time
-
-                    print("Training ...")
-                    print()
-                    save_name = utils.GenDnCNNFilename(sigma_w_min, sigma_w_max, useSURE=useSURE)
-                    save_name_chckpt = save_name + ".ckpt"
-                    val_values = []
-                    print("Initial Weights Validation Value:")
-                    rand_inds = np.random.choice(len(val_images), n_Val_Images, replace=False)
-                    start_time = time.time()
-                    for offset in range(0, n_Val_Images - BATCH_SIZE + 1,
-                                        BATCH_SIZE):  # Subtract batch size-1 to avoid eerrors when len(train_images) is not a multiple of the batch size
-                        end = offset + BATCH_SIZE
-
-                        batch_x_val = x_val[:, rand_inds[offset:end]]
-                        sigma_w_thisBatch = sigma_w_min + np.random.rand() * (sigma_w_max - sigma_w_min)
-
-                        # Run optimization.
-                        loss_val = sess.run(cost, feed_dict={x_true: batch_x_val, sigma_w_tf: sigma_w_thisBatch,
-                                                             training_tf: False})
-                        val_values.append(loss_val)
-                    time_taken = time.time() - start_time
-                    print(np.mean(val_values))
-                    best_val_error = np.mean(val_values)
-                    best_sess = sess
-                    print("********************")
-                    save_path = saver_best.save(best_sess, save_name_chckpt)
-                    print("Initial session model saved in file: %s" % save_path)
-                    failed_epochs = 0
-                    for i in range(EPOCHS):
-                        if failed_epochs >= max_Epoch_Fails:
-                            break
-                        train_values = []
-                        print("This Training iteration ...")
-                        rand_inds = np.random.choice(len(train_images), n_Train_Images, replace=False)
                         start_time = time.time()
-                        for offset in range(0, n_Train_Images - BATCH_SIZE + 1,
-                                            BATCH_SIZE):  # Subtract batch size-1 to avoid errors when len(train_images) is not a multiple of the batch size
-                            end = offset + BATCH_SIZE
-
-                            batch_x_train = x_train[:, rand_inds[offset:end]]
-                            sigma_w_thisBatch = sigma_w_min + np.random.rand() * (sigma_w_max - sigma_w_min)
-
-                            # Run optimization.
-                            _, loss_val = sess.run([optimizer, cost],
-                                                   feed_dict={x_true: batch_x_train, sigma_w_tf: sigma_w_thisBatch,
-                                                              training_tf: True})  # Feed dict names should match with the placeholders
-                            train_values.append(loss_val)
+                        print("Load Initial Weights ...")
+                        if ResumeTraining or learning_rate != learning_rates[0]:
+                            ##Load previous values for the weights and BNs
+                            saver_initvars_name_chckpt = utils.GenDnCNNFilename(sigma_w_min, sigma_w_max,useSURE=useSURE) + ".ckpt"
+                            for l in range(0, n_DnCNN_layers):
+                                saver_dict.update({"l" + str(l) + "/w": theta_dncnn[0][l]})
+                            for l in range(1, n_DnCNN_layers - 1):  # Associate variance, means, and beta
+                                gamma_name = "l" + str(l) + "/BN/gamma:0"
+                                beta_name = "l" + str(l) + "/BN/beta:0"
+                                var_name = "l" + str(l) + "/BN/moving_variance:0"
+                                mean_name = "l" + str(l) + "/BN/moving_mean:0"
+                                gamma = [v for v in tf.global_variables() if v.name == gamma_name][0]
+                                beta = [v for v in tf.global_variables() if v.name == beta_name][0]
+                                moving_variance = [v for v in tf.global_variables() if v.name == var_name][0]
+                                moving_mean = [v for v in tf.global_variables() if v.name == mean_name][0]
+                                saver_dict.update({"l" + str(l) + "/BN/gamma": gamma})
+                                saver_dict.update({"l" + str(l) + "/BN/beta": beta})
+                                saver_dict.update({"l" + str(l) + "/BN/moving_variance": moving_variance})
+                                saver_dict.update({"l" + str(l) + "/BN/moving_mean": moving_mean})
+                            saver_initvars = tf.train.Saver(saver_dict)
+                            saver_initvars.restore(sess, saver_initvars_name_chckpt)
+                            # saver_initvars = tf.train.Saver()
+                            # saver_initvars.restore(sess, saver_initvars_name_chckpt)
+                        else:
+                            pass
                         time_taken = time.time() - start_time
-                        print(np.mean(train_values))
+
+                        print("Training ...")
+                        print()
+                        save_name = utils.GenDnCNNFilename(sigma_w_min, sigma_w_max, useSURE=useSURE)
+                        save_name_chckpt = save_name + ".ckpt"
                         val_values = []
-                        print("EPOCH ", i + 1, " Validation Value:")
+                        print("Initial Weights Validation Value:")
                         rand_inds = np.random.choice(len(val_images), n_Val_Images, replace=False)
                         start_time = time.time()
                         for offset in range(0, n_Val_Images - BATCH_SIZE + 1,
@@ -327,209 +286,350 @@ class LDAMP_wrapper():
                             val_values.append(loss_val)
                         time_taken = time.time() - start_time
                         print(np.mean(val_values))
-                        if (np.mean(val_values) < best_val_error):
-                            failed_epochs = 0
-                            best_val_error = np.mean(val_values)
-                            best_sess = sess
-                            print("********************")
-                            save_path = saver_best.save(best_sess, save_name_chckpt)
-                            print("Best session model saved in file: %s" % save_path)
-                        else:
-                            failed_epochs = failed_epochs + 1
+                        best_val_error = np.mean(val_values)
+                        best_sess = sess
                         print("********************")
+                        save_path = saver_best.save(best_sess, save_name_chckpt)
+                        print("Initial session model saved in file: %s" % save_path)
+                        failed_epochs = 0
+                        for i in range(EPOCHS):
+                            if failed_epochs >= max_Epoch_Fails:
+                                break
+                            train_values = []
+                            print("This Training iteration ...")
+                            rand_inds = np.random.choice(len(train_images), n_Train_Images, replace=False)
+                            start_time = time.time()
+                            for offset in range(0, n_Train_Images - BATCH_SIZE + 1,
+                                                BATCH_SIZE):  # Subtract batch size-1 to avoid errors when len(train_images) is not a multiple of the batch size
+                                end = offset + BATCH_SIZE
 
-            total_train_time = time.time() - train_start_time
-            save_name_time = save_name + "_time.txt"
-            # f = open(save_name, 'wb') #TODO convert to python3.7?
-            # f.write("Total Training Time =" + str(total_train_time))
-            # f.close()
-        else:
-            for n_DAMP_layers in range(start_layer, max_n_DAMP_layers + 1, 1):
+                                batch_x_train = x_train[:, rand_inds[offset:end]]
+                                sigma_w_thisBatch = sigma_w_min + np.random.rand() * (sigma_w_max - sigma_w_min)
+
+                                # Run optimization.
+                                _, loss_val = sess.run([optimizer, cost],
+                                                       feed_dict={x_true: batch_x_train, sigma_w_tf: sigma_w_thisBatch,
+                                                                  training_tf: True})  # Feed dict names should match with the placeholders
+                                train_values.append(loss_val)
+                            time_taken = time.time() - start_time
+                            print(np.mean(train_values))
+                            val_values = []
+                            print("EPOCH ", i + 1, " Validation Value:")
+                            rand_inds = np.random.choice(len(val_images), n_Val_Images, replace=False)
+                            start_time = time.time()
+                            for offset in range(0, n_Val_Images - BATCH_SIZE + 1,
+                                                BATCH_SIZE):  # Subtract batch size-1 to avoid eerrors when len(train_images) is not a multiple of the batch size
+                                end = offset + BATCH_SIZE
+
+                                batch_x_val = x_val[:, rand_inds[offset:end]]
+                                sigma_w_thisBatch = sigma_w_min + np.random.rand() * (sigma_w_max - sigma_w_min)
+
+                                # Run optimization.
+                                loss_val = sess.run(cost, feed_dict={x_true: batch_x_val, sigma_w_tf: sigma_w_thisBatch,
+                                                                     training_tf: False})
+                                val_values.append(loss_val)
+                            time_taken = time.time() - start_time
+                            print(np.mean(val_values))
+                            if (np.mean(val_values) < best_val_error):
+                                failed_epochs = 0
+                                best_val_error = np.mean(val_values)
+                                best_sess = sess
+                                print("********************")
+                                save_path = saver_best.save(best_sess, save_name_chckpt)
+                                print("Best session model saved in file: %s" % save_path)
+                            else:
+                                failed_epochs = failed_epochs + 1
+                            print("********************")
+
+                total_train_time = time.time() - train_start_time
+                save_name_time = save_name + "_time.txt"
+                # f = open(save_name, 'wb') #TODO convert to python3.7?
+                # f.write("Total Training Time =" + str(total_train_time))
+                # f.close()
+            elif (stage == "testing"):
+                train_start_time = time.time()
+
                 ## Clear all the old variables, tensors, etc.
                 tf.reset_default_graph()
 
-                SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img, new_channel_img=self.channel_img,
-                                       new_filter_height=self.filter_height, new_filter_width=self.filter_width,
-                                       new_num_filters=self.num_filters,
-                                       new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=n_DAMP_layers,
-                                       new_sampling_rate=self.sampling_rate,
-                                       new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=self.sigma_w, new_n=self.n, new_m=self.m, new_training=True)
-                sensing_methods.SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img, new_channel_img=self.channel_img,
-                                       new_filter_height=self.filter_height, new_filter_width=self.filter_width,
-                                       new_num_filters=self.num_filters,
-                                       new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=n_DAMP_layers,
-                                       new_sampling_rate=self.sampling_rate,
-                                       new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=self.sigma_w, new_n=self.n, new_m=self.m, new_training=True)
-                utils.SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img, new_channel_img=self.channel_img,
-                                       new_filter_height=self.filter_height, new_filter_width=self.filter_width,
-                                       new_num_filters=self.num_filters,
-                                       new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=n_DAMP_layers,
-                                       new_sampling_rate=self.sampling_rate,
-                                       new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=self.sigma_w, new_n=self.n, new_m=self.m, new_training=True)
+                SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img,
+                                 new_channel_img=self.channel_img,
+                                 new_filter_height=self.filter_height, new_filter_width=self.filter_width,
+                                 new_num_filters=self.num_filters,
+                                 new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=None,
+                                 new_sampling_rate=None,
+                                 new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=self.sigma_w, new_n=self.n, new_m=None,
+                                 new_training=False)
+                sensing_methods.SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img,
+                                 new_channel_img=self.channel_img,
+                                 new_filter_height=self.filter_height, new_filter_width=self.filter_width,
+                                 new_num_filters=self.num_filters,
+                                 new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=None,
+                                 new_sampling_rate=None,
+                                 new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=self.sigma_w, new_n=self.n, new_m=None,
+                                 new_training=False)
+                utils.SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img,
+                                 new_channel_img=self.channel_img,
+                                 new_filter_height=self.filter_height, new_filter_width=self.filter_width,
+                                 new_num_filters=self.num_filters,
+                                 new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=None,
+                                 new_sampling_rate=None,
+                                 new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=self.sigma_w, new_n=self.n, new_m=None,
+                                 new_training=False)
                 n = self.n
+                useSURE = False
                 ListNetworkParameters()
 
                 # tf Graph input
-                training_tf = tf.placeholder(tf.bool, name='training')
                 x_true = tf.placeholder(tf.float32, [n, BATCH_SIZE])
 
-                ## Initialize the variable theta which stores the weights and biases
-                if tie_weights == True:
-                    n_layers_trained = 1
-                else:
-                    n_layers_trained = n_DAMP_layers
-                theta = [None] * n_layers_trained
-                for iter in range(n_layers_trained):
-                    with tf.variable_scope("Iter" + str(iter)):
-                        theta_thisIter = init_vars_DnCNN(init_mu, init_sigma)
-                    theta[iter] = theta_thisIter
-
                 ## Construct the measurement model and handles/placeholders
-                [A_handle, At_handle, A_val, A_val_tf] = sensing_methods.GenerateMeasurementOperators(measurement_mode)
-                y_measured = utils.GenerateNoisyCSData_handles(x_true, A_handle, sigma_w, A_val_tf)
+                y_measured = utils.AddNoise(x_true, sigma_w)
+
+                ## Initialize the variable theta which stores the weights and biases
+                theta_dncnn = init_vars_DnCNN(init_mu, init_sigma)
 
                 ## Construct the reconstruction model
-                if alg == 'DAMP':
-                    (x_hat, MSE_history, NMSE_history, PSNR_history, r_final, rvar_final, div_overN) = LDAMP(
-                        y_measured, A_handle, At_handle, A_val_tf, theta, x_true, tie=tie_weights, training=training_tf,
-                        LayerbyLayer=LayerbyLayer)
-                elif alg == 'DIT':
-                    (x_hat, MSE_history, NMSE_history, PSNR_history) = LDIT(y_measured, A_handle, At_handle, A_val_tf,
-                                                                                  theta, x_true, tie=tie_weights,
-                                                                                  training=training_tf,
-                                                                                  LayerbyLayer=LayerbyLayer)
-                else:
-                    raise ValueError('alg was not a supported option')
-
-                ## Define loss and determine which variables to train
-                nfp = np.float32(height_img * width_img)
-                if loss_func == 'SURE':
-                    assert alg == 'DAMP', "Only LDAMP supports training with SURE"
-                    cost = utils.MCSURE_loss(x_hat, div_overN, r_final, tf.sqrt(rvar_final))
-                elif loss_func == 'GSURE':
-                    assert alg == 'DAMP', "Only LDAMP currently supports training with GSURE"
-                    temp0 = tf.matmul(A_val_tf, A_val_tf, transpose_b=True)
-                    temp1 = tf.matrix_inverse(temp0)
-                    pinv_A = tf.matmul(A_val_tf, temp1, transpose_a=True)
-                    P = tf.matmul(pinv_A, A_val_tf)
-                    # Treat LDAMP/LDIT as a function of A^ty to calculate the divergence
-                    Aty_tf = At_handle(A_val_tf, y_measured)
-                    # Overwrite existing x_hat def
-                    (x_hat, _, _, _, _, _, _) = LDAMP_Aty(Aty_tf, A_handle, At_handle, A_val_tf, theta, x_true,
-                                                                tie=tie_weights, training=training_tf,
-                                                                LayerbyLayer=LayerbyLayer)
-                    if sigma_w == 0.:  # Not sure if TF is smart enough to avoid computing MCdiv when it doesn't have to
-                        MCdiv = 0.
-                    else:
-                        # Calculate MC divergence of P*LDAMP(Aty)
-                        epsilon = tf.maximum(.001 * tf.reduce_max(Aty_tf, axis=0), .00001)
-                        eta = tf.random_normal(shape=Aty_tf.get_shape(), dtype=tf.float32)
-                        Aty_perturbed_tf = Aty_tf + tf.multiply(eta, epsilon)
-                        (x_hat_perturbed, _, _, _, _, _, _) = LDAMP_Aty(Aty_perturbed_tf, A_handle, At_handle,
-                                                                              A_val_tf, theta, x_true,
-                                                                              tie=tie_weights, training=training_tf,
-                                                                              LayerbyLayer=LayerbyLayer)
-                        Px_hat_perturbed = tf.matmul(P, x_hat_perturbed)
-                        Px_hat = tf.matmul(P, x_hat)
-                        eta_dx = tf.multiply(eta, Px_hat_perturbed - Px_hat)
-                        mean_eta_dx = tf.reduce_mean(eta_dx, axis=0)
-                        MCdiv = tf.divide(mean_eta_dx, epsilon) * n
-                    x_ML = tf.matmul(pinv_A, y_measured)
-                    cost = utils.MCGSURE_loss(x_hat, x_ML, P, MCdiv, sigma_w)
-                    # Note: This cost is missing a ||Px||^2 term and so is expected to go negative
-                else:
-                    cost = tf.nn.l2_loss(x_true - x_hat) * 1. / nfp
-
-                iter = n_DAMP_layers - 1
-                if LayerbyLayer == True:
-                    vars_to_train = []  # List of only the variables in the last layer.
-                    for l in range(0, n_DnCNN_layers):
-                        # vars_to_train.extend([theta[iter][0][l], theta[iter][1][l]])
-                        vars_to_train.extend([theta[iter][0][l]])
-                    for l in range(1, n_DnCNN_layers - 1):  # Associate variance, means, beta, and gamma
-                        gamma_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/gamma:0"
-                        beta_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/beta:0"
-                        var_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/moving_variance:0"
-                        mean_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/moving_mean:0"
-                        gamma = [v for v in tf.global_variables() if v.name == gamma_name][0]
-                        beta = [v for v in tf.global_variables() if v.name == beta_name][0]
-                        moving_variance = [v for v in tf.global_variables() if v.name == var_name][0]
-                        moving_mean = [v for v in tf.global_variables() if v.name == mean_name][0]
-                        vars_to_train.extend([gamma, beta, moving_variance, moving_mean])
-                else:
-                    vars_to_train = tf.trainable_variables()
+                x_hat = DnCNN(y_measured, None, theta_dncnn, training=False)
 
                 CountParameters()
 
-                ## Load and Preprocess Training Data
-                train_images = np.load(training_patch + str(height_img) + '.npy')
-                train_images = train_images[range(n_Train_Images), 0, :, :]
-                assert (len(train_images) >= n_Train_Images), "Requested too much training data"
+                ## Load and Preprocess Test Data
+                if height_img > 50:
+                    test_im_name = "./TrainingData/StandardTestData_" + str(height_img) + "Res.npy"
+                else:
+                    test_im_name = "./TrainingData/TestData_patch" + str(height_img) + ".npy"
+                test_im_name = self.specifics['testing_patch']
 
-                val_images = np.load(validation_patch + str(height_img) + '.npy')
-                val_images = val_images[:, 0, :, :]
-                assert (len(val_images) >= n_Val_Images), "Requested too much validation data"
+                test_images = np.load(test_im_name)
+                test_images = test_images[:, 0, :, :]
+                assert (len(test_images) >= BATCH_SIZE), "Requested too much Test data"
 
-                x_train = np.transpose(np.reshape(train_images, (-1, channel_img * height_img * width_img)))
-                x_val = np.transpose(np.reshape(val_images, (-1, channel_img * height_img * width_img)))
+                x_test = np.transpose(
+                    np.reshape(test_images[0:BATCH_SIZE], (BATCH_SIZE, height_img * width_img * channel_img)))
+                with tf.Session() as sess:
+                    y_test = sess.run(y_measured, feed_dict={x_true: x_test})
 
                 ## Train the Model
-                for learning_rate in learning_rates:
-                    # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost, var_list=vars_to_train)
+                saver = tf.train.Saver()  # defaults to saving all variables
+                saver_dict = {}
+                with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+                    # if 255.*sigma_w<10.:
+                    #     sigma_w_min=0.
+                    #     sigma_w_max=10.
+                    # elif 255.*sigma_w<20.:
+                    #     sigma_w_min=10.
+                    #     sigma_w_max=20.
+                    # elif 255.*sigma_w < 40.:
+                    #     sigma_w_min = 20.
+                    #     sigma_w_max = 40.
+                    # elif 255.*sigma_w < 60.:
+                    #     sigma_w_min = 40.
+                    #     sigma_w_max = 60.
+                    # elif 255.*sigma_w < 80.:
+                    #     sigma_w_min = 60.
+                    #     sigma_w_max = 80.
+                    # elif 255.*sigma_w < 100.:
+                    #     sigma_w_min = 80.
+                    #     sigma_w_max = 100.
+                    # elif 255.*sigma_w < 150.:
+                    #     sigma_w_min = 100.
+                    #     sigma_w_max = 150.
+                    # elif 255.*sigma_w < 300.:
+                    #     sigma_w_min = 150.
+                    #     sigma_w_max = 300.
+                    # else:
+                    #     sigma_w_min = 300.
+                    #     sigma_w_max = 500.
+                    sigma_w_min = sigma_w * 255.
+                    sigma_w_max = sigma_w * 255.
 
-                    optimizer0 = tf.train.AdamOptimizer(learning_rate=learning_rate)
-                    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-                    with tf.control_dependencies(update_ops):
-                        # Ensures that we execute the update_ops before performing the train_step. Allows us to update averages w/in BN
-                        optimizer = optimizer0.minimize(cost, var_list=vars_to_train)
+                    save_name = utils.GenDnCNNFilename(sigma_w_min / 255., sigma_w_max / 255., useSURE=useSURE)
+                    save_name_chckpt = save_name + ".ckpt"
+                    saver.restore(sess, save_name_chckpt)
 
-                    saver_best = tf.train.Saver()  # defaults to saving all variables
-                    saver_dict = {}
-                    with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-                        sess.run(
-                            tf.global_variables_initializer())  # Seems to be necessary for the batch normalization layers for some reason.
+                    print("Reconstructing Signal")
+                    start_time = time.time()
+                    [reconstructed_test_images] = sess.run([x_hat], feed_dict={y_measured: y_test})
+                    time_taken = time.time() - start_time
+                    fig1 = plt.figure()
+                    plt.imshow(np.transpose(np.reshape(x_test[:, 0], (height_img, width_img))), interpolation='nearest',
+                               cmap='gray')
+                    plt.show()
+                    fig2 = plt.figure()
+                    plt.imshow(np.transpose(np.reshape(y_test[:, 0], (height_img, width_img))), interpolation='nearest',
+                               cmap='gray')
+                    plt.show()
+                    fig3 = plt.figure()
+                    plt.imshow(np.transpose(np.reshape(reconstructed_test_images[:, 0], (height_img, width_img))),
+                               interpolation='nearest', cmap='gray')
+                    plt.show()
+                    [_, _, PSNR] = utils.EvalError_np(x_test[:, 0], reconstructed_test_images[:, 0])
+                    print(" PSNR: ", PSNR)
+        else:
+            if (stage == 'training'):
+                for n_DAMP_layers in range(start_layer, max_n_DAMP_layers + 1, 1):
+                    ## Clear all the old variables, tensors, etc.
+                    tf.reset_default_graph()
 
-                        # if FLAGS.debug:
-                        #     sess = tf_debug.LocalCLIDebugWrapperSession(sess)
-                        #     sess.add_tensor_filter("has_inf_or_nan", tf_debug.has_inf_or_nan)
+                    SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img, new_channel_img=self.channel_img,
+                                           new_filter_height=self.filter_height, new_filter_width=self.filter_width,
+                                           new_num_filters=self.num_filters,
+                                           new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=n_DAMP_layers,
+                                           new_sampling_rate=self.sampling_rate,
+                                           new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=self.sigma_w, new_n=self.n, new_m=self.m, new_training=True)
+                    sensing_methods.SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img, new_channel_img=self.channel_img,
+                                           new_filter_height=self.filter_height, new_filter_width=self.filter_width,
+                                           new_num_filters=self.num_filters,
+                                           new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=n_DAMP_layers,
+                                           new_sampling_rate=self.sampling_rate,
+                                           new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=self.sigma_w, new_n=self.n, new_m=self.m, new_training=True)
+                    utils.SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img, new_channel_img=self.channel_img,
+                                           new_filter_height=self.filter_height, new_filter_width=self.filter_width,
+                                           new_num_filters=self.num_filters,
+                                           new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=n_DAMP_layers,
+                                           new_sampling_rate=self.sampling_rate,
+                                           new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=self.sigma_w, new_n=self.n, new_m=self.m, new_training=True)
+                    n = self.n
+                    ListNetworkParameters()
 
-                        start_time = time.time()
-                        print("Load Initial Weights ...")
-                        if ResumeTraining or learning_rate != learning_rates[0]:
-                            ##Load previous values for the weights
-                            saver_initvars_name_chckpt = utils.GenLDAMPFilename(alg, tie_weights, LayerbyLayer,loss_func=loss_func) + ".ckpt"
-                            for iter in range(n_layers_trained):  # Create a dictionary with all the variables except those associated with the optimizer.
-                                for l in range(0, n_DnCNN_layers):
-                                    saver_dict.update({"Iter" + str(iter) + "/l" + str(l) + "/w": theta[iter][0][l]})  # ,
-                                    # "Iter" + str(iter) + "/l" + str(l) + "/b": theta[iter][1][l]})
-                                for l in range(1, n_DnCNN_layers - 1):  # Associate variance, means, and beta
-                                    gamma_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/gamma:0"
-                                    beta_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/beta:0"
-                                    var_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/moving_variance:0"
-                                    mean_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/moving_mean:0"
-                                    gamma = [v for v in tf.global_variables() if v.name == gamma_name][0]
-                                    beta = [v for v in tf.global_variables() if v.name == beta_name][0]
-                                    moving_variance = [v for v in tf.global_variables() if v.name == var_name][0]
-                                    moving_mean = [v for v in tf.global_variables() if v.name == mean_name][0]
-                                    saver_dict.update({"Iter" + str(iter) + "/l" + str(l) + "/BN/gamma": gamma})
-                                    saver_dict.update({"Iter" + str(iter) + "/l" + str(l) + "/BN/beta": beta})
-                                    saver_dict.update(
-                                        {"Iter" + str(iter) + "/l" + str(l) + "/BN/moving_variance": moving_variance})
-                                    saver_dict.update({"Iter" + str(iter) + "/l" + str(l) + "/BN/moving_mean": moving_mean})
-                                saver_initvars = tf.train.Saver(saver_dict)
-                                saver_initvars.restore(sess, saver_initvars_name_chckpt)
-                                print("Loaded wieghts from %s" % saver_initvars_name_chckpt)
+                    # tf Graph input
+                    training_tf = tf.placeholder(tf.bool, name='training')
+                    x_true = tf.placeholder(tf.float32, [n, BATCH_SIZE])
+
+                    ## Initialize the variable theta which stores the weights and biases
+                    if tie_weights == True:
+                        n_layers_trained = 1
+                    else:
+                        n_layers_trained = n_DAMP_layers
+                    theta = [None] * n_layers_trained
+                    for iter in range(n_layers_trained):
+                        with tf.variable_scope("Iter" + str(iter)):
+                            theta_thisIter = init_vars_DnCNN(init_mu, init_sigma)
+                        theta[iter] = theta_thisIter
+
+                    ## Construct the measurement model and handles/placeholders
+                    [A_handle, At_handle, A_val, A_val_tf] = sensing_methods.GenerateMeasurementOperators(measurement_mode)
+                    y_measured = utils.GenerateNoisyCSData_handles(x_true, A_handle, sigma_w, A_val_tf)
+
+                    ## Construct the reconstruction model
+                    if alg == 'DAMP':
+                        (x_hat, MSE_history, NMSE_history, PSNR_history, r_final, rvar_final, div_overN) = LDAMP(
+                            y_measured, A_handle, At_handle, A_val_tf, theta, x_true, tie=tie_weights, training=training_tf,
+                            LayerbyLayer=LayerbyLayer)
+                    elif alg == 'DIT':
+                        (x_hat, MSE_history, NMSE_history, PSNR_history) = LDIT(y_measured, A_handle, At_handle, A_val_tf,
+                                                                                      theta, x_true, tie=tie_weights,
+                                                                                      training=training_tf,
+                                                                                      LayerbyLayer=LayerbyLayer)
+                    else:
+                        raise ValueError('alg was not a supported option')
+
+                    ## Define loss and determine which variables to train
+                    nfp = np.float32(height_img * width_img)
+                    if loss_func == 'SURE':
+                        assert alg == 'DAMP', "Only LDAMP supports training with SURE"
+                        cost = utils.MCSURE_loss(x_hat, div_overN, r_final, tf.sqrt(rvar_final))
+                    elif loss_func == 'GSURE':
+                        assert alg == 'DAMP', "Only LDAMP currently supports training with GSURE"
+                        temp0 = tf.matmul(A_val_tf, A_val_tf, transpose_b=True)
+                        temp1 = tf.matrix_inverse(temp0)
+                        pinv_A = tf.matmul(A_val_tf, temp1, transpose_a=True)
+                        P = tf.matmul(pinv_A, A_val_tf)
+                        # Treat LDAMP/LDIT as a function of A^ty to calculate the divergence
+                        Aty_tf = At_handle(A_val_tf, y_measured)
+                        # Overwrite existing x_hat def
+                        (x_hat, _, _, _, _, _, _) = LDAMP_Aty(Aty_tf, A_handle, At_handle, A_val_tf, theta, x_true,
+                                                                    tie=tie_weights, training=training_tf,
+                                                                    LayerbyLayer=LayerbyLayer)
+                        if sigma_w == 0.:  # Not sure if TF is smart enough to avoid computing MCdiv when it doesn't have to
+                            MCdiv = 0.
                         else:
-                            ## Load initial values for the weights.
-                            # To do so, one associates each variable with a key (e.g. theta[iter][0][0] with l1/w_DnCNN) and loads the l1/w_DCNN weights that were trained on the denoiser
-                            # To confirm weights were actually loaded, run sess.run(theta[0][0][0][0][0])[0][0]) before and after this statement. (Requires running sess.run(tf.global_variables_initializer()) first
-                            if InitWeightsMethod == 'layer_by_layer':
-                                # load the weights from an identical network that was trained layer-by-layer
-                                saver_initvars_name_chckpt = utils.GenLDAMPFilename(alg, tie_weights, LayerbyLayer=True,loss_func=loss_func) + ".ckpt"
+                            # Calculate MC divergence of P*LDAMP(Aty)
+                            epsilon = tf.maximum(.001 * tf.reduce_max(Aty_tf, axis=0), .00001)
+                            eta = tf.random_normal(shape=Aty_tf.get_shape(), dtype=tf.float32)
+                            Aty_perturbed_tf = Aty_tf + tf.multiply(eta, epsilon)
+                            (x_hat_perturbed, _, _, _, _, _, _) = LDAMP_Aty(Aty_perturbed_tf, A_handle, At_handle,
+                                                                                  A_val_tf, theta, x_true,
+                                                                                  tie=tie_weights, training=training_tf,
+                                                                                  LayerbyLayer=LayerbyLayer)
+                            Px_hat_perturbed = tf.matmul(P, x_hat_perturbed)
+                            Px_hat = tf.matmul(P, x_hat)
+                            eta_dx = tf.multiply(eta, Px_hat_perturbed - Px_hat)
+                            mean_eta_dx = tf.reduce_mean(eta_dx, axis=0)
+                            MCdiv = tf.divide(mean_eta_dx, epsilon) * n
+                        x_ML = tf.matmul(pinv_A, y_measured)
+                        cost = utils.MCGSURE_loss(x_hat, x_ML, P, MCdiv, sigma_w)
+                        # Note: This cost is missing a ||Px||^2 term and so is expected to go negative
+                    else:
+                        cost = tf.nn.l2_loss(x_true - x_hat) * 1. / nfp
+
+                    iter = n_DAMP_layers - 1
+                    if LayerbyLayer == True:
+                        vars_to_train = []  # List of only the variables in the last layer.
+                        for l in range(0, n_DnCNN_layers):
+                            # vars_to_train.extend([theta[iter][0][l], theta[iter][1][l]])
+                            vars_to_train.extend([theta[iter][0][l]])
+                        for l in range(1, n_DnCNN_layers - 1):  # Associate variance, means, beta, and gamma
+                            gamma_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/gamma:0"
+                            beta_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/beta:0"
+                            var_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/moving_variance:0"
+                            mean_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/moving_mean:0"
+                            gamma = [v for v in tf.global_variables() if v.name == gamma_name][0]
+                            beta = [v for v in tf.global_variables() if v.name == beta_name][0]
+                            moving_variance = [v for v in tf.global_variables() if v.name == var_name][0]
+                            moving_mean = [v for v in tf.global_variables() if v.name == mean_name][0]
+                            vars_to_train.extend([gamma, beta, moving_variance, moving_mean])
+                    else:
+                        vars_to_train = tf.trainable_variables()
+
+                    CountParameters()
+
+                    ## Load and Preprocess Training Data
+                    train_images = np.load(training_patch + str(height_img) + '.npy')
+                    train_images = train_images[range(n_Train_Images), 0, :, :]
+                    assert (len(train_images) >= n_Train_Images), "Requested too much training data"
+
+                    val_images = np.load(validation_patch + str(height_img) + '.npy')
+                    val_images = val_images[:, 0, :, :]
+                    assert (len(val_images) >= n_Val_Images), "Requested too much validation data"
+
+                    x_train = np.transpose(np.reshape(train_images, (-1, channel_img * height_img * width_img)))
+                    x_val = np.transpose(np.reshape(val_images, (-1, channel_img * height_img * width_img)))
+
+                    ## Train the Model
+                    for learning_rate in learning_rates:
+                        # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost, var_list=vars_to_train)
+
+                        optimizer0 = tf.train.AdamOptimizer(learning_rate=learning_rate)
+                        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+                        with tf.control_dependencies(update_ops):
+                            # Ensures that we execute the update_ops before performing the train_step. Allows us to update averages w/in BN
+                            optimizer = optimizer0.minimize(cost, var_list=vars_to_train)
+
+                        saver_best = tf.train.Saver()  # defaults to saving all variables
+                        saver_dict = {}
+
+                        # This is used to accommodate our RTX graphics card, don't need it otherwise
+                        config = tf.ConfigProto(allow_soft_placement=True)
+                        config.gpu_options.allow_growth = True
+
+                        with tf.Session(config=config) as sess:
+                            sess.run(
+                                tf.global_variables_initializer())  # Seems to be necessary for the batch normalization layers for some reason.
+
+                            # if FLAGS.debug:
+                            #     sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+                            #     sess.add_tensor_filter("has_inf_or_nan", tf_debug.has_inf_or_nan)
+
+                            start_time = time.time()
+                            print("Load Initial Weights ...")
+                            if ResumeTraining or learning_rate != learning_rates[0]:
+                                ##Load previous values for the weights
+                                saver_initvars_name_chckpt = utils.GenLDAMPFilename(alg, tie_weights, LayerbyLayer,loss_func=loss_func) + ".ckpt"
                                 for iter in range(n_layers_trained):  # Create a dictionary with all the variables except those associated with the optimizer.
                                     for l in range(0, n_DnCNN_layers):
-                                        saver_dict.update(
-                                            {"Iter" + str(iter) + "/l" + str(l) + "/w": theta[iter][0][l]})  # ,
+                                        saver_dict.update({"Iter" + str(iter) + "/l" + str(l) + "/w": theta[iter][0][l]})  # ,
                                         # "Iter" + str(iter) + "/l" + str(l) + "/b": theta[iter][1][l]})
                                     for l in range(1, n_DnCNN_layers - 1):  # Associate variance, means, and beta
                                         gamma_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/gamma:0"
@@ -544,43 +644,46 @@ class LDAMP_wrapper():
                                         saver_dict.update({"Iter" + str(iter) + "/l" + str(l) + "/BN/beta": beta})
                                         saver_dict.update(
                                             {"Iter" + str(iter) + "/l" + str(l) + "/BN/moving_variance": moving_variance})
-                                        saver_dict.update(
-                                            {"Iter" + str(iter) + "/l" + str(l) + "/BN/moving_mean": moving_mean})
+                                        saver_dict.update({"Iter" + str(iter) + "/l" + str(l) + "/BN/moving_mean": moving_mean})
                                     saver_initvars = tf.train.Saver(saver_dict)
                                     saver_initvars.restore(sess, saver_initvars_name_chckpt)
-                            if InitWeightsMethod == 'denoiser':
-                                # load initial weights that were trained on a denoising problem
-                                saver_initvars_name_chckpt = utils.GenDnCNNFilename(300. / 255., 500. / 255.) + ".ckpt"
-                                iter = 0
-                                for l in range(0, n_DnCNN_layers):
-                                    saver_dict.update({"l" + str(l) + "/w": theta[iter][0][
-                                        l]})  # , "l" + str(l) + "/b": theta[iter][1][l]})
-                                for l in range(1, n_DnCNN_layers - 1):  # Associate variance, means, and beta
-                                    gamma_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/gamma:0"
-                                    beta_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/beta:0"
-                                    var_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/moving_variance:0"
-                                    mean_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/moving_mean:0"
-                                    gamma = [v for v in tf.global_variables() if v.name == gamma_name][0]
-                                    beta = [v for v in tf.global_variables() if v.name == beta_name][0]
-                                    moving_variance = [v for v in tf.global_variables() if v.name == var_name][0]
-                                    moving_mean = [v for v in tf.global_variables() if v.name == mean_name][0]
-                                    saver_dict.update({"l" + str(l) + "/BN/gamma": gamma})
-                                    saver_dict.update({"l" + str(l) + "/BN/beta": beta})
-                                    saver_dict.update({"l" + str(l) + "/BN/moving_variance": moving_variance})
-                                    saver_dict.update({"l" + str(l) + "/BN/moving_mean": moving_mean})
-                                saver_initvars = tf.train.Saver(saver_dict)
-                                saver_initvars.restore(sess, saver_initvars_name_chckpt)
-                            elif InitWeightsMethod == 'smaller_net' and n_DAMP_layers != 1:
-                                # Initialize wieghts using a smaller network's weights
-                                saver_initvars_name_chckpt = utils.GenLDAMPFilename(alg, tie_weights, LayerbyLayer,
-                                                                                    n_DAMP_layer_override=n_DAMP_layers - 1,
-                                                                                    loss_func=loss_func) + ".ckpt"
-
-                                # Load the first n-1 iterations weights from a previously learned network
-                                for iter in range(n_DAMP_layers - 1):
+                                    print("Loaded wieghts from %s" % saver_initvars_name_chckpt)
+                            else:
+                                ## Load initial values for the weights.
+                                # To do so, one associates each variable with a key (e.g. theta[iter][0][0] with l1/w_DnCNN) and loads the l1/w_DCNN weights that were trained on the denoiser
+                                # To confirm weights were actually loaded, run sess.run(theta[0][0][0][0][0])[0][0]) before and after this statement. (Requires running sess.run(tf.global_variables_initializer()) first
+                                if InitWeightsMethod == 'layer_by_layer':
+                                    # load the weights from an identical network that was trained layer-by-layer
+                                    saver_initvars_name_chckpt = utils.GenLDAMPFilename(alg, tie_weights, LayerbyLayer=True,loss_func=loss_func) + ".ckpt"
+                                    for iter in range(n_layers_trained):  # Create a dictionary with all the variables except those associated with the optimizer.
+                                        for l in range(0, n_DnCNN_layers):
+                                            saver_dict.update(
+                                                {"Iter" + str(iter) + "/l" + str(l) + "/w": theta[iter][0][l]})  # ,
+                                            # "Iter" + str(iter) + "/l" + str(l) + "/b": theta[iter][1][l]})
+                                        for l in range(1, n_DnCNN_layers - 1):  # Associate variance, means, and beta
+                                            gamma_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/gamma:0"
+                                            beta_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/beta:0"
+                                            var_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/moving_variance:0"
+                                            mean_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/moving_mean:0"
+                                            gamma = [v for v in tf.global_variables() if v.name == gamma_name][0]
+                                            beta = [v for v in tf.global_variables() if v.name == beta_name][0]
+                                            moving_variance = [v for v in tf.global_variables() if v.name == var_name][0]
+                                            moving_mean = [v for v in tf.global_variables() if v.name == mean_name][0]
+                                            saver_dict.update({"Iter" + str(iter) + "/l" + str(l) + "/BN/gamma": gamma})
+                                            saver_dict.update({"Iter" + str(iter) + "/l" + str(l) + "/BN/beta": beta})
+                                            saver_dict.update(
+                                                {"Iter" + str(iter) + "/l" + str(l) + "/BN/moving_variance": moving_variance})
+                                            saver_dict.update(
+                                                {"Iter" + str(iter) + "/l" + str(l) + "/BN/moving_mean": moving_mean})
+                                        saver_initvars = tf.train.Saver(saver_dict)
+                                        saver_initvars.restore(sess, saver_initvars_name_chckpt)
+                                if InitWeightsMethod == 'denoiser':
+                                    # load initial weights that were trained on a denoising problem
+                                    saver_initvars_name_chckpt = utils.GenDnCNNFilename(300. / 255., 500. / 255.) + ".ckpt"
+                                    iter = 0
                                     for l in range(0, n_DnCNN_layers):
-                                        saver_dict.update({"Iter" + str(iter) + "/l" + str(l) + "/w": theta[iter][0][
-                                            l]})  # , "Iter"+str(iter)+"/l" + str(l) + "/b": theta[iter][1][l]})
+                                        saver_dict.update({"l" + str(l) + "/w": theta[iter][0][
+                                            l]})  # , "l" + str(l) + "/b": theta[iter][1][l]})
                                     for l in range(1, n_DnCNN_layers - 1):  # Associate variance, means, and beta
                                         gamma_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/gamma:0"
                                         beta_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/beta:0"
@@ -590,46 +693,71 @@ class LDAMP_wrapper():
                                         beta = [v for v in tf.global_variables() if v.name == beta_name][0]
                                         moving_variance = [v for v in tf.global_variables() if v.name == var_name][0]
                                         moving_mean = [v for v in tf.global_variables() if v.name == mean_name][0]
-                                        saver_dict.update({"Iter" + str(iter) + "/l" + str(l) + "/BN/gamma": gamma})
-                                        saver_dict.update({"Iter" + str(iter) + "/l" + str(l) + "/BN/beta": beta})
-                                        saver_dict.update(
-                                            {"Iter" + str(iter) + "/l" + str(l) + "/BN/moving_variance": moving_variance})
-                                        saver_dict.update(
-                                            {"Iter" + str(iter) + "/l" + str(l) + "/BN/moving_mean": moving_mean})
+                                        saver_dict.update({"l" + str(l) + "/BN/gamma": gamma})
+                                        saver_dict.update({"l" + str(l) + "/BN/beta": beta})
+                                        saver_dict.update({"l" + str(l) + "/BN/moving_variance": moving_variance})
+                                        saver_dict.update({"l" + str(l) + "/BN/moving_mean": moving_mean})
                                     saver_initvars = tf.train.Saver(saver_dict)
                                     saver_initvars.restore(sess, saver_initvars_name_chckpt)
+                                elif InitWeightsMethod == 'smaller_net' and n_DAMP_layers != 1:
+                                    # Initialize wieghts using a smaller network's weights
+                                    saver_initvars_name_chckpt = utils.GenLDAMPFilename(alg, tie_weights, LayerbyLayer,
+                                                                                        n_DAMP_layer_override=n_DAMP_layers - 1,
+                                                                                        loss_func=loss_func) + ".ckpt"
 
-                                # Initialize the weights of layer n by using the weights from layer n-1
-                                iter = n_DAMP_layers - 1
-                                saver_dict = {}
-                                for l in range(0, n_DnCNN_layers):
-                                    saver_dict.update({"Iter" + str(iter - 1) + "/l" + str(l) + "/w": theta[iter][0][
-                                        l]})  # ,"Iter" + str(iter-1) + "/l" + str(l) + "/b": theta[iter][1][l]})
-                                for l in range(1, n_DnCNN_layers - 1):  # Associate variance, means, and beta
-                                    gamma_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/gamma:0"
-                                    beta_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/beta:0"
-                                    var_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/moving_variance:0"
-                                    mean_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/moving_mean:0"
-                                    gamma = [v for v in tf.global_variables() if v.name == gamma_name][0]
-                                    beta = [v for v in tf.global_variables() if v.name == beta_name][0]
-                                    moving_variance = [v for v in tf.global_variables() if v.name == var_name][0]
-                                    moving_mean = [v for v in tf.global_variables() if v.name == mean_name][0]
-                                    saver_dict.update({"Iter" + str(iter - 1) + "/l" + str(l) + "/BN/gamma": gamma})
-                                    saver_dict.update({"Iter" + str(iter - 1) + "/l" + str(l) + "/BN/beta": beta})
-                                    saver_dict.update(
-                                        {"Iter" + str(iter - 1) + "/l" + str(l) + "/BN/moving_variance": moving_variance})
-                                    saver_dict.update(
-                                        {"Iter" + str(iter - 1) + "/l" + str(l) + "/BN/moving_mean": moving_mean})
-                                saver_initvars = tf.train.Saver(saver_dict)
-                                saver_initvars.restore(sess, saver_initvars_name_chckpt)
-                            else:
-                                # use random weights. This will occur for 1 layer networks if set to use smaller_net initialization
-                                pass
-                        time_taken = time.time() - start_time
+                                    # Load the first n-1 iterations weights from a previously learned network
+                                    for iter in range(n_DAMP_layers - 1):
+                                        for l in range(0, n_DnCNN_layers):
+                                            saver_dict.update({"Iter" + str(iter) + "/l" + str(l) + "/w": theta[iter][0][
+                                                l]})  # , "Iter"+str(iter)+"/l" + str(l) + "/b": theta[iter][1][l]})
+                                        for l in range(1, n_DnCNN_layers - 1):  # Associate variance, means, and beta
+                                            gamma_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/gamma:0"
+                                            beta_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/beta:0"
+                                            var_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/moving_variance:0"
+                                            mean_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/moving_mean:0"
+                                            gamma = [v for v in tf.global_variables() if v.name == gamma_name][0]
+                                            beta = [v for v in tf.global_variables() if v.name == beta_name][0]
+                                            moving_variance = [v for v in tf.global_variables() if v.name == var_name][0]
+                                            moving_mean = [v for v in tf.global_variables() if v.name == mean_name][0]
+                                            saver_dict.update({"Iter" + str(iter) + "/l" + str(l) + "/BN/gamma": gamma})
+                                            saver_dict.update({"Iter" + str(iter) + "/l" + str(l) + "/BN/beta": beta})
+                                            saver_dict.update(
+                                                {"Iter" + str(iter) + "/l" + str(l) + "/BN/moving_variance": moving_variance})
+                                            saver_dict.update(
+                                                {"Iter" + str(iter) + "/l" + str(l) + "/BN/moving_mean": moving_mean})
+                                        saver_initvars = tf.train.Saver(saver_dict)
+                                        saver_initvars.restore(sess, saver_initvars_name_chckpt)
 
-                        print("Training ...")
-                        print()
-                        if stage == 'training':
+                                    # Initialize the weights of layer n by using the weights from layer n-1
+                                    iter = n_DAMP_layers - 1
+                                    saver_dict = {}
+                                    for l in range(0, n_DnCNN_layers):
+                                        saver_dict.update({"Iter" + str(iter - 1) + "/l" + str(l) + "/w": theta[iter][0][
+                                            l]})  # ,"Iter" + str(iter-1) + "/l" + str(l) + "/b": theta[iter][1][l]})
+                                    for l in range(1, n_DnCNN_layers - 1):  # Associate variance, means, and beta
+                                        gamma_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/gamma:0"
+                                        beta_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/beta:0"
+                                        var_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/moving_variance:0"
+                                        mean_name = "Iter" + str(iter) + "/l" + str(l) + "/BN/moving_mean:0"
+                                        gamma = [v for v in tf.global_variables() if v.name == gamma_name][0]
+                                        beta = [v for v in tf.global_variables() if v.name == beta_name][0]
+                                        moving_variance = [v for v in tf.global_variables() if v.name == var_name][0]
+                                        moving_mean = [v for v in tf.global_variables() if v.name == mean_name][0]
+                                        saver_dict.update({"Iter" + str(iter - 1) + "/l" + str(l) + "/BN/gamma": gamma})
+                                        saver_dict.update({"Iter" + str(iter - 1) + "/l" + str(l) + "/BN/beta": beta})
+                                        saver_dict.update(
+                                            {"Iter" + str(iter - 1) + "/l" + str(l) + "/BN/moving_variance": moving_variance})
+                                        saver_dict.update(
+                                            {"Iter" + str(iter - 1) + "/l" + str(l) + "/BN/moving_mean": moving_mean})
+                                    saver_initvars = tf.train.Saver(saver_dict)
+                                    saver_initvars.restore(sess, saver_initvars_name_chckpt)
+                                else:
+                                    # use random weights. This will occur for 1 layer networks if set to use smaller_net initialization
+                                    pass
+                            time_taken = time.time() - start_time
+
+                            print("Training ...")
+                            print()
                             save_name = utils.GenLDAMPFilename(alg, tie_weights, LayerbyLayer, loss_func=loss_func)
                             save_name_chckpt = save_name + ".ckpt"
                             val_values = []
@@ -711,10 +839,210 @@ class LDAMP_wrapper():
                                 print("********************")
                                 total_train_time = time.time() - train_start_time
                                 print("Training time so far: %.2f seconds" % total_train_time)
-            save_name_txt = save_name + ".txt"
-            # f = open(save_name_txt, 'wb') #TODO convert to python3.7?
-            # f.write("Total Training Time =" + str(total_train_time))
-            # f.close()
+                save_name_txt = save_name + ".txt"
+                # f = open(save_name_txt, 'wb') #TODO convert to python3.7?
+                # f.write("Total Training Time =" + str(total_train_time))
+                # f.close()
+            elif(stage == 'testing'):
+                ## Testing/Problem Parameters
+                # BATCH_SIZE = 1  # Using a batch size larger than 1 will hurt the denoiser by denoiser trained network because it will use an average noise level, rather than a noise level specific to each image
+                # n_Test_Images = 5
+                # sampling_rate_test = .2  # The sampling rate used for testing
+                # sampling_rate_train = .2  # The sampling rate that was used for training
+                # sigma_w = 0.
+                # n = channel_img * height_img * width_img
+                # m = int(np.round(sampling_rate_test * n))
+                # measurement_mode = 'Fast-JL'  # 'coded-diffraction'#'gaussian'#'complex-gaussian'#
+
+                # Parameters to to initalize weights. Won't be used if old weights are loaded
+                init_mu = 0
+                init_sigma = 0.1
+
+                random.seed(1)
+
+                SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img,
+                                 new_channel_img=self.channel_img,
+                                 new_filter_height=self.filter_height, new_filter_width=self.filter_width,
+                                 new_num_filters=self.num_filters,
+                                 new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=self.max_n_DAMP_layers,
+                                 new_sampling_rate=self.sampling_rate,
+                                 new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=self.sigma_w, new_n=self.n, new_m=self.m,
+                                 new_training=False, use_adaptive_weights=self.DenoiserbyDenoiser)
+                sensing_methods.SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img,
+                                 new_channel_img=self.channel_img,
+                                 new_filter_height=self.filter_height, new_filter_width=self.filter_width,
+                                 new_num_filters=self.num_filters,
+                                 new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=self.max_n_DAMP_layers,
+                                 new_sampling_rate=self.sampling_rate,
+                                 new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=self.sigma_w, new_n=self.n, new_m=self.m,
+                                 new_training=False, use_adaptive_weights=self.DenoiserbyDenoiser)
+                utils.SetNetworkParams(new_height_img=self.height_img, new_width_img=self.width_img,
+                                 new_channel_img=self.channel_img,
+                                 new_filter_height=self.filter_height, new_filter_width=self.filter_width,
+                                 new_num_filters=self.num_filters,
+                                 new_n_DnCNN_layers=self.n_DnCNN_layers, new_n_DAMP_layers=self.max_n_DAMP_layers,
+                                 new_sampling_rate=self.sampling_rate,
+                                 new_BATCH_SIZE=self.BATCH_SIZE, new_sigma_w=self.sigma_w, new_n=self.n, new_m=self.m,
+                                 new_training=False, use_adaptive_weights=self.DenoiserbyDenoiser)
+                n = self.n
+                DenoiserbyDenoiser = self.DenoiserbyDenoiser
+                n_DAMP_layers = self.max_n_DAMP_layers
+                n_Test_Images = 5
+                sampling_rate_train = self.sampling_rate
+                TrainLoss = self.loss_func
+                ListNetworkParameters()
+
+                # tf Graph input
+                x_true = tf.placeholder(tf.float32, [n, BATCH_SIZE])
+
+                # Create handles for the measurement operator
+                [A_handle, At_handle, A_val, A_val_tf] = sensing_methods.GenerateMeasurementOperators(measurement_mode)
+
+                ## Initialize the variable theta which stores the weights and biases
+                if tie_weights == True:
+                    theta = [None]
+                    with tf.variable_scope("Iter" + str(0)):
+                        theta_thisIter = init_vars_DnCNN(init_mu, init_sigma)
+                    theta[0] = theta_thisIter
+                elif DenoiserbyDenoiser:
+                    noise_min_stds = [0, 10, 20, 40, 60, 80, 100, 150,
+                                      300]  # This is currently hardcoded within LearnedDAMP_functionhelper
+                    noise_max_stds = [10, 20, 40, 60, 80, 100, 150, 300,
+                                      500]  # This is currently hardcoded within LearnedDAMP_functionhelper
+                    theta = [None] * len(noise_min_stds)
+                    for noise_level in range(len(noise_min_stds)):
+                        with tf.variable_scope("Adaptive_NL" + str(noise_level)):
+                            theta[noise_level] = init_vars_DnCNN(init_mu, init_sigma)
+                else:
+                    n_layers_trained = n_DAMP_layers
+                    theta = [None] * n_layers_trained
+                    for iter in range(n_layers_trained):
+                        with tf.variable_scope("Iter" + str(iter)):
+                            theta_thisIter = init_vars_DnCNN(init_mu, init_sigma)
+                        theta[iter] = theta_thisIter
+
+                ## Construct model
+                y_measured = utils.GenerateNoisyCSData_handles(x_true, A_handle, sigma_w, A_val_tf)
+                if alg == 'DAMP':
+                    (x_hat, MSE_history, NMSE_history, PSNR_history, r, rvar, dxdr) = LDAMP(y_measured, A_handle,
+                                                                                                  At_handle, A_val_tf,
+                                                                                                  theta, x_true,
+                                                                                                  tie=tie_weights)
+                elif alg == 'DIT':
+                    (x_hat, MSE_history, NMSE_history, PSNR_history) = LDIT(y_measured, A_handle, At_handle,
+                                                                                  A_val_tf, theta, x_true,
+                                                                                  tie=tie_weights)
+                else:
+                    raise ValueError('alg was not a supported option')
+
+                ## Load and Preprocess Test Data
+                if height_img > 50:
+                    test_im_name = "./TrainingData/StandardTestData_" + str(height_img) + "Res.npy"
+                else:
+                    test_im_name = "./TrainingData/TestData_patch" + str(height_img) + ".npy"
+                test_im_name = self.specifics['testing_patch']
+
+                test_images = np.load(test_im_name)
+                test_images = test_images[:, 0, :, :]
+                assert (len(test_images) >= n_Test_Images), "Requested too much Test data"
+
+                x_test = np.transpose(np.reshape(test_images, (-1, height_img * width_img * channel_img)))
+
+                # with tf.Session() as sess:
+                #     y_test=sess.run(y_measured,feed_dict={x_true: x_test, A_val_tf: A_val})#All the batches will use the same measurement matrix
+
+                ## Test the Model
+                saver = tf.train.Saver()  # defaults to saving all variables
+                saver_dict = {}
+
+                # This is used to accommodate our RTX graphics card, don't need it otherwise
+                config = tf.ConfigProto()
+                config.gpu_options.allow_growth = True
+
+                with tf.Session(config=config) as sess:
+                    if tie_weights == 1:  # Load weights from pretrained denoiser
+                        save_name = utils.GenDnCNNFilename(80. / 255.) + ".ckpt"
+                        for l in range(0, n_DnCNN_layers):
+                            saver_dict.update(
+                                {"l" + str(l) + "/w": theta[0][0][l]})  # , "l" + str(l) + "/b": theta[0][1][l]})
+                        for l in range(1, n_DnCNN_layers - 1):  # Associate variance, means, and beta
+                            gamma_name = "Iter" + str(0) + "/l" + str(l) + "/BN/gamma:0"
+                            beta_name = "Iter" + str(0) + "/l" + str(l) + "/BN/beta:0"
+                            var_name = "Iter" + str(0) + "/l" + str(l) + "/BN/moving_variance:0"
+                            mean_name = "Iter" + str(0) + "/l" + str(l) + "/BN/moving_mean:0"
+                            gamma = [v for v in tf.global_variables() if v.name == gamma_name][0]
+                            beta = [v for v in tf.global_variables() if v.name == beta_name][0]
+                            moving_variance = [v for v in tf.global_variables() if v.name == var_name][0]
+                            moving_mean = [v for v in tf.global_variables() if v.name == mean_name][0]
+                            saver_dict.update({"l" + str(l) + "/BN/gamma": gamma})
+                            saver_dict.update({"l" + str(l) + "/BN/beta": beta})
+                            saver_dict.update({"l" + str(l) + "/BN/moving_variance": moving_variance})
+                            saver_dict.update({"l" + str(l) + "/BN/moving_mean": moving_mean})
+                        saver_initvars = tf.train.Saver(saver_dict)
+                        saver_initvars.restore(sess, save_name)
+                    elif DenoiserbyDenoiser:
+                        for noise_level in range(len(noise_min_stds)):
+                            noise_min_std = noise_min_stds[noise_level]
+                            noise_max_std = noise_max_stds[noise_level]
+                            save_name = utils.GenDnCNNFilename(noise_min_std / 255., noise_max_std / 255.) + ".ckpt"
+                            for l in range(0, n_DnCNN_layers):
+                                saver_dict.update({"l" + str(l) + "/w": theta[noise_level][0][
+                                    l]})  # , "l" + str(l) + "/b": theta[noise_level][1][l]})
+                            for l in range(1, n_DnCNN_layers - 1):  # Associate variance, means, and beta
+                                gamma_name = "Adaptive_NL" + str(noise_level) + "/l" + str(l) + "/BN/gamma:0"
+                                beta_name = "Adaptive_NL" + str(noise_level) + "/l" + str(l) + "/BN/beta:0"
+                                var_name = "Adaptive_NL" + str(noise_level) + "/l" + str(l) + "/BN/moving_variance:0"
+                                mean_name = "Adaptive_NL" + str(noise_level) + "/l" + str(l) + "/BN/moving_mean:0"
+                                gamma = [v for v in tf.global_variables() if v.name == gamma_name][0]
+                                beta = [v for v in tf.global_variables() if v.name == beta_name][0]
+                                moving_variance = [v for v in tf.global_variables() if v.name == var_name][0]
+                                moving_mean = [v for v in tf.global_variables() if v.name == mean_name][0]
+                                saver_dict.update({"l" + str(l) + "/BN/gamma": gamma})
+                                saver_dict.update({"l" + str(l) + "/BN/beta": beta})
+                                saver_dict.update({"l" + str(l) + "/BN/moving_variance": moving_variance})
+                                saver_dict.update({"l" + str(l) + "/BN/moving_mean": moving_mean})
+                            saver_initvars = tf.train.Saver(saver_dict)
+                            saver_initvars.restore(sess, save_name)
+                    else:
+                        # save_name = LDAMP.GenLDAMPFilename(alg, tie_weights, LayerbyLayer) + ".ckpt"
+                        save_name = utils.GenLDAMPFilename(alg, tie_weights, LayerbyLayer,
+                                                           sampling_rate_override=sampling_rate_train,
+                                                           loss_func=TrainLoss) + ".ckpt"
+                        saver.restore(sess, save_name)
+
+                    print("Reconstructing Signal")
+                    start_time = time.time()
+
+                    Final_PSNRs = []
+                    for offset in range(0, n_Test_Images - BATCH_SIZE + 1,
+                                        BATCH_SIZE):  # Subtract batch size-1 to avoid eerrors when len(train_images) is not a multiple of the batch size
+                        end = offset + BATCH_SIZE
+                        # batch_y_test = y_test[:, offset:end] #To be used when using precomputed measurements
+
+                        # Generate a new measurement matrix
+                        A_val = sensing_methods.GenerateMeasurementMatrix(measurement_mode)
+
+                        batch_x_test = x_test[:, offset:end]
+
+                        # Run optimization. This will both generate compressive measurements and then recontruct from them.
+                        batch_x_recon, batch_MSE_hist, batch_NMSE_hist, batch_PSNR_hist = sess.run(
+                            [x_hat, MSE_history, NMSE_history, PSNR_history],
+                            feed_dict={x_true: batch_x_test, A_val_tf: A_val})
+                        Final_PSNRs.append(batch_PSNR_hist[-1][0])
+                    print(Final_PSNRs)
+                    print(np.mean(Final_PSNRs))
+                    fig1 = plt.figure()
+                    plt.imshow(np.transpose(np.reshape(x_test[:, n_Test_Images - 1], (height_img, width_img))),
+                               interpolation='nearest', cmap='gray')
+                    plt.show()
+                    fig2 = plt.figure()
+                    plt.imshow(np.transpose(np.reshape(batch_x_recon[:, 0], (height_img, width_img))),
+                               interpolation='nearest', cmap='gray')
+                    plt.show()
+                    fig3 = plt.figure()
+                    plt.plot(range(n_DAMP_layers + 1), np.mean(batch_PSNR_hist, axis=1))
+                    plt.title("PSNR over " + str(alg) + " layers")
+                    plt.show()
 
 __author__ = 'cmetzler&alimousavi'
 

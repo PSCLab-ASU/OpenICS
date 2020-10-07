@@ -47,7 +47,7 @@ if __name__ == "__main__":
     stage = 'training'
     main(
         "random",
-        "ISTANet",
+        "ISTANetPlus",
         stage,
         False,
         dataset,

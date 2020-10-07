@@ -19,19 +19,22 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def reconstruction_method(reconstruction, specifics):
     # a function to return the reconstruction method with given parameters. It's a class with two methods: initialize and run.
-    ISTA_model = ISTANet_wrapper(specifics)
-    return ISTA_model
+    ISTANetPLus_model = ISTANetPlus_wrapper(specifics)
+    return ISTANetPLus_model
 
-class ISTANet_wrapper():
-    def __init__(self, specifics):
+
+class ISTANetPlus_wrapper():
+    def __init__(self,specifics):
+        # do the initialization of the network with given parameters.
         self.specifics = specifics
 
-    def initialize(self, dataset, specifics):
+    def initialize(self,dataset,sensing):
+        # do the preparation for the running.
         self.rand_loader = dataset
 
     def run(self):
-        if(self.specifics['stage'] == 'training'):
-            model = ISTANet(self.specifics['layer_num'])
+        if (self.specifics['stage'] == 'training'):
+            model = ISTANetplus(self.specifics['layer_num'])
             model = nn.DataParallel(model)
             model = model.to(device)
 
@@ -58,9 +61,10 @@ class ISTANet_wrapper():
 
             optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-            model_dir = "./%s/CS_ISTA_Net_layer_%d_group_%d_ratio_%d_lr_%.4f" % (model_dir, layer_num, group_num, cs_ratio, learning_rate)
+            model_dir = "./%s/CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f" % (
+            model_dir, layer_num, group_num, cs_ratio, learning_rate)
 
-            log_file_name = "./%s/Log_CS_ISTA_Net_layer_%d_group_%d_ratio_%d_lr_%.4f.txt" % (
+            log_file_name = "./%s/Log_CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f.txt" % (
             log_dir, layer_num, group_num, cs_ratio, learning_rate)
 
             if not os.path.exists(model_dir):
@@ -118,9 +122,10 @@ class ISTANet_wrapper():
                 output_file.close()
 
                 if epoch_i % 5 == 0:
-                    torch.save(model.state_dict(), "./%s/net_params_%d.pkl" % (model_dir, epoch_i))  # save only the parameters
-        elif(self.specifics['stage'] == 'testing'):
-            model = ISTANet(self.specifics['layer_num'])
+                    torch.save(model.state_dict(),
+                               "./%s/net_params_%d.pkl" % (model_dir, epoch_i))  # save only the parameters
+        elif (self.specifics['stage'] == 'testing'):
+            model = ISTANetplus(self.specifics['layer_num'])
             model = nn.DataParallel(model)
             model = model.to(device)
 
@@ -137,7 +142,7 @@ class ISTANet_wrapper():
 
             optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-            model_dir = "./%s/CS_ISTA_Net_layer_%d_group_%d_ratio_%d_lr_%.4f" % (
+            model_dir = "./%s/CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f" % (
             model_dir, layer_num, group_num, cs_ratio, learning_rate)
 
             # Load pre-trained model with epoch number
@@ -216,7 +221,7 @@ class ISTANet_wrapper():
                     im_rec_rgb = np.clip(im_rec_rgb, 0, 255).astype(np.uint8)
 
                     resultName = imgName.replace(data_dir, result_dir)
-                    cv2.imwrite("%s_ISTA_Net_ratio_%d_epoch_%d_PSNR_%.2f_SSIM_%.4f.png" % (
+                    cv2.imwrite("%s_ISTA_Net_plus_ratio_%d_epoch_%d_PSNR_%.2f_SSIM_%.4f.png" % (
                     resultName, cs_ratio, epoch_num, rec_PSNR, rec_SSIM), im_rec_rgb)
                     del x_output
 
@@ -228,7 +233,7 @@ class ISTANet_wrapper():
             cs_ratio, test_name, np.mean(PSNR_All), np.mean(SSIM_All), epoch_num)
             print(output_data)
 
-            output_file_name = "./%s/PSNR_SSIM_Results_CS_ISTA_Net_layer_%d_group_%d_ratio_%d_lr_%.4f.txt" % (
+            output_file_name = "./%s/PSNR_SSIM_Results_CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f.txt" % (
             log_dir, layer_num, group_num, cs_ratio, learning_rate)
 
             output_file = open(output_file_name, 'a')
@@ -237,7 +242,7 @@ class ISTANet_wrapper():
 
             print("CS Reconstruction End")
 
-# Define ISTA-Net Block
+# Define ISTA-Net-plus Block
 class BasicBlock(torch.nn.Module):
     def __init__(self):
         super(BasicBlock, self).__init__()
@@ -245,17 +250,23 @@ class BasicBlock(torch.nn.Module):
         self.lambda_step = nn.Parameter(torch.Tensor([0.5]))
         self.soft_thr = nn.Parameter(torch.Tensor([0.01]))
 
-        self.conv1_forward = nn.Parameter(init.xavier_normal_(torch.Tensor(32, 1, 3, 3)))
+        self.conv_D = nn.Parameter(init.xavier_normal_(torch.Tensor(32, 1, 3, 3)))
+
+        self.conv1_forward = nn.Parameter(init.xavier_normal_(torch.Tensor(32, 32, 3, 3)))
         self.conv2_forward = nn.Parameter(init.xavier_normal_(torch.Tensor(32, 32, 3, 3)))
         self.conv1_backward = nn.Parameter(init.xavier_normal_(torch.Tensor(32, 32, 3, 3)))
-        self.conv2_backward = nn.Parameter(init.xavier_normal_(torch.Tensor(1, 32, 3, 3)))
+        self.conv2_backward = nn.Parameter(init.xavier_normal_(torch.Tensor(32, 32, 3, 3)))
+
+        self.conv_G = nn.Parameter(init.xavier_normal_(torch.Tensor(1, 32, 3, 3)))
 
     def forward(self, x, PhiTPhi, PhiTb):
         x = x - self.lambda_step * torch.mm(x, PhiTPhi)
         x = x + self.lambda_step * PhiTb
         x_input = x.view(-1, 1, 33, 33)
 
-        x = F.conv2d(x_input, self.conv1_forward, padding=1)
+        x_D = F.conv2d(x_input, self.conv_D, padding=1)
+
+        x = F.conv2d(x_D, self.conv1_forward, padding=1)
         x = F.relu(x)
         x_forward = F.conv2d(x, self.conv2_forward, padding=1)
 
@@ -265,19 +276,24 @@ class BasicBlock(torch.nn.Module):
         x = F.relu(x)
         x_backward = F.conv2d(x, self.conv2_backward, padding=1)
 
-        x_pred = x_backward.view(-1, 1089)
+        x_G = F.conv2d(x_backward, self.conv_G, padding=1)
+
+        x_pred = x_input + x_G
+
+        x_pred = x_pred.view(-1, 1089)
 
         x = F.conv2d(x_forward, self.conv1_backward, padding=1)
         x = F.relu(x)
-        x_est = F.conv2d(x, self.conv2_backward, padding=1)
-        symloss = x_est - x_input
+        x_D_est = F.conv2d(x, self.conv2_backward, padding=1)
+        symloss = x_D_est - x_D
 
         return [x_pred, symloss]
 
-# Define ISTA-Net
-class ISTANet(torch.nn.Module):
+
+# Define ISTA-Net-plus
+class ISTANetplus(torch.nn.Module):
     def __init__(self, LayerNo):
-        super(ISTANet, self).__init__()
+        super(ISTANetplus, self).__init__()
         onelayer = []
         self.LayerNo = LayerNo
 

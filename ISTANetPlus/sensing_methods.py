@@ -4,9 +4,7 @@ import os
 
 def sensing_method(method_name,specifics):
     # a function which returns a sensing method with given parameters. a sensing method is a subclass of nn.Module
-
     return 1
-
 
 def computInitMx(Training_labels, specifics):
     Phi_data_Name = './%s/phi_0_%d_1089.mat' % (specifics['matrix_dir'], specifics['cs_ratio'])
