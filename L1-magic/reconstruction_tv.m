@@ -16,7 +16,7 @@
 %
 % At - Function handle to transposed sensing method
 %
-% specifics - Map that must contain at least the following arguments:
+% specifics - struct that may contain the following arguments:
 %
 %   constraint - The constraint to use. 'eq', 'qc', or 'dantzig'.
 %       Default: 'eq'
@@ -47,37 +47,37 @@
 function x_hat = reconstruction_tv(x, y, input_width, input_height, A, At, specifics)
 
     % set default values
-    if ~isKey(specifics, 'constraint')
-        specifics('constraint') = 'eq';
+    if ~isfield(specifics, 'constraint')
+        specifics.constraint = 'eq';
     end
     
-    if ~isKey(specifics, 'lbtol')
-        specifics('lbtol') = 1e-3;
+    if ~isfield(specifics, 'lbtol')
+        specifics.lbtol = 1e-3;
     end
     
-    if ~isKey(specifics, 'mu')
-        specifics('mu') = 10;
+    if ~isfield(specifics, 'mu')
+        specifics.mu = 10;
     end
     
-    if ~isKey(specifics, 'lintol')
-        specifics('lintol') = 1e-8;
+    if ~isfield(specifics, 'lintol')
+        specifics.lintol = 1e-8;
     end
     
-    if ~isKey(specifics, 'linmaxiter')
-        specifics('linmaxiter') = 200;
+    if ~isfield(specifics, 'linmaxiter')
+        specifics.linmaxiter = 200;
     end
     
-    if ~isKey(specifics, 'normalization')
-        specifics('normalization') = false;
+    if ~isfield(specifics, 'normalization')
+        specifics.normalization = false;
     end
     
     % all constraints besides 'eq' require an epsilon argument
-    if ~strcmp(specifics('constraint'), 'eq') && ~isKey(specifics, 'epsilon')
-        specifics('epsilon') = 5e-3;
+    if ~strcmp(specifics.constraint, 'eq') && ~isfield(specifics, 'epsilon')
+        specifics.epsilon = 5e-3;
     end
     
     % apply normalization to image
-    if specifics('normalization')
+    if specifics.normalization
         x_norm = norm(x(:));
         x = x / x_norm;
         x_mean = mean(x(:));
@@ -90,19 +90,19 @@ function x_hat = reconstruction_tv(x, y, input_width, input_height, A, At, speci
     fprintf('Original TV = %.3f\n', tvI);
     time0 = clock;
     
-    if strcmp(specifics('constraint'), 'eq')
-        xp = tveq_logbarrier(x0, A, At, y, specifics('lbtol'), specifics('mu'), specifics('lintol'), specifics('linmaxiter'));
-    elseif strcmp(specifics('constraint'), 'qc')
-        xp = tvqc_logbarrier(x0, A, At, y, specifics('epsilon'), specifics('lbtol'), specifics('mu'), specifics('lintol'), specifics('linmaxiter'));
-    elseif strcmp(specifics('constraint'), 'dantzig')
-        xp = tvdantzig_logbarrier(x0, A, At, y, specifics('epsilon'), specifics('lbtol'), specifics('mu'), specifics('lintol'), specifics('linmaxiter'));
+    if strcmp(specifics.constraint, 'eq')
+        xp = tveq_logbarrier(x0, A, At, y, specifics.lbtol, specifics.mu, specifics.lintol, specifics.linmaxiter);
+    elseif strcmp(specifics.constraint, 'qc')
+        xp = tvqc_logbarrier(x0, A, At, y, specifics.epsilon, specifics.lbtol, specifics.mu, specifics.lintol, specifics.linmaxiter);
+    elseif strcmp(specifics.constraint, 'dantzig')
+        xp = tvdantzig_logbarrier(x0, A, At, y, specifics.epsilon, specifics.lbtol, specifics.mu, specifics.lintol, specifics.linmaxiter);
     end
     
     x_hat = xp;
     fprintf('Total elapsed time = %f secs\n\n', etime(clock,time0));
     
     % invert normalization
-    if specifics('normalization')
+    if specifics.normalization
         x_hat = x_hat + x_mean;
         x_hat = x_hat * x_norm;
     end

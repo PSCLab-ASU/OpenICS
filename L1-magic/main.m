@@ -22,7 +22,7 @@
 %
 % n - The size of the original signal.
 %
-% specifics - containers.Map, any specific parameters for the reconstruction method.
+% specifics - struct, any specific parameters for the reconstruction method.
 %
 % slice - boolean, whether to slice the image into submatrices.
 %
@@ -30,11 +30,8 @@
 %
 
 function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,input_width,input_height,m,n,specifics,slice,slice_size)
-    % add l1magic functions to path
-    [folder, filename, extension] = fileparts(mfilename('fullpath'));
-    path(path, strcat(folder, '/l1magic/Data'));
-    path(path, strcat(folder, '/l1magic/Measurements'));
-    path(path, strcat(folder, '/l1magic/Optimization'));
+    % add all required sub-folders to path
+    create_path();
 
     if default
         % set all parameters with default values.
@@ -44,7 +41,7 @@ function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,
         input_height = 256;
         m = 25000;
         n = input_height * input_width * input_channel;
-        specifics = containers.Map();
+        specifics = struct;
         slice = false;
     else
         % check parameters are valid
@@ -57,7 +54,7 @@ function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,
         end
         
         if ~exist('specifics', 'var')
-            specifics = containers.Map();
+            specifics = struct;
         end
         
         if numel(slice_size) == 1
