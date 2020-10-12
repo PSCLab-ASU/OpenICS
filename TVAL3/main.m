@@ -2,7 +2,7 @@
 % 
 % Main method for the CS_Framework.
 % 
-% Usage: [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,input_width,input_height,m,n,specifics)
+% Usage: [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,input_width,input_height,m,n,specifics,slice,slice_size)
 %
 % sensing - string, the sensing method to use.
 %
@@ -67,7 +67,7 @@ function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,
     if ~slice
         [A,At]=sensing_method(n, m); % get sensing method function handles
         y=A(x(:)); % apply sensing to x
-        x_hat=reconstruction_method(x, y, input_width, input_height, A, At, specifics); % apply reconstruction method
+        x_hat=reconstruction_method(x, y, input_channel, input_width, input_height, A, At, specifics); % apply reconstruction method
     else
         n=prod(slice_size); % calculate new n
         [A,At]=sensing_method(n, m); % get sensing method function handles
@@ -79,7 +79,7 @@ function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,
             disp("On slice " + i);
             temp_x=cell2mat(x(i)); % turn slice from x into matrix
             y=A(temp_x(:)); % apply sensing to temp_x
-            temp_x_hat=reconstruction_method(temp_x, y, slice_size(1), slice_size(2), A, At, specifics); % apply reconstruction method
+            temp_x_hat=reconstruction_method(temp_x, y, input_channel, slice_size(1), slice_size(2), A, At, specifics); % apply reconstruction method
             temp_x_hat=reshape(temp_x_hat, slice_size); % reshape into original shape
             x_hat(i)=num2cell(temp_x_hat,[1,2]); % add cell into x_hat
         end

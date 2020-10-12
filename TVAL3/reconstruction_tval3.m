@@ -1,12 +1,14 @@
-% reconstruction_tv.m
+% reconstruction_tval3.m
 % 
-% Uses TV (total variance) reconstruction methods from l1-magic toolbox.
+% Uses TVAL3 reconstruction method.
 % 
-% Usage: x_hat = reconstruction_tv(x, y, input_width, input_height, A, At, specifics)
+% Usage: x_hat = reconstruction_tval3(x,y,input_channel,input_width,input_height,A,At,specifics)
 %
 % x - nx1 vector, original signal
 %
 % y - mx1 vector, observations
+%
+% input_channel - Channels in the original image
 %
 % input_width - Width of the original image
 %
@@ -89,7 +91,7 @@
 %       Default: false
 %
 
-function x_hat = reconstruction_tval3(x, y, input_width, input_height, A, At, specifics)
+function x_hat = reconstruction_tval3(x, y, input_channel, input_width, input_height, A, At, specifics)
 
     % set default values
     if ~isfield(specifics, 'normalization')
@@ -105,6 +107,7 @@ function x_hat = reconstruction_tval3(x, y, input_width, input_height, A, At, sp
         y = A(x(:));
     end
     
+    % TVAL3 implementation structures function differently
     function out = A_handles(z, mode)
         switch mode
             case 1
