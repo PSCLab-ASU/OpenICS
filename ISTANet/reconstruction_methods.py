@@ -154,7 +154,7 @@ class ISTANet_wrapper():
             PSNR_All = np.zeros([1, ImgNum], dtype=np.float32)
             SSIM_All = np.zeros([1, ImgNum], dtype=np.float32)
 
-            Training_labels = utils.getTrainingLabels(self.specifics['stage'], self.specifics)
+            Training_labels = 0 # not needed for testing
             Phi_input, Qinit = sensing_methods.computInitMx(Training_labels=Training_labels, specifics=self.specifics)
 
             Phi = torch.from_numpy(Phi_input).type(torch.FloatTensor)

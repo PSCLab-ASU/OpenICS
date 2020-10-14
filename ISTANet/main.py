@@ -33,7 +33,6 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
             'test_name': 'Set11'
         }
 
-
     dset = utils.generate_dataset(stage, specifics)
     # sensing_method=sms.sensing_method(sensing, specifics) # not used
     reconstruction_method=rms.reconstruction_method(reconstruction,specifics)
@@ -69,7 +68,7 @@ if __name__ == "__main__":
             'n_input': n,
             'n_output': m,
             'nrtrain': 88912,
-            'batch_size': 64,
+            'batch_size': 64, # 1 for test, 64 for train
             'model_dir': 'model',
             'log_dir': 'log',
             'data_dir': 'data',
