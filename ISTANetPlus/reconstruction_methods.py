@@ -14,7 +14,7 @@ from skimage.measure import compare_ssim as ssim
 from argparse import ArgumentParser
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+os.environ["CUDA_VISIBLE_DEVICES"] = '3'
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def reconstruction_method(reconstruction, specifics):
@@ -159,7 +159,7 @@ class ISTANetPlus_wrapper():
             PSNR_All = np.zeros([1, ImgNum], dtype=np.float32)
             SSIM_All = np.zeros([1, ImgNum], dtype=np.float32)
 
-            Training_labels = utils.getTrainingLabels(self.specifics['stage'], self.specifics)
+            Training_labels = 0 # not needed for testing
             Phi_input, Qinit = sensing_methods.computInitMx(Training_labels=Training_labels, specifics=self.specifics)
 
             Phi = torch.from_numpy(Phi_input).type(torch.FloatTensor)
