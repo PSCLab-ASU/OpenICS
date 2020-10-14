@@ -86,8 +86,8 @@
 %   rate_gam - Shrinkage rate of gam.
 %       Default: 0.9
 %
-%   normalization - Whether the image should be normalized. May help make
-%                   the image sparser and improve reconstruction accuracy.
+%   normalization - Whether the image should be normalized after
+%                   reconstruction. May improve reconstruction accuracy.
 %       Default: false
 %
 
@@ -96,15 +96,6 @@ function x_hat = reconstruction_tval3(x, y, input_channel, input_width, input_he
     % set default values
     if ~isfield(specifics, 'normalization')
         specifics.normalization = false;
-    end
-    
-    % apply normalization to image
-    if specifics.normalization
-        x_norm = norm(x(:));
-        x = x / x_norm;
-        x_mean = mean(x(:));
-        x = x - x_mean;
-        y = A(x(:));
     end
     
     % TVAL3 implementation structures function differently
@@ -123,9 +114,8 @@ function x_hat = reconstruction_tval3(x, y, input_channel, input_width, input_he
     [x_hat, hist] = TVAL3(@A_handles, y, input_height, input_width, specifics);
     fprintf('Total elapsed time = %f secs\n\n', etime(clock,time0));
     
-    % invert normalization
+    % normalize image slightly by subtracting the minimum value in x_hat
     if specifics.normalization
-        x_hat = x_hat + x_mean;
-        x_hat = x_hat * x_norm;
+        x_hat = x_hat - min(x_hat(:));
     end
 end
