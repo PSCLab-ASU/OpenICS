@@ -1,52 +1,31 @@
-import torch
-from torch import nn
+import scipy.io as sio
 import numpy as np
+import os
 
-if torch.cuda.is_available():
-    device = torch.device('cuda')
-else:
-    device = torch.device('cpu')
+def sensing_method(method_name,specifics):
+    # a function which returns a sensing method with given parameters. a sensing method is a subclass of nn.Module
 
-def sensing_method(sensing,specifics,m,n):
-    from_Numpy_matrix = np.float32(1.0 / np.sqrt(m) * np.random.randn(m, n))
-    sense = random_sensing(specifics, from_Numpy_matrix)
-    return sense
-
-class random_sensing(nn.Module):
-    def __init__(self, specifics, from_Numpy_matrix):
-        super(random_sensing, self).__init__()
-        self.n = specifics["n"]
-        self.m = specifics["m"]
-        self.sigma = specifics["sigma_w"]
-        sensing_matrix = from_Numpy_matrix[:self.m, :self.n]
-
-        self.sm = torch.from_numpy(sensing_matrix).to(device)
-        self.s1 = nn.Linear(self.n, self.m, bias=False)
-        self.s1.weight.data = self.sm[0:self.m, :self.n]
-
-    def forward(self, x):
-        r = self.s1(x)
-        noise = self.sigma * torch.rand(r.shape).to(device)
-        r = r + noise
-        return r
-
-    def returnSensingMatrix(self):
-        return self.sm
+    return 1
 
 
+def computInitMx(Training_labels, specifics):
+    Phi_data_Name = './%s/phi_0_%d_1089.mat' % (specifics['matrix_dir'], specifics['cs_ratio'])
+    Phi_data = sio.loadmat(Phi_data_Name)
+    Phi_input = Phi_data['phi']
 
-class original_sensing():
-    def __init__(self, specifics, from_Numpy_matrix):
-        self.sigma_w = specifics["sigma_w"]
-        self.A_val = from_Numpy_matrix
+    Qinit_Name = './%s/Initialization_Matrix_%d.mat' % (specifics['matrix_dir'], specifics['cs_ratio'])
 
-    def sense(self, x):
-        y = torch.matmul(torch.Tensor(self.A_val).to(device), torch.t(x.type(torch.FloatTensor).to(device)))
-        clean = torch.tensor(y)
-        noise_vec = torch.rand(clean.shape)
-        noise_vec = self.sigma_w * np.reshape(noise_vec, newshape=clean.shape)
-        noisy_data = clean + noise_vec.to(device)
-        return noisy_data
+    # Computing Initialization Matrix:
+    if os.path.exists(Qinit_Name):
+        Qinit_data = sio.loadmat(Qinit_Name)
+        Qinit = Qinit_data['Qinit']
 
-    def returnSensingMatrix(self):
-        return torch.Tensor(self.A_val)
+    else:
+        X_data = Training_labels.transpose()
+        Y_data = np.dot(Phi_input, X_data)
+        Y_YT = np.dot(Y_data, Y_data.transpose())
+        X_YT = np.dot(X_data, Y_data.transpose())
+        Qinit = np.dot(X_YT, np.linalg.inv(Y_YT))
+        del X_data, Y_data, X_YT, Y_YT
+        sio.savemat(Qinit_Name, {'Qinit': Qinit})
+    return Phi_input, Qinit

@@ -1,236 +1,305 @@
-import torch
-from torch import nn
+import sensing_methods
 import utils
-import matplotlib.pyplot as plt
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 import numpy as np
-import testNet
-import scipy.linalg as la
+import os
+import glob
+from time import time
+from torch.nn import init
+import cv2
+from skimage.measure import compare_ssim as ssim
+from argparse import ArgumentParser
 
-if torch.cuda.is_available():
-    print("Detected " + str(torch.cuda.device_count()) + " GPU(s)!")
-    device = torch.device('cuda')
-else:
-    print("GPU unavailable, using CPU!")
-    device = torch.device('cpu')
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+def reconstruction_method(reconstruction, specifics):
+    # a function to return the reconstruction method with given parameters. It's a class with two methods: initialize and run.
+    ISTA_model = ISTANet_wrapper(specifics)
+    return ISTA_model
 
-def reconstruction_method(reconstruction,specifics):
-    if(reconstruction == 'LearnedDAMP' or reconstruction == 'LDAMP'):
-        ldamp_wrap = LDAMP_wrapper(specifics)
-        return ldamp_wrap
-
-class LDAMP_wrapper():
+class ISTANet_wrapper():
     def __init__(self, specifics):
-        self.name = 'LearnedDAMPwrap'
         self.specifics = specifics
 
-    def initialize(self, dset,sensing_method,specifics):
-        # set up variables
-        self.BATCH_SIZE = specifics["BATCH_SIZE"]
-        self.input_channel = specifics["input_channel"]
-        self.input_width = specifics["input_width"]
-        self.input_height = specifics["input_height"]
-        self.n = specifics["n"]
-        self.m = specifics["m"]
-        self.n_train_images = self.specifics['n_train_images']
-        self.n_val_images = self.specifics["n_val_images"]
-        self.EPOCHS = self.specifics["EPOCHS"]
-        self.previously_trained = self.specifics["previously_trained"]
-        self.usersName = specifics["fileName"]
+    def initialize(self, dataset, specifics):
+        self.rand_loader = dataset
 
-        # set up network and inputs
-        self.dset = dset
-        self.sensing_method = sensing_method
-        self.A_val = self.sensing_method.returnSensingMatrix().requires_grad_(False).to(device)
-        self.A_val_pinv = torch.Tensor(la.pinv(self.A_val.cpu())).requires_grad_(False).to(device)
-        self.net = LearnedDAMP(specifics=specifics, A_val=self.A_val, A_val_pinv=self.A_val_pinv).to(device)
-        if(specifics["resume"]):
-            self.net.load_state_dict(torch.load(specifics["load_network"]))
+    def run(self):
+        if(self.specifics['stage'] == 'training'):
+            model = ISTANet(self.specifics['layer_num'])
+            model = nn.DataParallel(model)
+            model = model.to(device)
 
-        # self.net = testNet.testLearnedDAMP(specifics=specifics)
-        self.dataloader = torch.utils.data.DataLoader(self.dset,
-                                                  batch_size=self.specifics["BATCH_SIZE"], shuffle=True, num_workers=2)
-        self.testdataloader=torch.utils.data.DataLoader(self.dset[:self.n_val_images],
-                                                  batch_size=self.specifics["BATCH_SIZE"], shuffle=True, num_workers=2)
-        self.loss_f = torch.nn.MSELoss(reduction='mean').to(device)  # use 'mean' for torch versions after 1.0.0
+            start_epoch = self.specifics['start_epoch']
+            end_epoch = self.specifics['end_epoch']
+            learning_rate = self.specifics['learning_rate']
+            layer_num = self.specifics['layer_num']
+            group_num = self.specifics['group_num']
+            cs_ratio = self.specifics['cs_ratio']
+            gpu_list = self.specifics['gpu_list']
+            batch_size = self.specifics['batch_size']
+            nrtrain = self.specifics['nrtrain']
+            model_dir = self.specifics['model_dir']
+            log_dir = self.specifics['log_dir']
 
-        params = list(self.net.parameters())
-        print("Number of parameters: " + str(len(params)))
+            print_flag = 1  # print parameter number
 
-    def run(self, stage):
-        if (stage == 'training'):
-            self.optimizer = torch.optim.Adam(self.net.parameters(), lr=self.specifics['learning_rate'])
-            mseData = []
-            psnrData = []
-            for epoch in range(self.EPOCHS):
-                print("\nBeginning EPOCH " + str(epoch) + "...")
-                for i, img in enumerate(self.dataloader):
-                    if(img.shape[0] % self.BATCH_SIZE != 0):
-                        break;
-                    # zero gradients
-                    self.optimizer.zero_grad()
-                    img = img.type(torch.float).to(device)
-                    # img = img.reshape((self.BATCH_SIZE, self.input_channel * self.input_width * self.input_height))
-                    measurement = self.sensing_method(img)
+            if print_flag:
+                num_count = 0
+                for para in model.parameters():
+                    num_count += 1
+                    print('Layer %d' % num_count)
+                    print(para.size())
 
-                    # forward function
-                    img_hat = self.net(measurement)
-                    img_hat = torch.reshape(img_hat, img.shape)
+            optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-                    # calculate loss and backpropogate
-                    loss = self.loss_f(img_hat, img)
-                    loss.backward()
-                    self.optimizer.step()
+            model_dir = "./%s/CS_ISTA_Net_layer_%d_group_%d_ratio_%d_lr_%.4f" % (model_dir, layer_num, group_num, cs_ratio, learning_rate)
 
-                    # print graphs error and graphs
-                    if (i % 100 == 0):
-                        currentNumImgs = (i + 1) * self.BATCH_SIZE + epoch * self.n_train_images + self.previously_trained
-                        mse_error, psnr = utils.EvalError(img_hat, img)
+            log_file_name = "./%s/Log_CS_ISTA_Net_layer_%d_group_%d_ratio_%d_lr_%.4f.txt" % (
+            log_dir, layer_num, group_num, cs_ratio, learning_rate)
 
-                        print("Processed " + str(currentNumImgs) + " images"
-                              + " MSE Loss: " + "%.4f" % mse_error.clone().cpu().detach_().numpy()
-                              + " PSNR: " + "%.4f" % psnr.clone().cpu().detach_().numpy())
-                        mseData.append(mse_error.clone().cpu().detach_().numpy())
-                        psnrData.append(psnr.clone().cpu().detach_().numpy())
-                print("**QUICKSAVE**")
-                currentNumImgs = (epoch+1) * self.n_train_images + self.previously_trained
-                torch.save(self.net.state_dict(), './LDAMP saved models/quickSave' + self.usersName + str(currentNumImgs))
-            torch.save(self.net.state_dict(), './LDAMP saved models/completed' + self.usersName + str(self.n_train_images))
-            plt.plot(mseData)
-            plt.xlabel('Epoch')
-            plt.ylabel('MSE loss')
-            plt.show()
-            plt.plot(psnrData)
-            plt.xlabel('Epoch')
-            plt.ylabel('PSNR')
-            plt.show()
+            if not os.path.exists(model_dir):
+                os.makedirs(model_dir)
 
-        elif (stage == 'testing'):
+            if start_epoch > 0:
+                pre_model_dir = model_dir
+                model.load_state_dict(torch.load('./%s/net_params_%d.pkl' % (pre_model_dir, start_epoch)))
+
+            Training_labels = utils.getTrainingLabels(self.specifics['stage'], self.specifics)
+            Phi_input, Qinit = sensing_methods.computInitMx(Training_labels=Training_labels, specifics=self.specifics)
+
+            Phi = torch.from_numpy(Phi_input).type(torch.FloatTensor)
+            Phi = Phi.to(device)
+
+            Qinit = torch.from_numpy(Qinit).type(torch.FloatTensor)
+            Qinit = Qinit.to(device)
+
+            # Training loop
+            print('Training on GPU? ' + str(torch.cuda.is_available()))
+            for epoch_i in range(start_epoch + 1, end_epoch + 1):
+                for j, data in enumerate(self.rand_loader):
+
+                    batch_x = data
+                    batch_x = batch_x.to(device)
+
+                    Phix = torch.mm(batch_x, torch.transpose(Phi, 0, 1))
+
+                    [x_output, loss_layers_sym] = model(Phix, Phi, Qinit)
+
+                    # Compute and print loss
+                    loss_discrepancy = torch.mean(torch.pow(x_output - batch_x, 2))
+
+                    loss_constraint = torch.mean(torch.pow(loss_layers_sym[0], 2))
+                    for k in range(layer_num - 1):
+                        loss_constraint += torch.mean(torch.pow(loss_layers_sym[k + 1], 2))
+
+                    gamma = torch.Tensor([0.01]).to(device)
+
+                    # loss_all = loss_discrepancy
+                    loss_all = loss_discrepancy + torch.mul(gamma, loss_constraint)
+
+                    # Zero gradients, perform a backward pass, and update the weights.
+                    optimizer.zero_grad()
+                    loss_all.backward()
+                    optimizer.step()
+
+                    output_data = "[%02d/%02d][%d/%d] Total Loss: %.4f, Discrepancy Loss: %.4f,  Constraint Loss: %.4f\n" % (
+                    epoch_i, end_epoch, j * batch_size, nrtrain, loss_all.item(), loss_discrepancy.item(),
+                    loss_constraint)
+                    print(output_data)
+
+                output_file = open(log_file_name, 'a')
+                output_file.write(output_data)
+                output_file.close()
+
+                if epoch_i % 5 == 0:
+                    torch.save(model.state_dict(), "./%s/net_params_%d.pkl" % (model_dir, epoch_i))  # save only the parameters
+        elif(self.specifics['stage'] == 'testing'):
+            model = ISTANet(self.specifics['layer_num'])
+            model = nn.DataParallel(model)
+            model = model.to(device)
+
+            epoch_num = self.specifics['testing_epoch_num']
+            learning_rate = self.specifics['learning_rate']
+            layer_num = self.specifics['layer_num']
+            group_num = self.specifics['group_num']
+            cs_ratio = self.specifics['cs_ratio']
+            model_dir = self.specifics['model_dir']
+            log_dir = self.specifics['log_dir']
+            data_dir = self.specifics['data_dir']
+            result_dir = self.specifics['result_dir']
+            test_name = self.specifics['test_name']
+
+            optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+            model_dir = "./%s/CS_ISTA_Net_layer_%d_group_%d_ratio_%d_lr_%.4f" % (
+            model_dir, layer_num, group_num, cs_ratio, learning_rate)
+
+            # Load pre-trained model with epoch number
+            model.load_state_dict(torch.load('./%s/net_params_%d.pkl' % (model_dir, epoch_num)))
+
+            test_dir = os.path.join(data_dir, test_name)
+            filepaths = glob.glob(test_dir + '/*.tif')
+
+            result_dir = os.path.join(result_dir, test_name)
+            if not os.path.exists(result_dir):
+                os.makedirs(result_dir)
+
+            ImgNum = len(filepaths)
+            PSNR_All = np.zeros([1, ImgNum], dtype=np.float32)
+            SSIM_All = np.zeros([1, ImgNum], dtype=np.float32)
+
+            Training_labels = 0 # not needed for testing
+            Phi_input, Qinit = sensing_methods.computInitMx(Training_labels=Training_labels, specifics=self.specifics)
+
+            Phi = torch.from_numpy(Phi_input).type(torch.FloatTensor)
+            Phi = Phi.to(device)
+
+            Qinit = torch.from_numpy(Qinit).type(torch.FloatTensor)
+            Qinit = Qinit.to(device)
+
+            print('\n')
+            print("CS Reconstruction Start")
+
             with torch.no_grad():
-                self.net.load_state_dict(torch.load(self.specifics["load_network"]))
-                self.net.eval()
-                history = []
-                for i, img in enumerate(self.testdataloader):
-                    print("Processing batch " + str(i) + "...")
+                for img_no in range(ImgNum):
+                    imgName = filepaths[img_no]
 
-                    img = img.type(torch.float).to(device)
-                    measurement = self.sensing_method(img)
+                    Img = cv2.imread(imgName, 1)
 
-                    # forward function
-                    img_hat = self.net(measurement)
-                    img_hat = torch.reshape(img_hat, img.shape)
+                    Img_yuv = cv2.cvtColor(Img, cv2.COLOR_BGR2YCrCb)
+                    Img_rec_yuv = Img_yuv.copy()
 
-                    mse_error, psnr = utils.EvalError(img_hat, img)
-                    history.append(psnr)
-                psnrs = sum(history) / len(history)
-                print("average test psnr my own: " + str(psnrs))
+                    Iorg_y = Img_yuv[:, :, 0]
 
-class LearnedDAMP(nn.Module):
-    def __init__(self, specifics, A_val, A_val_pinv):
-        super(LearnedDAMP, self).__init__()
-        self.name = 'LearnedDAMP'
-        self.specifics = specifics
-        self.n = self.specifics["n"]
-        self.m = self.specifics["m"]
-        self.BATCH_SIZE = self.specifics["BATCH_SIZE"]
-        self.A_val = A_val
-        self.A_val_pinv = A_val_pinv
-        self.layers = nn.Sequential().to(device)
-        for i in range(self.specifics["max_n_DAMP_layers"]):
-            self.layers.add_module("Layer" + str(i),LearnedDAMPLayer(specifics))
+                    [Iorg, row, col, Ipad, row_new, col_new] = utils.imread_CS_py(Iorg_y)
+                    Icol = utils.img2col_py(Ipad, 33).transpose() / 255.0
 
-    def forward(self, y_measured):
-        y_measured = y_measured.t()
-        z = y_measured
-        xhat = torch.zeros([self.n, self.BATCH_SIZE], dtype=torch.float32).to(device)
-        for i, l in enumerate(self.layers):
-            # print("\tDAMP Layer " + str(i))
-            (next_xhat, next_z) = l(xhat, z, self.A_val, self.A_val_pinv, y_measured)
-            z = next_z
-            xhat = next_xhat
-        return xhat
+                    Img_output = Icol
 
-class LearnedDAMPLayer(nn.Module):
-    def __init__(self, specifics):
-        super(LearnedDAMPLayer, self).__init__()
+                    start = time()
 
-        # instantiate carry-over variables
-        self.specifics = specifics
-        self.input_channel = specifics["input_channel"]
-        self.input_width = specifics["input_width"]
-        self.input_height = specifics["input_height"]
-        self.BATCH_SIZE = specifics["BATCH_SIZE"]
-        self.m = specifics["m"]
-        self.n = specifics["n"]
-        self.n_DAMP_layers = specifics["max_n_DAMP_layers"]
-        self.DnCNN_wrapper = DnCNN_wrapper(specifics=specifics).to(device)
+                    batch_x = torch.from_numpy(Img_output)
+                    batch_x = batch_x.type(torch.FloatTensor)
+                    batch_x = batch_x.to(device)
 
-    def forward(self, xhat, z, A_val, A_val_pinv, y_measured):
-        r = xhat + utils.A_handle(A_val_pinv, z) # TODO SIGNIFICANT CHANGE HERE
-        (xhat, dxdr) = self.DnCNN_wrapper(r)
+                    Phix = torch.mm(batch_x, torch.transpose(Phi, 0, 1))
 
-        z = y_measured - utils.A_handle(A_val, xhat).to(device)
-        z = z + (float(1)/ float(self.m) * dxdr * z.to(device)) #TODO SIGNIFICANT CHANGE HERE
-        return xhat, z
+                    [x_output, loss_layers_sym] = model(Phix, Phi, Qinit)
 
-class DnCNN_wrapper(nn.Module):
-    def __init__(self, specifics):
-        super(DnCNN_wrapper, self).__init__()
-        if torch.cuda.device_count() > 1:
-            self.DnCNN = nn.DataParallel(DnCNN(specifics=specifics).to(device))
-        else:
-            self.DnCNN = DnCNN(specifics=specifics).to(device)
+                    end = time()
 
-    def forward(self, r):
-        xhat = self.DnCNN(r)
+                    Prediction_value = x_output.cpu().data.numpy()
 
-        r_abs = torch.abs(r)
-        r_absColumnWise = torch.max(r_abs, dim=0)  # gives a tuple ([max of each row] , [index of where it was found]) # reduce on dim=0 to get rid of n and leave BATCH_SIZE
-        epsilon = torch.max(r_absColumnWise[0] * 0.001, torch.tensor(0.00001).to(device))  # of size [BATCH_SIZE]
-        eta = torch.empty(r.shape).normal_(mean=0, std=1).to(device)
-        r_perturbed = r + torch.mul(eta, epsilon)
-        xhat_perturbed = self.DnCNN(r_perturbed.detach())
-        eta_dx = torch.mul(eta, xhat_perturbed - xhat)  # Want element-wise multiplication
-        mean_eta_dx = torch.mean(eta_dx, dim=0)
-        dxdr = torch.div(mean_eta_dx, epsilon).to(device)
-        dxdr.detach() # turn off gradient calculation
+                    # loss_sym = torch.mean(torch.pow(loss_layers_sym[0], 2))
+                    # for k in range(layer_num - 1):
+                    #     loss_sym += torch.mean(torch.pow(loss_layers_sym[k + 1], 2))
+                    #
+                    # loss_sym = loss_sym.cpu().data.numpy()
 
-        return xhat, dxdr
+                    X_rec = np.clip(utils.col2im_CS_py(Prediction_value.transpose(), row, col, row_new, col_new), 0, 1)
 
-class DnCNN(nn.Module):
-    def __init__(self, specifics):
-        super(DnCNN, self).__init__()
-        self.name = 'DnCNN'
-        self.specifics = specifics
-        self.channel_img = self.specifics["input_channel"]
-        self.width_img = self.specifics["input_width"]
-        self.height_img = self.specifics["input_height"]
+                    rec_PSNR = utils.psnr(X_rec * 255, Iorg.astype(np.float64))
+                    rec_SSIM = ssim(X_rec * 255, Iorg.astype(np.float64), data_range=255)
 
-        denoiser = nn.ModuleList()
-        conv0 = nn.Conv2d(specifics["input_channel"], 64, kernel_size=3, stride=1, padding=1, bias=False).to(device)
-        relu0 = nn.ReLU().to(device)
-        denoiser.add_module("conv0", conv0)
-        denoiser.add_module("relu0", relu0)
-        for j in range(1, specifics["n_DnCNN_layers"] - 1):
-            conv = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1, bias=False).to(device)
-            batchnorm = nn.BatchNorm2d(64).to(device) # training
-            relu = nn.ReLU().to(device)
-            denoiser.add_module("conv" + str(j), conv)
-            denoiser.add_module("batch" + str(j), batchnorm)
-            denoiser.add_module("relu" + str(j), relu)
-        convLast = nn.Conv2d(64, specifics["input_channel"], kernel_size=3, stride=1, padding=1, bias=False).to(device)
-        denoiser.add_module("convLast", convLast)
-        self.dncnnLayers = denoiser
+                    print("[%02d/%02d] Run time for %s is %.4f, PSNR is %.2f, SSIM is %.4f" % (
+                    img_no, ImgNum, imgName, (end - start), rec_PSNR, rec_SSIM))
 
-    def forward(self, r):
-        orig_Shape = r.shape
-        shape4D = [-1, self.channel_img, self.width_img, self.height_img]
-        r = torch.reshape(r, shape4D)
+                    Img_rec_yuv[:, :, 0] = X_rec * 255
 
-        x = r
-        for i, l in enumerate(self.dncnnLayers):
-            x = l(x)
+                    im_rec_rgb = cv2.cvtColor(Img_rec_yuv, cv2.COLOR_YCrCb2BGR)
+                    im_rec_rgb = np.clip(im_rec_rgb, 0, 255).astype(np.uint8)
 
-        x_hat = r - x
-        x_hat = torch.reshape(x_hat, orig_Shape)
-        return x_hat
+                    resultName = imgName.replace(data_dir, result_dir)
+                    cv2.imwrite("%s_ISTA_Net_ratio_%d_epoch_%d_PSNR_%.2f_SSIM_%.4f.png" % (
+                    resultName, cs_ratio, epoch_num, rec_PSNR, rec_SSIM), im_rec_rgb)
+                    del x_output
+
+                    PSNR_All[0, img_no] = rec_PSNR
+                    SSIM_All[0, img_no] = rec_SSIM
+
+            print('\n')
+            output_data = "CS ratio is %d, Avg PSNR/SSIM for %s is %.2f/%.4f, Epoch number of model is %d \n" % (
+            cs_ratio, test_name, np.mean(PSNR_All), np.mean(SSIM_All), epoch_num)
+            print(output_data)
+
+            output_file_name = "./%s/PSNR_SSIM_Results_CS_ISTA_Net_layer_%d_group_%d_ratio_%d_lr_%.4f.txt" % (
+            log_dir, layer_num, group_num, cs_ratio, learning_rate)
+
+            output_file = open(output_file_name, 'a')
+            output_file.write(output_data)
+            output_file.close()
+
+            print("CS Reconstruction End")
+
+# Define ISTA-Net Block
+class BasicBlock(torch.nn.Module):
+    def __init__(self):
+        super(BasicBlock, self).__init__()
+
+        self.lambda_step = nn.Parameter(torch.Tensor([0.5]))
+        self.soft_thr = nn.Parameter(torch.Tensor([0.01]))
+
+        self.conv1_forward = nn.Parameter(init.xavier_normal_(torch.Tensor(32, 1, 3, 3)))
+        self.conv2_forward = nn.Parameter(init.xavier_normal_(torch.Tensor(32, 32, 3, 3)))
+        self.conv1_backward = nn.Parameter(init.xavier_normal_(torch.Tensor(32, 32, 3, 3)))
+        self.conv2_backward = nn.Parameter(init.xavier_normal_(torch.Tensor(1, 32, 3, 3)))
+
+    def forward(self, x, PhiTPhi, PhiTb):
+        x = x - self.lambda_step * torch.mm(x, PhiTPhi)
+        x = x + self.lambda_step * PhiTb
+        x_input = x.view(-1, 1, 33, 33)
+
+        x = F.conv2d(x_input, self.conv1_forward, padding=1)
+        x = F.relu(x)
+        x_forward = F.conv2d(x, self.conv2_forward, padding=1)
+
+        x = torch.mul(torch.sign(x_forward), F.relu(torch.abs(x_forward) - self.soft_thr))
+
+        x = F.conv2d(x, self.conv1_backward, padding=1)
+        x = F.relu(x)
+        x_backward = F.conv2d(x, self.conv2_backward, padding=1)
+
+        x_pred = x_backward.view(-1, 1089)
+
+        x = F.conv2d(x_forward, self.conv1_backward, padding=1)
+        x = F.relu(x)
+        x_est = F.conv2d(x, self.conv2_backward, padding=1)
+        symloss = x_est - x_input
+
+        return [x_pred, symloss]
+
+# Define ISTA-Net
+class ISTANet(torch.nn.Module):
+    def __init__(self, LayerNo):
+        super(ISTANet, self).__init__()
+        onelayer = []
+        self.LayerNo = LayerNo
+
+        for i in range(LayerNo):
+            onelayer.append(BasicBlock())
+
+        self.fcs = nn.ModuleList(onelayer)
+
+    def forward(self, Phix, Phi, Qinit):
+
+        PhiTPhi = torch.mm(torch.transpose(Phi, 0, 1), Phi)
+        PhiTb = torch.mm(Phix, Phi)
+
+        x = torch.mm(Phix, torch.transpose(Qinit, 0, 1))
+
+        layers_sym = []   # for computing symmetric loss
+
+        for i in range(self.LayerNo):
+            [x, layer_sym] = self.fcs[i](x, PhiTPhi, PhiTb)
+            layers_sym.append(layer_sym)
+
+        x_final = x
+
+        return [x_final, layers_sym]
+
