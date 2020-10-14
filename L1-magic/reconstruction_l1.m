@@ -112,7 +112,7 @@ function x_hat = reconstruction_l1(x, y, input_channel, input_width, input_heigh
     if strcmp(specifics.constraint, 'eq')
         xp = l1eq_pd(x0, A, At, y, specifics.pdtol, specifics.pdmaxiter, specifics.cgtol, specifics.cgmaxiter);
     elseif strcmp(specifics.constraint, 'qc')
-        xp = l1qc_logbarrier(x0, A, At, y, specifics.epsilon, specifics.lbtol, specifics.mu, psecifics.cgtol, specifics.cgmaxiter);
+        xp = l1qc_logbarrier(x0, A, At, y, specifics.epsilon, specifics.lbtol, specifics.mu, specifics.cgtol, specifics.cgmaxiter);
     elseif strcmp(specifics.constraint, 'dantzig')
         xp = l1dantzig_pd(x0, A, At, y, specifics.epsilon, specifics.pdtol, specifics.pdmaxiter, specifics.cgtol, specifics.cgmaxiter);
     elseif strcmp(specifics.constraint, 'decode')
