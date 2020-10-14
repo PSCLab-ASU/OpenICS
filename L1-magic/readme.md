@@ -1,6 +1,8 @@
-# L1-Magic
+# L1-Magic Toolbox
 The L1-Magic toolbox implementation within the framework utilizes both the L1 and TV (Total Variation) methods from the original code.
+Note that the L1 methods are generally ill-suited for image reconstruction, so the TV methods will likely perform better.
 
+# L1 Methods
 The L1 methods have four different implementations which it can run, which are specified under the 'constraints' parameter. These include:
 * Equality constraints, or **'eq'**
 * Quadratic constraints, or **'qc'**
@@ -15,4 +17,18 @@ Additional parameters include the following:
 * **epsilon** - The allowed error for the initial point x0 of the 'qc' and 'dantzig' constraints. For 'dantzig' it is also used as the correlation constraints. Must be a scalar for 'qc', but can be a scalar or an Nx1 vector for 'dantzig', where N is the original size of the signal.
 * **lbtol** - The tolerance of the log-barrier algorithm. This is only applied to the 'qc' constraint.
 * **mu** - The factor by which to increase the barrier constant per iteration. This is only applied on the 'qc' constraint.
-* **normalization** - Whether the image should be normalized prior to sensing and reconstruction. Normalization consists of dividing by the L2-norm and subtracting the mean, and then inverting this transformation after reconstruction. This allows images to become sparser.
+* **normalization** - Whether the image should be normalized prior to sensing and reconstruction. Normalization consists of dividing by the L2-norm and subtracting the mean, and then inverting this transformation after reconstruction. This allows images to become sparser and may improve reconstruction accuracy.
+
+# TV Methods
+The TV methods have three different implementations which it can run, which are specified under the 'constraints' parameter. These include:
+* Equality constraints, or **'eq'**
+* Quadratic constraints, or **'qc'**
+* Dantzig Selector, or **'dantzig'**
+
+Additional parameters include the following:
+* **lbtol** - The tolerance of the log-barrier algorithm.
+* **mu** - The factor by which to increase the barrier constant per iteration.
+* **lintol** - The tolerance of the linear equation solving algorithm.
+* **linmaxiter** - The maximum number of iterations of the linear equation solving algorithm. For 'eq', it is the Symmetric LQ method, while 'qc' and 'dantzig' utilize the Conjugated Gradients method.
+* **epsilon** - The allowed error for the initial point x0 of the 'qc' and 'dantzig' constraints. Must be a scalar.
+* **normalization** - Whether the image should be normalized prior to sensing and reconstruction. Normalization consists of dividing by the L2-norm and subtracting the mean, and then inverting this transformation after reconstruction. This allows images to become sparser and may improve reconstruction accuracy.
