@@ -8,6 +8,8 @@ import math
 
 def generate_dataset(stage, specifics):
     # a function to generate the corresponding dataset with given parameters. return an instance of the dataset class.
+    if(stage == 'testing'):
+        return 1
 
     Training_labels = getTrainingLabels(stage, specifics)
 
