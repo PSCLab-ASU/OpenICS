@@ -1,0 +1,18 @@
+# L1-Magic
+The L1-Magic toolbox implementation within the framework utilizes both the L1 and TV (Total Variation) methods from the original code.
+
+The L1 methods have four different implementations which it can run, which are specified under the 'constraints' parameter. These include:
+* Equality constraints, or **'eq'**
+* Quadratic constraints, or **'qc'**
+* Dantzig Selector, or **'dantzig'**
+* Minimum error approximation, or **'decode'**
+
+Additional parameters include the following:
+* **pdtol** - The tolerance of the primal-dual algorithm. 'qc' utilizes the log-barrier algorithm, so it does not apply when using quadratic constraints.
+* **pdmaxiter** - The maximum number of iterations of the primal-dual algorithm. Similarly, it does not apply to the 'qc' constraint.
+* **cgtol** - The tolerance of the Conjugated Gradients algorithm, which is used to solve the system of linear equations.
+* **cgmaxiter** - The maximum number of iterations of the Conjugated Gradients algorithm.
+* **epsilon** - The allowed error for the initial point x0 of the 'qc' and 'dantzig' constraints. For 'dantzig' it is also used as the correlation constraints. Must be a scalar for 'qc', but can be a scalar or an Nx1 vector for 'dantzig', where N is the original size of the signal.
+* **lbtol** - The tolerance of the log-barrier algorithm. This is only applied to the 'qc' constraint.
+* **mu** - The factor by which to increase the barrier constant per iteration. This is only applied on the 'qc' constraint.
+* **normalization** - Whether the image should be normalized prior to sensing and reconstruction. Normalization consists of dividing by the L2-norm and subtracting the mean, and then inverting this transformation after reconstruction. This allows images to become sparser.
