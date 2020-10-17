@@ -5,7 +5,7 @@ function [A, At] = sensing_guassian_random(n,m)
     % being stored in memory
     
     if n > 10000
-        disp('WARNING: Guassian sensing is significantly slower for larger images!');
+        disp('WARNING: Explicit matrix sensing is significantly slower for larger images!');
     end
     
     Amat = normrnd(0, 1/m, m, n); % random sensing matrix

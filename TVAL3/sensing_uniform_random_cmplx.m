@@ -5,7 +5,7 @@ function [A, At] = sensing_uniform_random_cmplx(n,m)
     % being stored in memory
     
     if n > 10000
-        disp('WARNING: Guassian sensing is significantly slower for larger images!');
+        disp('WARNING: Explicit matrix sensing is significantly slower for larger images!');
     end
     
     Amat = rand(m, n) - 0.5 + 1i * (rand(m, n) - 0.5); % random sensing matrix
