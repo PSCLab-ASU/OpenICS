@@ -44,7 +44,6 @@ class ISTANetPlus_wrapper():
             layer_num = self.specifics['layer_num']
             group_num = self.specifics['group_num']
             cs_ratio = self.specifics['cs_ratio']
-            gpu_list = self.specifics['gpu_list']
             batch_size = self.specifics['batch_size']
             nrtrain = self.specifics['nrtrain']
             model_dir = self.specifics['model_dir']
