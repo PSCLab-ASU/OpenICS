@@ -9,7 +9,7 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
         input_width = 0 # computed automatically
         input_height = 0 # computed automatically
         m = 1089
-        n = 272
+        n = 272  # ratio_dict = {1: 10, 4: 43, 10: 109, 25: 272, 30: 327, 40: 436, 50: 545}
         specifics = {
             'stage': 'training',
             'start_epoch': 0,
@@ -19,9 +19,9 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
             'layer_num': 9,
             'group_num': 1,
             'cs_ratio': 25,
-            'gpu_list': 0,
-            'n_input': n,
-            'n_output':m,
+            # 'gpu_list': 0,
+            # 'n_input': n,
+            # 'n_output':m,
             'nrtrain': 88912,
             'batch_size': 64,
             'model_dir': 'model',
@@ -40,8 +40,8 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
     reconstruction_method.run()
         
 if __name__ == "__main__":
-    m = 1089
-    n = 272 # ratio_dict = {1: 10, 4: 43, 10: 109, 25: 272, 30: 327, 40: 436, 50: 545}
+    # m = 1089
+    # n = 272 # ratio_dict = {1: 10, 4: 43, 10: 109, 25: 272, 30: 327, 40: 436, 50: 545}
     dataset = 'Training_Data.mat'
     stage = 'training'
     main(
@@ -53,8 +53,8 @@ if __name__ == "__main__":
         0,
         0,
         0,
-        m,
-        n,
+        0,
+        0,
         specifics={
             'stage': stage,
             'start_epoch': 0,
@@ -62,11 +62,11 @@ if __name__ == "__main__":
             'testing_epoch_num': 200,
             'learning_rate': 1e-4,
             'layer_num': 9,
-            'group_num': 1,
+            'group_num': 2,
             'cs_ratio': 25,
-            'gpu_list': 0,
-            'n_input': n,
-            'n_output': m,
+            # 'gpu_list': 0,
+            # 'n_input': n,
+            # 'n_output': m,
             'nrtrain': 88912,
             'batch_size': 64, # 1 for test, 64 for train
             'model_dir': 'model',
