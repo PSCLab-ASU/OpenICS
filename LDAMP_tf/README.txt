@@ -1,7 +1,7 @@
 Variables:
 
 sensing: unused
-reconstruction: type of reconstruction (IstaNetPlus)
+reconstruction: type of reconstruction (LDAMP)
 stage: either "training" or "testing"
 default: default is training
 dataset: name of dataset to train on
