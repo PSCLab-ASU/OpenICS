@@ -22,6 +22,8 @@ specifics.maxit = 300;
 specifics.mu0 = 2^4;       % trigger continuation shceme
 specifics.beta0 = 2^-2;    % trigger continuation shceme
 
+specifics.isreal = false;
+
 % image parameters and information
 img_path = fullfile(matlabroot, '/toolbox/images/imdata/cameraman.tif');
 input_channel = 1;
@@ -29,13 +31,19 @@ input_width = 256;
 input_height = 256;
 
 % sensing parameters
-sensing_method = 'sensing_walsh_hadamard';
+sensing_method = 'sensing_guassian_random';
+ratio = 0.2;
 n = input_width * input_height * input_channel;
-m = round(65536 * 0.6);
+m = round(n * ratio);
 
 % slicing parameters
-slice = false;
+slice = true;
 slice_size = 64;
+
+% if slicing, recalculate number of measurements
+if slice
+    m = round(slice_size * slice_size * input_channel * ratio);
+end
 
 % main execution
 [x,x_hat] = main(sensing_method,reconstruction_method,false,img_path,input_channel,input_width,input_height,m,n,specifics,slice,slice_size);

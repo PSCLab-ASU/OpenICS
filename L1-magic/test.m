@@ -7,12 +7,8 @@
 run set_up
 
 % reconstruction parameters
-reconstruction_method = 'reconstruction_l1';
+reconstruction_method = 'reconstruction_tv';
 specifics = struct;
-specifics.lbtol = 1e-3;
-specifics.mu = 5;
-specifics.lintol = 1e-8;
-specifics.linmaxiter = 200;
 specifics.constraint = 'eq';
 specifics.normalization = true;
 
@@ -23,13 +19,19 @@ input_width = 256;
 input_height = 256;
 
 % sensing parameters
-sensing_method = 'sensing_scrambled_fourier';
-m = 300;
+sensing_method = 'sensing_guassian_random';
+ratio = 0.1;
 n = input_width * input_height * input_channel;
+m = round(n * ratio);
 
 % slicing parameters
 slice = true;
-slice_size = 32;
+slice_size = 128;
+
+% if slicing, recalculate number of measurements
+if slice
+    m = round(slice_size * slice_size * input_channel * ratio);
+end
 
 % main execution
 [x,x_hat] = main(sensing_method,reconstruction_method,false,img_path,input_channel,input_width,input_height,m,n,specifics,slice,slice_size);

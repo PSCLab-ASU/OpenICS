@@ -1,10 +1,11 @@
-function [A, At] = sensing_uhp_fourier(n,m)
+function [A, At] = sensing_uhp_fourier(c,w,h,m)
     % returns two function handles:
     % one for regular sensing and one for transposed sensing
     % used more often for largescale images
     % IMPORTANT: this method requires n to have an integer square root
     
     % creates random observation set OMEGA for Fourier coefficients
+    n = c * w * h;
     q = randperm(n/2-1)+1;
     OMEGA = q(1:m/2)';
     n = sqrt(n);

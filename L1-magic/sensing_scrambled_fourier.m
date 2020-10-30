@@ -1,9 +1,10 @@
-function [A, At] = sensing_scrambled_fourier(n,m)
+function [A, At] = sensing_scrambled_fourier(c,w,h,m)
     % returns two function handles:
     % one for regular sensing and one for transposed sensing
     % used for smaller scale images
     
     % permutation P and observation set OMEGA
+    n = c * w * h;
     P = randperm(n)';
     q = randperm(n/2-1)+1;
     OMEGA = q(1:m/2)';

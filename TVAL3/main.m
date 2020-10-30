@@ -27,6 +27,7 @@
 % slice - boolean, whether to slice the image into submatrices.
 %
 % slice_size - scalar or 2-element vector, the size of each slice.
+%              If passed in as a vector, ordered [width, height].
 %
 
 function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,input_width,input_height,m,n,specifics,slice,slice_size)
@@ -65,12 +66,12 @@ function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,
     x=im2double(imread(img_path)); % read image
     
     if ~slice
-        [A,At]=sensing_method(n, m); % get sensing method function handles
+        [A,At]=sensing_method(input_channel, input_width, input_height, m); % get sensing method function handles
         y=A(x(:)); % apply sensing to x
         x_hat=reconstruction_method(x, y, input_channel, input_width, input_height, A, At, specifics); % apply reconstruction method
     else
         n=prod(slice_size); % calculate new n
-        [A,At]=sensing_method(n, m); % get sensing method function handles
+        [A,At]=sensing_method(input_channel, slice_size(1), slice_size(2), m); % get sensing method function handles
         x=imslice(x, input_channel, input_width, input_height, slice_size); % slice image into cell array
         x_hat=cell(size(x)); % create empty cell array for x_hat
         
