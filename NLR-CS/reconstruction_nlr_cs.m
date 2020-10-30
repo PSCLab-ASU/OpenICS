@@ -64,6 +64,7 @@ function x_hat = reconstruction_nlr_cs(x, y, input_channel, input_width, input_h
     end
     
     % set code-defined properties
+    % note, NLR-CS uses 0-255 instead of 0-1, so multiply image data by 255
     specifics.y = A(x .* 255);
     specifics.ori_im = x .* 255;
     specifics.s_model = 1;
@@ -71,6 +72,7 @@ function x_hat = reconstruction_nlr_cs(x, y, input_channel, input_width, input_h
     specifics.picks = q(1:numel(y) / 2)';
 
     time0 = clock;
+    % divide image data by 255 to get back to 0-1 range
     x_hat = NLR_CS_Reconstruction(specifics, A, At) ./ 255;
     fprintf('Total elapsed time = %f secs\n\n', etime(clock,time0));
 end
