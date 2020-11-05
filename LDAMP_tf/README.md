@@ -1,5 +1,4 @@
-Variables:
-
+# Variables:
 sensing: unused
 reconstruction: type of reconstruction (LDAMP)
 stage: either "training" or "testing"
