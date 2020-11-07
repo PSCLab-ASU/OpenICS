@@ -4,7 +4,7 @@
 %
 
 % run set_up
-run set_up
+run set_up;
 
 % reconstruction parameters
 reconstruction_method = 'reconstruction_tval3';
@@ -31,21 +31,20 @@ input_width = 256;
 input_height = 256;
 
 % sensing parameters
-sensing_method = 'sensing_guassian_random';
+sensing_method = 'sensing_walsh_hadamard';
 ratio = 0.2;
 n = input_width * input_height * input_channel;
 m = round(n * ratio);
 
 % slicing parameters
-slice = true;
-slice_size = 64;
+% specifics.slice_size = 64;
 
 % if slicing, recalculate number of measurements
-if slice
-    m = round(slice_size * slice_size * input_channel * ratio);
+if isfield(specifics, 'slice_size')
+    m = round(specifics.slice_size * specifics.slice_size * input_channel * ratio);
 end
 
 % main execution
-[x,x_hat] = main(sensing_method,reconstruction_method,false,img_path,input_channel,input_width,input_height,m,n,specifics,slice,slice_size);
+[x,x_hat] = main(sensing_method,reconstruction_method,false,img_path,input_channel,input_width,input_height,m,n,specifics);
 imshow([x, x_hat]); % display images side by side
-disp("Reconstruction error: " + norm(x - x_hat, 1));
+disp("Reconstruction Error: " + norm(x - x_hat, 1));

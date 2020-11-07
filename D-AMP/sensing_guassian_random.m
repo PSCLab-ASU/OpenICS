@@ -1,20 +1,19 @@
-function [A, At] = sensing_guassian_random_rowwise(c,w,h,m)
+function [A, At] = sensing_guassian_random(img_dims,m)
     % returns two function handles:
     % one for regular sensing and one for transposed sensing
     % WARNING: significantly slower on large images due to sensing matrix
     % being stored in memory
     
-    n = c * w * h;
+    n = prod(img_dims);
     
     if n > 10000
         disp('WARNING: Explicit matrix sensing is significantly slower for larger images!');
     end
     
-    M=randn(m,n);
-    for i = 1:m
-        M(i,:) = M(i,:) ./ sqrt(sum(abs(M(i,:)).^2));
-    end
+    % random sensing matrix
+    Amat = randn(m, n);
+    Amat = orth(Amat')';
     
-    A = @(z) M * reshape(z, [], 1);
-    At = @(z) M' * reshape(z, [], 1);
+    A = @(z) Amat * reshape(z, [], 1);
+    At = @(z) Amat' * reshape(z, [], 1);
 end

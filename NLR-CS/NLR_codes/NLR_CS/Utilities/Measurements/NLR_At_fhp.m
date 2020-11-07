@@ -1,8 +1,8 @@
-% At_fhp.m
+% NLR_At_fhp.m
 %
 % Adjoint of At_fhp (2D Fourier half plane measurements).
 %
-% Usage: x = At_fhp(b, OMEGA, n)
+% Usage: x = NLR_At_fhp(b, OMEGA, n)
 %
 % b - K vector = [mean; real part(OMEGA); imag part(OMEGA)]
 %
@@ -17,8 +17,9 @@
 % Created: October 2005
 % Email: jrom@acm.caltech.edu
 %
+% Renamed to NLR_At_fhp to distinguish from L1-magic implementations
 
-function x = At_fhp(y, OMEGA, h, w)
+function x = NLR_At_fhp(y, OMEGA, h, w)
 
 K = length(y);
 

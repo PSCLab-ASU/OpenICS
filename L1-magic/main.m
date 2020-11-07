@@ -22,15 +22,10 @@
 %
 % n - The size of the original signal.
 %
-% specifics - struct, any specific parameters for the reconstruction method.
-%
-% slice - boolean, whether to slice the image into submatrices.
-%
-% slice_size - scalar or 2-element vector, the size of each slice.
-%              If passed in as a vector, ordered [width, height].
+% specifics - struct, any specific parameters for reconstruction.
 %
 
-function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,input_width,input_height,m,n,specifics,slice,slice_size)
+function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,input_width,input_height,m,n,specifics)
 
     if default
         % set all parameters with default values.
@@ -41,7 +36,7 @@ function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,
         m = 25000;
         n = input_height * input_width * input_channel;
         specifics = struct;
-        slice = false;
+        sensing = default_sensing(reconstruction);
     else
         % check parameters are valid
         if input_channel > 1
@@ -56,9 +51,19 @@ function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,
             specifics = struct;
         end
         
-        if numel(slice_size) == 1
-            slice_size = repelem(slice_size, 2);
+    end
+    
+    if isfield(specifics, 'slicesize')
+        slice = true;
+        
+        if numel(specifics.slice_size) == 1
+            slice_size = repelem(specifics.slice_size, 2);
+        else
+            slice_size = specifics.slice_size;
         end
+        
+    else
+        slice = false;
     end
     
     sensing_method=str2func(sensing); % convert to function handle
@@ -66,12 +71,14 @@ function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,
     x=im2double(imread(img_path)); % read image
     
     if ~slice
-        [A,At]=sensing_method(input_channel, input_width, input_height, m); % get sensing method function handles
+        img_size=[input_channel,input_width,input_height]; % size vector ordered [c,w,h]
+        [A,At]=sensing_method(img_size, m); % get sensing method function handles
         y=A(x(:)); % apply sensing to x
-        x_hat=reconstruction_method(x, y, input_channel, input_width, input_height, A, At, specifics); % apply reconstruction method
+        x_hat=reconstruction_method(x, y, img_size, A, At, specifics); % apply reconstruction method
     else
         n=prod(slice_size); % calculate new n
-        [A,At]=sensing_method(input_channel, slice_size(1), slice_size(2), m); % get sensing method function handles
+        img_size=[input_channel,slice_size(1),slice_size(2)]; % size vector ordered [c,w,h]
+        [A,At]=sensing_method(img_size, m); % get sensing method function handles
         x=imslice(x, input_channel, input_width, input_height, slice_size); % slice image into cell array
         x_hat=cell(size(x)); % create empty cell array for x_hat
         
@@ -80,7 +87,7 @@ function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,
             disp("On slice " + i);
             temp_x=cell2mat(x(i)); % turn slice from x into matrix
             y=A(temp_x(:)); % apply sensing to temp_x
-            temp_x_hat=reconstruction_method(temp_x, y, input_channel, slice_size(1), slice_size(2), A, At, specifics); % apply reconstruction method
+            temp_x_hat=reconstruction_method(temp_x, y, img_size, A, At, specifics); % apply reconstruction method
             temp_x_hat=reshape(temp_x_hat, slice_size); % reshape into original shape
             x_hat(i)=num2cell(temp_x_hat,[1,2]); % add cell into x_hat
         end

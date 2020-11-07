@@ -2,17 +2,13 @@
 % 
 % Uses TVAL3 reconstruction method.
 % 
-% Usage: x_hat = reconstruction_tval3(x,y,input_channel,input_width,input_height,A,At,specifics)
+% Usage: x_hat = reconstruction_tval3(x,y,img_dims,A,At,specifics)
 %
 % x - nx1 vector, original signal
 %
 % y - mx1 vector, observations
 %
-% input_channel - Channels in the original image
-%
-% input_width - Width of the original image
-%
-% input_height - Height of the original image
+% img_dims - Vector denoting the size of the original image. [c,w,h]
 %
 % A - Function handle to sensing method
 %
@@ -91,7 +87,7 @@
 %       Default: false
 %
 
-function x_hat = reconstruction_tval3(x, y, input_channel, input_width, input_height, A, At, specifics)
+function x_hat = reconstruction_tval3(x, y, img_dims, A, At, specifics)
 
     % set default values
     if ~isfield(specifics, 'normalization')
@@ -111,7 +107,7 @@ function x_hat = reconstruction_tval3(x, y, input_channel, input_width, input_he
     end
 
     time0 = clock;
-    [x_hat, hist] = TVAL3(@A_handles, y, input_height, input_width, specifics);
+    [x_hat, hist] = TVAL3(@A_handles, y, img_dims(3), img_dims(2), specifics);
     fprintf('Total elapsed time = %f secs\n\n', etime(clock,time0));
     
     % normalize image slightly by subtracting the minimum value in x_hat

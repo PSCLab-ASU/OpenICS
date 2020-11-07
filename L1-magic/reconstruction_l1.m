@@ -2,17 +2,13 @@
 % 
 % Uses L1 reconstruction methods from l1-magic toolbox.
 % 
-% Usage: x_hat = reconstruction_l1(x,y,input_channel,input_width,input_height,A,At,specifics)
+% Usage: x_hat = reconstruction_l1(x,y,img_dims,A,At,specifics)
 %
 % x - nx1 vector, original signal
 %
 % y - mx1 vector, observations
 %
-% input_channel - Channels in the original image
-%
-% input_width - Width of the original image
-%
-% input_height - Height of the original image
+% img_dims - Vector denoting the size of the original image. [c,w,h]
 %
 % A - Function handle to sensing method
 %
@@ -55,7 +51,7 @@
 %       Default: false
 %
 
-function x_hat = reconstruction_l1(x, y, input_channel, input_width, input_height, A, At, specifics)
+function x_hat = reconstruction_l1(x, y, img_dims, A, At, specifics)
     % set default values
     if ~isfield(specifics, 'constraint')
         specifics.constraint = 'eq';
@@ -108,18 +104,19 @@ function x_hat = reconstruction_l1(x, y, input_channel, input_width, input_heigh
     end
     
     x0 = At(y);
+    time0 = clock;
 
     if strcmp(specifics.constraint, 'eq')
-        xp = l1eq_pd(x0, A, At, y, specifics.pdtol, specifics.pdmaxiter, specifics.cgtol, specifics.cgmaxiter);
+        x_hat = l1eq_pd(x0, A, At, y, specifics.pdtol, specifics.pdmaxiter, specifics.cgtol, specifics.cgmaxiter);
     elseif strcmp(specifics.constraint, 'qc')
-        xp = l1qc_logbarrier(x0, A, At, y, specifics.epsilon, specifics.lbtol, specifics.mu, specifics.cgtol, specifics.cgmaxiter);
+        x_hat = l1qc_logbarrier(x0, A, At, y, specifics.epsilon, specifics.lbtol, specifics.mu, specifics.cgtol, specifics.cgmaxiter);
     elseif strcmp(specifics.constraint, 'dantzig')
-        xp = l1dantzig_pd(x0, A, At, y, specifics.epsilon, specifics.pdtol, specifics.pdmaxiter, specifics.cgtol, specifics.cgmaxiter);
+        x_hat = l1dantzig_pd(x0, A, At, y, specifics.epsilon, specifics.pdtol, specifics.pdmaxiter, specifics.cgtol, specifics.cgmaxiter);
     elseif strcmp(specifics.constraint, 'decode')
-        xp = l1decode_pd(x0, A, At, y, specifics.pdtol, specifics.pdmaxiter, specifics.cgtol, specifics.cgmaxiter);
+        x_hat = l1decode_pd(x0, A, At, y, specifics.pdtol, specifics.pdmaxiter, specifics.cgtol, specifics.cgmaxiter);
     end
     
-    x_hat = xp;
+    fprintf('Total elapsed time = %f secs\n\n', etime(clock,time0));
     
     % invert normalization
     if specifics.normalization

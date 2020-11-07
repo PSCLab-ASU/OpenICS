@@ -2,17 +2,13 @@
 % 
 % Uses TV (total variance) reconstruction methods from l1-magic toolbox.
 % 
-% Usage: x_hat = reconstruction_tv(x,y,input_channel,input_width,input_height,A,At,specifics)
+% Usage: x_hat = reconstruction_tv(x,y,img_dims,A,At,specifics)
 %
 % x - nx1 vector, original signal
 %
 % y - mx1 vector, observations
 %
-% input_channel - Channels in the original image
-%
-% input_width - Width of the original image
-%
-% input_height - Height of the original image
+% img_dims - Vector denoting the size of the original image. [c,w,h]
 %
 % A - Function handle to sensing method
 %
@@ -46,7 +42,7 @@
 %       Default: false
 %
 
-function x_hat = reconstruction_tv(x, y, input_channel, input_width, input_height, A, At, specifics)
+function x_hat = reconstruction_tv(x, y, img_dims, A, At, specifics)
 
     % set default values
     if ~isfield(specifics, 'constraint')
@@ -88,19 +84,16 @@ function x_hat = reconstruction_tv(x, y, input_channel, input_width, input_heigh
     end
 
     x0 = At(y); % lowest energy initial point
-    tvI = sum(sum(sqrt([diff(x,1,2) zeros(input_height,1)].^2 + [diff(x,1,1); zeros(1,input_width)].^2)));
-    fprintf('Original TV = %.3f\n', tvI);
     time0 = clock;
     
     if strcmp(specifics.constraint, 'eq')
-        xp = tveq_logbarrier(x0, A, At, y, specifics.lbtol, specifics.mu, specifics.lintol, specifics.linmaxiter);
+        x_hat = tveq_logbarrier(x0, A, At, y, specifics.lbtol, specifics.mu, specifics.lintol, specifics.linmaxiter);
     elseif strcmp(specifics.constraint, 'qc')
-        xp = tvqc_logbarrier(x0, A, At, y, specifics.epsilon, specifics.lbtol, specifics.mu, specifics.lintol, specifics.linmaxiter);
+        x_hat = tvqc_logbarrier(x0, A, At, y, specifics.epsilon, specifics.lbtol, specifics.mu, specifics.lintol, specifics.linmaxiter);
     elseif strcmp(specifics.constraint, 'dantzig')
-        xp = tvdantzig_logbarrier(x0, A, At, y, specifics.epsilon, specifics.lbtol, specifics.mu, specifics.lintol, specifics.linmaxiter);
+        x_hat = tvdantzig_logbarrier(x0, A, At, y, specifics.epsilon, specifics.lbtol, specifics.mu, specifics.lintol, specifics.linmaxiter);
     end
     
-    x_hat = xp;
     fprintf('Total elapsed time = %f secs\n\n', etime(clock,time0));
     
     % invert normalization

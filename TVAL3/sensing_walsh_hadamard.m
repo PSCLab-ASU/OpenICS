@@ -1,9 +1,9 @@
-function [A, At] = sensing_walsh_hadamard(c,w,h,m)
+function [A, At] = sensing_walsh_hadamard(img_dims,m)
     % returns two function handles:
     % one for regular sensing and one for transposed sensing
     
     % generate measurement matrix
-    n = c * w * h;
+    n = prod(img_dims);
     p = randperm(n);
     picks = p(1:m);
     for ii = 1:m

@@ -12,7 +12,9 @@ M(1,1)           =    1;
 DtY              =    zeros( size(rec_im) );
 DtY(1,1)         =    y(1);
 K                =    length(y);
-DtY(par.picks)   =    y(2:(K+1)/2) + i*y((K+3)/2:K);
+
+% modified to round indices to suppress warning
+DtY(par.picks)   =    y(2:ceil((K+1)/2)) + i*y(floor((K+3)/2):K);
 
 [h, w]           =    size( rec_im );
 cnt              =    0;

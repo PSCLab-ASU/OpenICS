@@ -26,3 +26,6 @@ The list of parameters for TVAL3 include the following:
 * **gam** - Controls the degree of nonmonotonicity. 0 = monotone line search, 1 = nonmonotone line search.
 * **rate_gam** - The shrinking rate of gam.
 * **normalization** - Whether the image should be normalized after reconstruction. Normalization consists of subtracting the minimum value such that the minimum value is zero. May improve reconstruction accuracy.
+
+Other non-method specific parameters include the following:
+* **slice_size** - The size of each slice of the image to reconstruct. Scalar or 2-element vector ordered [width, height].

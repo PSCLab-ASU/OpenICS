@@ -1,8 +1,8 @@
-% A_f.m
+% NLR_A_f.m
 %
 % Takes "scrambled Fourier" measurements.
 %
-% Usage: b = A_f(x, OMEGA, P)
+% Usage: b = NLR_A_f(x, OMEGA, P)
 %
 % x - N vector
 %
@@ -19,8 +19,9 @@
 % Created: October 2005
 % Email: jrom@acm.caltech.edu
 %
+% Renamed to NLR_A_f to distinguish from L1-magic implementations
 
-function b = A_f(x, OMEGA, P)
+function b = NLR_A_f(x, OMEGA, P)
 
 N = length(x);
 if (nargin < 3), P = 1:N;  end

@@ -2,17 +2,13 @@
 % 
 % Uses NLR-CS method from original source code.
 % 
-% Usage: x_hat = reconstruction_nlr_cs(x,y,input_channel,input_width,input_height,A,At,specifics)
+% Usage: x_hat = reconstruction_nlr_cs(x,y,img_dims,A,At,specifics)
 %
 % x - nx1 vector, original signal
 %
 % y - mx1 vector, observations
 %
-% input_channel - Channels in the original image
-%
-% input_width - Width of the original image
-%
-% input_height - Height of the original image
+% img_dims - Vector denoting the size of the original image. [c,w,h]
 %
 % A - Function handle to sensing method
 %
@@ -48,7 +44,7 @@
 %       Default: Varies based on sampling ratio
 %
 
-function x_hat = reconstruction_nlr_cs(x, y, input_channel, input_width, input_height, A, At, specifics)
+function x_hat = reconstruction_nlr_cs(x, y, img_dims, A, At, specifics)
 
     % set default values based on Set_parameters method
     defaults = Set_parameters(0.1, 0, 1);

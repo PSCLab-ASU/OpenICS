@@ -1,8 +1,8 @@
-% A_fhp.m
+% L1_A_fhp.m
 %
 % Takes measurements in the upper half-plane of the 2D Fourier transform.
 %
-% Usage: b = A_fhp(x, OMEGA)
+% Usage: b = L1_A_fhp(x, OMEGA)
 %
 % x - N vector
 %
@@ -15,8 +15,9 @@
 % Created: October 2005
 % Email: jrom@acm.caltech.edu
 %
+% Renamed to L1_A_fhp to distinguish from NLR-CS implementations
 
-function y = A_fhp(x, OMEGA)
+function y = L1_A_fhp(x, OMEGA)
 
 n = round(sqrt(length(x)));
 

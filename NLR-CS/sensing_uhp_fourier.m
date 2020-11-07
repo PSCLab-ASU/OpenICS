@@ -1,23 +1,14 @@
-function [A, At] = sensing_uhp_fourier(c,w,h,m)
+function [A, At] = sensing_uhp_fourier(img_dims,m)
     % returns two function handles:
     % one for regular sensing and one for transposed sensing
-    % used more often for largescale images
     % IMPORTANT: this method requires n to have an integer square root
     
-    % creates random rectangular mask for Fourier coefficients
-    rate = m / w / h / c;
-    
-    if rate==0.2
-        factor = 4.427;
-    elseif rate==0.25
-        factor = 4;
-    else
-        factor = sqrt(1/rate)*2;
-    end
-    
-    picks = RandMask_rect(double(h/factor), double(w/factor), h / 4, w / 4);
+    % creates random observation set OMEGA for Fourier coefficients
+    n = prod(img_dims);
+    q = randperm(n/2-1)+1;
+    OMEGA = q(1:m/2)';
     
     % function handles to A_fhp and At_fhp functions
-    A = @(z) A_fhp(z(:), picks, h, w);
-    At = @(z) At_fhp(z(:), picks, h, w);
+    A = @(z) NLR_A_fhp(reshape(z, [], 1), OMEGA, img_dims(3), img_dims(2));
+    At = @(z) NLR_At_fhp(reshape(z, [], 1), OMEGA, img_dims(3), img_dims(2));
 end

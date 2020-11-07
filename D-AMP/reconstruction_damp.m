@@ -2,17 +2,13 @@
 % 
 % Uses D-AMP reconstruction method.
 % 
-% Usage: x_hat = reconstruction_damp(x,y,input_channel,input_width,input_height,A,At,specifics)
+% Usage: x_hat = reconstruction_damp(x,y,img_dims,A,At,specifics)
 %
 % x - nx1 vector, original signal
 %
 % y - mx1 vector, observations
 %
-% input_channel - Channels in the original image
-%
-% input_width - Width of the original image
-%
-% input_height - Height of the original image
+% img_dims - Vector denoting the size of the original image. [c,w,h]
 %
 % A - Function handle to sensing method
 %
@@ -29,7 +25,7 @@
 %       Default: 30
 %
 
-function x_hat = reconstruction_damp(x, y, input_channel, input_width, input_height, A, At, specifics)
+function x_hat = reconstruction_damp(x, y, img_dims, A, At, specifics)
 
     % set default values
     if ~isfield(specifics, 'denoiser')
@@ -37,10 +33,16 @@ function x_hat = reconstruction_damp(x, y, input_channel, input_width, input_hei
     end
     
     if ~isfield(specifics, 'iters')
-        specifics.denoiser = 30;
+        specifics.iters = 30;
     end
+    
+    % D-AMP operates on 0-255, so modify y
+    y = y .* 255;
 
     time0 = clock;
-    [x_hat, PSNR] = DAMP(y, specifics.iters, input_width, input_height, specifics.denoiser, A, At);
+    [x_hat, PSNR] = DAMP(y, specifics.iters, img_dims(2), img_dims(3), specifics.denoiser, A, At);
     fprintf('Total elapsed time = %f secs\n\n', etime(clock,time0));
+    
+    % divide by 255 to shift back to 0-1 range
+    x_hat = x_hat ./ 255;
 end
