@@ -14,6 +14,8 @@ function [A, At] = sensing_walsh_hadamard(img_dims,m)
     end
     perm = randperm(n); % column permutations allowable
     
+    % return function handles to A_fWH and At_fWH functions from original
+    % TVAL3 source code
     A = @(z) A_fWH(reshape(z, [], 1), picks, perm);
     At = @(z) At_fWH(reshape(z, [], 1), picks, perm);
 end

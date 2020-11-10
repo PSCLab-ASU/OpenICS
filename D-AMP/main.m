@@ -2,7 +2,7 @@
 % 
 % Main method for the CS_Framework.
 % 
-% Usage: [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,input_width,input_height,m,n,specifics,slice,slice_size)
+% Usage: [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,input_width,input_height,m,n,specifics)
 %
 % sensing - string, the sensing method to use.
 %

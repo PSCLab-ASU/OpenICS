@@ -1,6 +1,6 @@
 # TVAL3
-The TVAL3 implementation within the framework utilizes the TVAL3 algorithm source code from Rice University.
-Note that the 'sensing_walsh_hadamard' sensing method also comes from the same source code.
+The TVAL3 implementation within the framework utilizes the TVAL3 algorithm source code from [Rice University](https://www.caam.rice.edu/~optimization/L1/TVAL3/).
+Unused files such as demos have been removed from the source code.
 
 The list of parameters for TVAL3 include the following:
 * **TVL2** - Whether to use the TVL2 version of the algorithm, where TVL2 utilizes a penalty parameter ||Au-b||_2^2 instead of an equality constraint Au = b
