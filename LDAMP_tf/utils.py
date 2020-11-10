@@ -4,10 +4,11 @@
 import tensorflow as tf
 import numpy as np
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]='1'
+os.environ["CUDA_VISIBLE_DEVICES"]='0'
+
 def SetNetworkParams(new_height_img, new_width_img,new_channel_img, new_filter_height,new_filter_width,\
                      new_num_filters,new_n_DnCNN_layers,new_n_DAMP_layers, new_sampling_rate,\
-                     new_BATCH_SIZE,new_sigma_w,new_n,new_m,new_training,use_adaptive_weights=False):
+                     new_BATCH_SIZE,new_sigma_w,new_n,new_m,new_training, iscomplex, use_adaptive_weights=False):
     global height_img, width_img, channel_img, filter_height, filter_width, num_filters, n_DnCNN_layers, n_DAMP_layers,\
         sampling_rate, BATCH_SIZE, sigma_w, n, m, n_fp, m_fp, is_complex, training, adaptive_weights
     height_img = new_height_img
@@ -25,7 +26,7 @@ def SetNetworkParams(new_height_img, new_width_img,new_channel_img, new_filter_h
     m = new_m
     n_fp = np.float32(n)
     m_fp = np.float32(m)
-    is_complex=False#Just the default
+    is_complex=iscomplex#Just the default
     adaptive_weights=use_adaptive_weights
     training=new_training
 

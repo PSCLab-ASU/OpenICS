@@ -4,10 +4,11 @@
 import tensorflow as tf
 import numpy as np
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]='1'
+os.environ["CUDA_VISIBLE_DEVICES"]='0'
+
 def SetNetworkParams(new_height_img, new_width_img,new_channel_img, new_filter_height,new_filter_width,\
                      new_num_filters,new_n_DnCNN_layers,new_n_DAMP_layers, new_sampling_rate,\
-                     new_BATCH_SIZE,new_sigma_w,new_n,new_m,new_training,use_adaptive_weights=False):
+                     new_BATCH_SIZE,new_sigma_w,new_n,new_m,new_training, iscomplex, use_adaptive_weights=False):
     global height_img, width_img, channel_img, filter_height, filter_width, num_filters, n_DnCNN_layers, n_DAMP_layers,\
         sampling_rate, BATCH_SIZE, sigma_w, n, m, n_fp, m_fp, is_complex, training, adaptive_weights
     height_img = new_height_img
@@ -25,7 +26,7 @@ def SetNetworkParams(new_height_img, new_width_img,new_channel_img, new_filter_h
     m = new_m
     n_fp = np.float32(n)
     m_fp = np.float32(m)
-    is_complex=False#Just the default
+    is_complex=iscomplex#Just the default
     adaptive_weights=use_adaptive_weights
     training=new_training
 
@@ -36,7 +37,6 @@ def sensing_method(method_name,specifics):
 #Form the measurement operators
 def GenerateMeasurementOperators(mode):
     global is_complex
-    global sparse_sampling_matrix #TODO moved this to declare before assigning python 2.7 vs 3.7
     if mode=='gaussian':
         is_complex=False
         A_val = np.float32(1. / np.sqrt(m_fp) * np.random.randn(m, n))# values that parameterize the measurement model. This could be the measurement matrix itself or the random mask with coded diffraction patterns.
@@ -65,11 +65,11 @@ def GenerateMeasurementOperators(mode):
         A_val = np.zeros([n, 1]) + 1j * np.zeros([n, 1])
         A_val[0:n] = np.exp(1j*2*np.pi*np.random.rand(n,1))#The random sign vector
 
-        #global sparse_sampling_matrix
+        global sparse_sampling_matrix
         rand_col_inds=np.random.permutation(range(n))
         rand_col_inds=rand_col_inds[0:m]
         row_inds = range(m)
-        inds=zip(row_inds,rand_col_inds)
+        inds=list(zip(row_inds,rand_col_inds)) # 2.7 doesn't need the list(), 3.7.9 does to get list content
         vals=tf.ones(m, dtype=tf.complex64);
         sparse_sampling_matrix = tf.SparseTensor(indices=inds, values=vals, dense_shape=[m,n])
 
@@ -104,7 +104,7 @@ def GenerateMeasurementOperators(mode):
         rand_col_inds=np.random.permutation(range(n))
         rand_col_inds=rand_col_inds[0:m]
         row_inds = range(m)
-        inds=zip(row_inds,rand_col_inds)
+        inds=list(zip(row_inds,rand_col_inds)) # 2.7 doesn't need the list(), 3.7.9 does to get list content
         vals=tf.ones(m, dtype=tf.float32);
         sparse_sampling_matrix = tf.SparseTensor(indices=inds, values=vals, dense_shape=[m,n])
 
@@ -145,7 +145,7 @@ def GenerateMeasurementMatrix(mode):
         rand_col_inds=np.random.permutation(range(n))
         rand_col_inds=rand_col_inds[0:m]
         row_inds = range(m)
-        inds=zip(row_inds,rand_col_inds)
+        inds=list(zip(row_inds,rand_col_inds)) # 2.7 doesn't need the list(), 3.7.9 does to get list content
         vals=tf.ones(m, dtype=tf.complex64);
         sparse_sampling_matrix = tf.SparseTensor(indices=inds, values=vals, dense_shape=[m,n])
     elif mode == 'Fast-JL':
@@ -154,7 +154,7 @@ def GenerateMeasurementMatrix(mode):
         rand_col_inds=np.random.permutation(range(n))
         rand_col_inds=rand_col_inds[0:m]
         row_inds = range(m)
-        inds=zip(row_inds,rand_col_inds)
+        inds=list(zip(row_inds,rand_col_inds)) # 2.7 doesn't need the list(), 3.7.9 does to get list content
         vals=tf.ones(m, dtype=tf.float32);
         sparse_sampling_matrix = tf.SparseTensor(indices=inds, values=vals, dense_shape=[m,n])
     else:
