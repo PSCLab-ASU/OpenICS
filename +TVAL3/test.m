@@ -45,6 +45,6 @@ if isfield(specifics, 'slice_size')
 end
 
 % main execution
-[x,x_hat] = TVAL3.main(sensing_method,reconstruction_method,false,img_path,input_channel,input_width,input_height,m,n,specifics);
+[x,x_hat,metrics] = TVAL3.main(sensing_method,reconstruction_method,false,img_path,input_channel,input_width,input_height,m,n,specifics);
 imshow([x, x_hat]); % display images side by side
 disp("Reconstruction Error: " + norm(x - x_hat, 1));

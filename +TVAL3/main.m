@@ -114,6 +114,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
     
     x_hat=reshape(x_hat, input_height, input_width, input_channel); % reshape to match original
     metrics.psnr = psnr(x_hat, x);
+    metrics.ssim = ssim(x_hat, x);
 end
 
 function slices = imslice(img,img_channel,img_width,img_height,slice_size)
