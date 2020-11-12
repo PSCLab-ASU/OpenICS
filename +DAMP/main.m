@@ -66,15 +66,6 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         slice = false;
     end
     
-    % get current package name
-    file_path = fileparts(mfilename('fullpath'));
-    folders = strsplit(file_path,'/');
-    pkg_name = folders{end};
-    pkg_name = [pkg_name(2:end),'.'];
-    
-    % append package names to string function handles
-    sensing = [pkg_name, sensing];
-    reconstruction = [pkg_name, reconstruction];
     sensing_method=str2func(sensing); % convert to function handle
     reconstruction_method=str2func(reconstruction); % convert to function handle
     x=im2double(imread(img_path)); % read image
@@ -163,18 +154,18 @@ function sensing = default_sensing(reconstruction_method)
 %
 
     switch reconstruction_method
-        case 'reconstruction_tval3'
-            sensing = 'sensing_walsh_hadamard';
-        case 'reconstruction_nlr_cs'
-            sensing = 'sensing_scrambled_fourier';
-        case 'reconstruction_tv'
-            sensing = 'sensing_scrambled_fourier';
-        case 'reconstruction_l1'
-            sensing = 'sensing_uhp_fourier';
-        case 'reconstruction_damp'
-            sensing = 'sensing_guassian_random_columnwise';
+        case 'TVAL3.reconstruction_tval3'
+            sensing = 'TVAL3.sensing_walsh_hadamard';
+        case 'NLRCS.reconstruction_nlr_cs'
+            sensing = 'NLRCS.sensing_scrambled_fourier';
+        case 'L1_magic.reconstruction_tv'
+            sensing = 'L1_magic.sensing_scrambled_fourier';
+        case 'L1_magic.reconstruction_l1'
+            sensing = 'L1_magic.sensing_uhp_fourier';
+        case 'DAMP.reconstruction_damp'
+            sensing = 'DAMP.sensing_guassian_random_columnwise';
         otherwise
-            sensing = 'sensing_guassian_random';
+            sensing = 'L1_magic.sensing_guassian_random';
     end
 
 end

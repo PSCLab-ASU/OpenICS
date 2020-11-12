@@ -7,7 +7,7 @@
 run DAMP.set_up.m;
 
 % reconstruction parameters
-reconstruction_method = 'reconstruction_damp';
+reconstruction_method = 'DAMP.reconstruction_damp';
 specifics = struct;
 specifics.denoiser = 'fast-BM3D';
 specifics.iters = 30;
@@ -19,7 +19,7 @@ input_width = 256;
 input_height = 256;
 
 % sensing parameters
-sensing_method = 'sensing_guassian_random_columnwise';
+sensing_method = 'DAMP.sensing_guassian_random_columnwise';
 ratio = 0.2;
 n = input_width * input_height * input_channel;
 m = round(n * ratio);

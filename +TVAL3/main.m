@@ -66,15 +66,6 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         slice = false;
     end
     
-    % get current package name
-    file_path = fileparts(mfilename('fullpath'));
-    folders = strsplit(file_path,'/');
-    pkg_name = folders{end};
-    pkg_name = [pkg_name(2:end),'.'];
-    
-    % append package names to string function handles
-    sensing = [pkg_name, sensing];
-    reconstruction = [pkg_name, reconstruction];
     sensing_method=str2func(sensing); % convert to function handle
     reconstruction_method=str2func(reconstruction); % convert to function handle
     x=im2double(imread(img_path)); % read image

@@ -7,7 +7,7 @@
 run L1_magic.set_up.m;
 
 % reconstruction parameters
-reconstruction_method = 'reconstruction_tv';
+reconstruction_method = 'L1_magic.reconstruction_tv';
 specifics = struct;
 specifics.constraint = 'eq';
 specifics.normalization = true;
@@ -19,7 +19,7 @@ input_width = 256;
 input_height = 256;
 
 % sensing parameters
-sensing_method = 'sensing_linemasked_uhp_fourier';
+sensing_method = 'L1_magic.sensing_linemasked_uhp_fourier';
 ratio = 0.1;
 n = input_width * input_height * input_channel;
 m = round(n * ratio);

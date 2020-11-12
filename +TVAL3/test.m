@@ -7,7 +7,7 @@
 run TVAL3.set_up.m;
 
 % reconstruction parameters
-reconstruction_method = 'reconstruction_tval3';
+reconstruction_method = 'TVAL3.reconstruction_tval3';
 specifics = struct;
 specifics.normalization = true;
 specifics.TVnorm = 2;
@@ -31,7 +31,7 @@ input_width = 256;
 input_height = 256;
 
 % sensing parameters
-sensing_method = 'sensing_walsh_hadamard';
+sensing_method = 'TVAL3.sensing_walsh_hadamard';
 ratio = 0.2;
 n = input_width * input_height * input_channel;
 m = round(n * ratio);
