@@ -70,5 +70,6 @@ function x_hat = reconstruction_nlr_cs(x, y, img_dims, A, At, specifics)
     time0 = clock;
     % divide image data by 255 to get back to 0-1 range
     x_hat = NLR_CS_Reconstruction(specifics, A, At) ./ 255;
-    fprintf('Total elapsed time = %f secs\n\n', etime(clock,time0));
+    runtime = etime(clock, time0);
+    fprintf('Total elapsed time = %f secs\n\n', runtime);
 end

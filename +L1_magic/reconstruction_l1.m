@@ -116,7 +116,8 @@ function x_hat = reconstruction_l1(x, y, img_dims, A, At, specifics)
         x_hat = l1decode_pd(x0, A, At, y, specifics.pdtol, specifics.pdmaxiter, specifics.cgtol, specifics.cgmaxiter);
     end
     
-    fprintf('Total elapsed time = %f secs\n\n', etime(clock,time0));
+    runtime = etime(clock, time0);
+    fprintf('Total elapsed time = %f secs\n\n', runtime);
     
     % invert normalization
     if specifics.normalization

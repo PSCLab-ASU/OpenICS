@@ -94,7 +94,8 @@ function x_hat = reconstruction_tv(x, y, img_dims, A, At, specifics)
         x_hat = tvdantzig_logbarrier(x0, A, At, y, specifics.epsilon, specifics.lbtol, specifics.mu, specifics.lintol, specifics.linmaxiter);
     end
     
-    fprintf('Total elapsed time = %f secs\n\n', etime(clock,time0));
+    runtime = etime(clock, time0);
+    fprintf('Total elapsed time = %f secs\n\n', runtime);
     
     % invert normalization
     if specifics.normalization

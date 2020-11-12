@@ -107,8 +107,9 @@ function x_hat = reconstruction_tval3(x, y, img_dims, A, At, specifics)
     end
 
     time0 = clock;
-    [x_hat, hist] = TVAL3(@A_handles, y, img_dims(3), img_dims(2), specifics);
-    fprintf('Total elapsed time = %f secs\n\n', etime(clock,time0));
+    x_hat = TVAL3(@A_handles, y, img_dims(3), img_dims(2), specifics);
+    runtime = etime(clock, time0);
+    fprintf('Total elapsed time = %f secs\n\n',runtime);
     
     % normalize image slightly by subtracting the minimum value in x_hat
     if specifics.normalization

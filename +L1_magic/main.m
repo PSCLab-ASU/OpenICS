@@ -2,7 +2,7 @@
 % 
 % Main method for the CS_Framework.
 % 
-% Usage: [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,input_width,input_height,m,n,specifics)
+% Usage: [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_channel,input_width,input_height,m,n,specifics)
 %
 % sensing - string, the sensing method to use.
 %
@@ -25,7 +25,7 @@
 % specifics - struct, any specific parameters for reconstruction.
 %
 
-function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,input_width,input_height,m,n,specifics)
+function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_channel,input_width,input_height,m,n,specifics)
 
     if default
         % set all parameters with default values.
@@ -53,7 +53,7 @@ function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,
         
     end
     
-    if isfield(specifics, 'slicesize')
+    if isfield(specifics, 'slice_size')
         slice = true;
         
         if numel(specifics.slice_size) == 1
@@ -83,8 +83,12 @@ function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,
         img_size=[input_channel,input_width,input_height]; % size vector ordered [c,w,h]
         [A,At]=sensing_method(img_size, m); % get sensing method function handles
         y=A(x(:)); % apply sensing to x
+        time0 = clock;
         x_hat=reconstruction_method(x, y, img_size, A, At, specifics); % apply reconstruction method
+        metrics.runtime = etime(clock, time0);
     else
+        disp("Slicing");
+        metrics.runtime = 0;
         n=prod(slice_size); % calculate new n
         img_size=[input_channel,slice_size(1),slice_size(2)]; % size vector ordered [c,w,h]
         [A,At]=sensing_method(img_size, m); % get sensing method function handles
@@ -96,7 +100,9 @@ function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,
             disp("On slice " + i);
             temp_x=cell2mat(x(i)); % turn slice from x into matrix
             y=A(temp_x(:)); % apply sensing to temp_x
+            time0 = clock;
             temp_x_hat=reconstruction_method(temp_x, y, img_size, A, At, specifics); % apply reconstruction method
+            metrics.runtime = metrics.runtime + etime(clock, time0);
             temp_x_hat=reshape(temp_x_hat, slice_size); % reshape into original shape
             x_hat(i)=num2cell(temp_x_hat,[1,2]); % add cell into x_hat
         end
@@ -107,6 +113,7 @@ function [x,x_hat] = main(sensing,reconstruction,default,img_path,input_channel,
     end
     
     x_hat=reshape(x_hat, input_height, input_width, input_channel); % reshape to match original
+    metrics.psnr = psnr(x_hat, x);
 end
 
 function slices = imslice(img,img_channel,img_width,img_height,slice_size)

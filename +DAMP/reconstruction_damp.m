@@ -40,8 +40,9 @@ function x_hat = reconstruction_damp(x, y, img_dims, A, At, specifics)
     y = y .* 255;
 
     time0 = clock;
-    [x_hat, PSNR] = DAMP(y, specifics.iters, img_dims(2), img_dims(3), specifics.denoiser, A, At);
-    fprintf('Total elapsed time = %f secs\n\n', etime(clock,time0));
+    x_hat = DAMP(y, specifics.iters, img_dims(2), img_dims(3), specifics.denoiser, A, At);
+    runtime = etime(clock, time0);
+    fprintf('Total elapsed time = %f secs\n\n', runtime);
     
     % divide by 255 to shift back to 0-1 range
     x_hat = x_hat ./ 255;
