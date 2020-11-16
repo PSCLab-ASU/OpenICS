@@ -36,4 +36,5 @@ end
 % main execution
 [x,x_hat,metrics] = L1_magic.main(sensing_method,reconstruction_method,false,img_path,input_channel,input_width,input_height,m,n,specifics);
 imshow([x, x_hat]); % display images side by side
-disp("Reconstruction Error: " + norm(x - x_hat, 1));
+img_dif = x - x_hat;
+fprintf("Reconstruction Percent Error: %.2f %%\n", 100 * norm(img_dif(:), 1) / norm(x(:), 1));

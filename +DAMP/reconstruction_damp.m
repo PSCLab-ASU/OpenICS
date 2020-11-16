@@ -38,9 +38,12 @@ function x_hat = reconstruction_damp(x, y, img_dims, A, At, specifics)
     
     % D-AMP operates on 0-255, so modify y
     y = y .* 255;
+    
+    % Dummy PSNR func
+    psnr_func = @(x) 0;
 
     time0 = clock;
-    x_hat = DAMP(y, specifics.iters, img_dims(2), img_dims(3), specifics.denoiser, A, At);
+    x_hat = DAMP(y, specifics.iters, img_dims(2), img_dims(3), specifics.denoiser, A, At, psnr_func, img_dims(3) > 1);
     runtime = etime(clock, time0);
     fprintf('Total elapsed time = %f secs\n\n', runtime);
     

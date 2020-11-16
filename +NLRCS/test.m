@@ -12,7 +12,6 @@ specifics = struct;
 
 % image parameters and information
 img_path = fullfile(matlabroot, '/toolbox/images/imdata/cameraman.tif');
-img_path = fullfile('NLR_codes/NLR_CS/Data/CS_test_images', 'barbara.tif');
 input_channel = 1;
 input_width = 256;
 input_height = 256;
@@ -32,6 +31,7 @@ if isfield(specifics, 'slice_size')
 end
 
 % main execution
-[x,x_hat,metrics] = NLRCS.main(sensing_method,reconstruction_method,true,img_path,input_channel,input_width,input_height,m,n,specifics);
+[x,x_hat,metrics] = NLRCS.main(sensing_method,reconstruction_method,false,img_path,input_channel,input_width,input_height,m,n,specifics);
 imshow([x, x_hat]); % display images side by side
-disp("Reconstruction Error: " + norm(x - x_hat, 1));
+img_dif = x - x_hat;
+fprintf("Reconstruction Percent Error: %.2f %%\n", 100 * norm(img_dif(:), 1) / norm(x(:), 1));

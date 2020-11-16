@@ -25,10 +25,13 @@ specifics.beta0 = 2^-2;    % trigger continuation shceme
 specifics.isreal = false;
 
 % image parameters and information
-img_path = fullfile(matlabroot, '/toolbox/images/imdata/cameraman.tif');
-input_channel = 1;
-input_width = 256;
-input_height = 256;
+img_path = '~/Downloads/color_512';
+input_channel = 3;
+input_width = 512;
+input_height = 512;
+
+img_path = fullfile(matlabroot, '/toolbox/images/imdata/autumn.tif');
+[input_height, input_width, input_channel] = size(imread(img_path));
 
 % sensing parameters
 sensing_method = 'TVAL3.sensing_walsh_hadamard';
@@ -47,4 +50,5 @@ end
 % main execution
 [x,x_hat,metrics] = TVAL3.main(sensing_method,reconstruction_method,false,img_path,input_channel,input_width,input_height,m,n,specifics);
 imshow([x, x_hat]); % display images side by side
-disp("Reconstruction Error: " + norm(x - x_hat, 1));
+img_dif = x - x_hat;
+fprintf("Reconstruction Percent Error: %.2f %%\n", 100 * norm(img_dif(:), 1) / norm(x(:), 1));
