@@ -13,8 +13,7 @@ conda install pytorch==1.6.0 torchvision cudatoolkit=10.2 -c pytorch</br>
 conda install scipy==1.5.2</br>
 conda install opencv==3.4.2</br>
 conda install scikit-image==0.17.2</br>
-pip install tensorflow==2.3.0</br>
-conda install -c anaconda cudnn</br>
+conda install tensorflow-gpu==1.15</br>
  
 ### Matlab:
 
