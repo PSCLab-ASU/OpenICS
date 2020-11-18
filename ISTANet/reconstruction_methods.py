@@ -11,7 +11,7 @@ from time import time
 from torch.nn import init
 import cv2
 from skimage.measure import compare_ssim as ssim
-from argparse import ArgumentParser
+import matplotlib.pyplot as plt
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = '0'
@@ -31,11 +31,11 @@ class ISTANet_wrapper():
 
         self.model = 0
         if(reconstruction == "ISTANetPlus"):
-            model = ISTANetplus(self.specifics['layer_num'])
+            model = ISTANetplus(self.specifics['layer_num'], specifics)
             model = nn.DataParallel(model)
             model = model.to(device)
         elif(reconstruction == "ISTANet"):
-            model = ISTANet(self.specifics['layer_num'])
+            model = ISTANet(self.specifics['layer_num'], specifics)
             model = nn.DataParallel(model)
             model = model.to(device)
         self.model = model
@@ -70,11 +70,11 @@ class ISTANet_wrapper():
 
             optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-            model_dir = "./%s/CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f" % (
-            model_dir, layer_num, group_num, cs_ratio, learning_rate)
+            model_dir = "./%s/CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f_imgwidth_%d" % (
+            model_dir, layer_num, group_num, cs_ratio, learning_rate, self.specifics['input_width'])
 
-            log_file_name = "./%s/Log_CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f.txt" % (
-            log_dir, layer_num, group_num, cs_ratio, learning_rate)
+            log_file_name = "./%s/Log_CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f_imgwidth_%d.txt" % (
+            log_dir, layer_num, group_num, cs_ratio, learning_rate, self.specifics['input_width'])
 
             if not os.path.exists(model_dir):
                 os.makedirs(model_dir)
@@ -83,8 +83,17 @@ class ISTANet_wrapper():
                 pre_model_dir = model_dir
                 model.load_state_dict(torch.load('./%s/net_params_%d.pkl' % (pre_model_dir, start_epoch)))
 
+            # added functionality
+            # if(self.specifics['bmp_folder_images'] == True):
+            #     Training_labels = utils.getTrainingLabelsFolder(self.specifics['stage'], self.specifics)
+            #     Phi_input, Qinit = sensing_methods.computInitMxScratch(Training_labels=Training_labels,
+            #                                                            specifics=self.specifics)
+            # else:
             Training_labels = utils.getTrainingLabels(self.specifics['stage'], self.specifics)
-            Phi_input, Qinit = sensing_methods.computInitMx(Training_labels=Training_labels, specifics=self.specifics)
+            Phi_input, Qinit = sensing_methods.computInitMx(Training_labels=Training_labels,
+                                                            specifics=self.specifics)
+
+
 
             Phi = torch.from_numpy(Phi_input).type(torch.FloatTensor)
             Phi = Phi.to(device)
@@ -145,20 +154,30 @@ class ISTANet_wrapper():
             log_dir = self.specifics['log_dir']
             data_dir = self.specifics['data_dir']
             result_dir = self.specifics['result_dir']
-            test_name = self.specifics['test_name']
+            test_name = self.specifics['Testing_data_location']
 
             optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-            model_dir = "./%s/CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f" % (
-            model_dir, layer_num, group_num, cs_ratio, learning_rate)
+            model_dir = "./%s/CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f_imgwidth_%d" % (
+            model_dir, layer_num, group_num, cs_ratio, learning_rate, self.specifics['input_width'])
 
             # Load pre-trained model with epoch number
             model.load_state_dict(torch.load('./%s/net_params_%d.pkl' % (model_dir, epoch_num)))
 
+
+            if(self.specifics['testing_data_isFolderImages'] == False):
+                raise Exception('testing_data_isFolderImages must be True (Data must be bmp or tif in folder)')
+
             test_dir = os.path.join(data_dir, test_name)
-            filepaths = glob.glob(test_dir + '/*.tif')
+            if(self.specifics['testing_data_type'] == 'tif'):
+                filepaths = glob.glob(test_dir + '/*.tif')
+            elif(self.specifics['testing_data_type'] == 'bmp'):
+                filepaths = glob.glob(test_dir + '/*.bmp')
+            else:
+                raise Exception('testing_data_type of ' + self.specifics['testing_data_type'] + ' is unknown')
 
             result_dir = os.path.join(result_dir, test_name)
+
             if not os.path.exists(result_dir):
                 os.makedirs(result_dir)
 
@@ -166,7 +185,7 @@ class ISTANet_wrapper():
             PSNR_All = np.zeros([1, ImgNum], dtype=np.float32)
             SSIM_All = np.zeros([1, ImgNum], dtype=np.float32)
 
-            Training_labels = 0 # not needed for testing
+            Training_labels = utils.getTrainingLabels(self.specifics['stage'], self.specifics)
             Phi_input, Qinit = sensing_methods.computInitMx(Training_labels=Training_labels, specifics=self.specifics)
 
             Phi = torch.from_numpy(Phi_input).type(torch.FloatTensor)
@@ -189,8 +208,8 @@ class ISTANet_wrapper():
 
                     Iorg_y = Img_yuv[:, :, 0]
 
-                    [Iorg, row, col, Ipad, row_new, col_new] = utils.imread_CS_py(Iorg_y)
-                    Icol = utils.img2col_py(Ipad, 33).transpose() / 255.0
+                    [Iorg, row, col, Ipad, row_new, col_new] = utils.imread_CS_py(Iorg_y, self.specifics)
+                    Icol = utils.img2col_py(Ipad, self.specifics['input_width']).transpose() / 255.0
 
                     Img_output = Icol
 
@@ -214,14 +233,16 @@ class ISTANet_wrapper():
                     #
                     # loss_sym = loss_sym.cpu().data.numpy()
 
-                    X_rec = np.clip(utils.col2im_CS_py(Prediction_value.transpose(), row, col, row_new, col_new), 0, 1)
+                    X_rec = np.clip(utils.col2im_CS_py(Prediction_value.transpose(), row, col, row_new, col_new, self.specifics), 0, 1)
 
                     rec_PSNR = utils.psnr(X_rec * 255, Iorg.astype(np.float64))
                     rec_SSIM = ssim(X_rec * 255, Iorg.astype(np.float64), data_range=255)
 
+                    # plt.imshow(X_rec, cmap='gray_r')
+                    # plt.show()
                     print("[%02d/%02d] Run time for %s is %.4f, PSNR is %.2f, SSIM is %.4f" % (
                     img_no, ImgNum, imgName, (end - start), rec_PSNR, rec_SSIM))
-
+                    #TODO rewrite this
                     Img_rec_yuv[:, :, 0] = X_rec * 255
 
                     im_rec_rgb = cv2.cvtColor(Img_rec_yuv, cv2.COLOR_YCrCb2BGR)
@@ -230,8 +251,8 @@ class ISTANet_wrapper():
                     resultName = imgName.replace(data_dir, result_dir)
                     cv2.imwrite("%s_ISTA_Net_plus_ratio_%d_epoch_%d_PSNR_%.2f_SSIM_%.4f.png" % (
                     resultName, cs_ratio, epoch_num, rec_PSNR, rec_SSIM), im_rec_rgb)
-                    del x_output
 
+                    del x_output
                     PSNR_All[0, img_no] = rec_PSNR
                     SSIM_All[0, img_no] = rec_SSIM
 
@@ -240,8 +261,8 @@ class ISTANet_wrapper():
             cs_ratio, test_name, np.mean(PSNR_All), np.mean(SSIM_All), epoch_num)
             print(output_data)
 
-            output_file_name = "./%s/PSNR_SSIM_Results_CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f.txt" % (
-            log_dir, layer_num, group_num, cs_ratio, learning_rate)
+            output_file_name = "./%s/PSNR_SSIM_Results_CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f_imgwidth_%d.txt" % (
+            log_dir, layer_num, group_num, cs_ratio, learning_rate, self.specifics['input_width'])
 
             output_file = open(output_file_name, 'a')
             output_file.write(output_data)
@@ -251,12 +272,14 @@ class ISTANet_wrapper():
 
 # Define ISTA-Net-plus Block
 class BasicBlock(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, specifics):
         super(BasicBlock, self).__init__()
+        self.specifics = specifics
 
         self.lambda_step = nn.Parameter(torch.Tensor([0.5]))
         self.soft_thr = nn.Parameter(torch.Tensor([0.01]))
 
+        # 3 x 3 x Nf (Nf = 32 is default)
         self.conv_D = nn.Parameter(init.xavier_normal_(torch.Tensor(32, 1, 3, 3)))
 
         self.conv1_forward = nn.Parameter(init.xavier_normal_(torch.Tensor(32, 32, 3, 3)))
@@ -269,7 +292,7 @@ class BasicBlock(torch.nn.Module):
     def forward(self, x, PhiTPhi, PhiTb):
         x = x - self.lambda_step * torch.mm(x, PhiTPhi)
         x = x + self.lambda_step * PhiTb
-        x_input = x.view(-1, 1, 33, 33)
+        x_input = x.view(-1, 1, self.specifics['input_width'], self.specifics['input_width'])
 
         x_D = F.conv2d(x_input, self.conv_D, padding=1)
 
@@ -287,7 +310,7 @@ class BasicBlock(torch.nn.Module):
 
         x_pred = x_input + x_G
 
-        x_pred = x_pred.view(-1, 1089)
+        x_pred = x_pred.view(-1, self.specifics['input_width']*self.specifics['input_width'])
 
         x = F.conv2d(x_forward, self.conv1_backward, padding=1)
         x = F.relu(x)
@@ -299,13 +322,13 @@ class BasicBlock(torch.nn.Module):
 
 # Define ISTA-Net-plus
 class ISTANetplus(torch.nn.Module):
-    def __init__(self, LayerNo):
+    def __init__(self, LayerNo, specifics):
         super(ISTANetplus, self).__init__()
         onelayer = []
         self.LayerNo = LayerNo
 
         for i in range(LayerNo):
-            onelayer.append(BasicBlock())
+            onelayer.append(BasicBlock(specifics))
 
         self.fcs = nn.ModuleList(onelayer)
 
@@ -328,12 +351,14 @@ class ISTANetplus(torch.nn.Module):
 
 # Define ISTA-Net Block
 class BasicBlock2(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, specifics):
         super(BasicBlock2, self).__init__()
+        self.specifics = specifics
 
         self.lambda_step = nn.Parameter(torch.Tensor([0.5]))
         self.soft_thr = nn.Parameter(torch.Tensor([0.01]))
 
+        # 3 x 3 x Nf (Nf = 32 is default)
         self.conv1_forward = nn.Parameter(init.xavier_normal_(torch.Tensor(32, 1, 3, 3)))
         self.conv2_forward = nn.Parameter(init.xavier_normal_(torch.Tensor(32, 32, 3, 3)))
         self.conv1_backward = nn.Parameter(init.xavier_normal_(torch.Tensor(32, 32, 3, 3)))
@@ -342,7 +367,7 @@ class BasicBlock2(torch.nn.Module):
     def forward(self, x, PhiTPhi, PhiTb):
         x = x - self.lambda_step * torch.mm(x, PhiTPhi)
         x = x + self.lambda_step * PhiTb
-        x_input = x.view(-1, 1, 33, 33)
+        x_input = x.view(-1, 1, self.specifics['input_width'], self.specifics['input_width'])
 
         x = F.conv2d(x_input, self.conv1_forward, padding=1)
         x = F.relu(x)
@@ -354,7 +379,7 @@ class BasicBlock2(torch.nn.Module):
         x = F.relu(x)
         x_backward = F.conv2d(x, self.conv2_backward, padding=1)
 
-        x_pred = x_backward.view(-1, 1089)
+        x_pred = x_backward.view(-1, self.specifics['input_width']*self.specifics['input_width'])
 
         x = F.conv2d(x_forward, self.conv1_backward, padding=1)
         x = F.relu(x)
@@ -365,13 +390,13 @@ class BasicBlock2(torch.nn.Module):
 
 # Define ISTA-Net
 class ISTANet(torch.nn.Module):
-    def __init__(self, LayerNo):
+    def __init__(self, LayerNo, specifics):
         super(ISTANet, self).__init__()
         onelayer = []
         self.LayerNo = LayerNo
 
         for i in range(LayerNo):
-            onelayer.append(BasicBlock2())
+            onelayer.append(BasicBlock2(specifics))
 
         self.fcs = nn.ModuleList(onelayer)
 

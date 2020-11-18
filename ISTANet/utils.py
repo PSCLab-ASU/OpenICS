@@ -6,10 +6,15 @@ import numpy as np
 import copy
 import math
 
+import glob
+from PIL import Image
+import os
+
 def generate_dataset(stage, specifics):
     # a function to generate the corresponding dataset with given parameters. return an instance of the dataset class.
     if(stage == 'testing'):
         return 1
+
 
     Training_labels = getTrainingLabels(stage, specifics)
 
@@ -54,8 +59,8 @@ def ycbcr2rgb(ycbcr):
     return rgb.clip(0, 255).reshape(shape)
 
 
-def imread_CS_py(Iorg):
-    block_size = 33
+def imread_CS_py(Iorg, specifics):
+    block_size = specifics['input_width']
     [row, col] = Iorg.shape
     row_pad = block_size - np.mod(row, block_size)
     col_pad = block_size - np.mod(col, block_size)
@@ -81,8 +86,8 @@ def img2col_py(Ipad, block_size):
     return img_col
 
 
-def col2im_CS_py(X_col, row, col, row_new, col_new):
-    block_size = 33
+def col2im_CS_py(X_col, row, col, row_new, col_new, specifics):
+    block_size = specifics['input_width']
     X0_rec = np.zeros([row_new, col_new])
     count = 0
     for x in range(0, row_new - block_size + 1, block_size):
@@ -104,9 +109,51 @@ def psnr(img1, img2):
     return 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
 
 def getTrainingLabels(stage, specifics):
-    Training_data_Name = specifics['Training_data_Name']
-    Training_data = sio.loadmat('./%s/%s' % (specifics['data_dir'], Training_data_Name))
-    Training_labels = Training_data['labels']
+    if (specifics['create_custom_dataset'] == True):
+        Training_data = createTrainingLabels(stage, specifics)
+    else:
+        Training_data = specifics['training_data_fileName']
+        if(specifics['training_data_type'] == 'mat'):
+            Training_data = sio.loadmat('./%s/%s.mat' % (specifics['data_dir'], Training_data))
+            Training_data = Training_data['labels']
+        elif(specifics['training_data_type'] == 'npy'):
+            Training_data = np.load('./%s/%s.npy' % (specifics['data_dir'], Training_data))
+        else:
+            raise Exception('training_data_type of ' + specifics['training_data_type'] + ' is unsupported')
+    return Training_data
+
+def createTrainingLabels(stage, specifics):
+    custom_dataset = './%s/%s.npy' % (specifics['data_dir'], specifics['custom_dataset_name'])
+    if(os.path.exists(custom_dataset)):
+        return np.load(custom_dataset)
+
+    Training_labels = []
+    if(specifics['custom_type_of_image'] == 'bmp'):
+        images = glob.glob(specifics['custom_training_data_location'] + '/*.bmp')
+    elif(specifics['custom_type_of_image'] == 'tif'):
+        images = glob.glob(specifics['custom_training_data_location'] + '/*.tif')
+    else:
+        raise Exception('custom_type_of_image of ' + specifics['custom_type_of_image'] + ' is unsupported')
+
+    for image in images:
+        with open(image, 'rb') as file:
+            img = Image.open(file)
+            img = np.array(img)
+            # convert to grayscale if in RGB
+            if (len(img.shape) == 3):
+                img = np.mean(img, 2)
+            # scale to 1-dimensional vector between 0 and 1
+            img = img.reshape((-1)) / 255
+            Training_labels.append(img)
+    Training_labels = np.array(Training_labels)
+
+    if (not (os.path.exists(specifics['data_dir']))):
+        os.mkdir(specifics['data_dir'])
+    np.save(os.path.join('./%s/%s.npy' % (specifics['data_dir'], specifics['custom_dataset_name'])), Training_labels)
+    print("################################################################\nCreated new file: "
+          + './%s/%s.npy' % (specifics['data_dir'], specifics['custom_dataset_name'])
+          + "\n################################################################\n")
+
     return Training_labels
 
 class RandomDataset(Dataset):
