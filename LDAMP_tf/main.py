@@ -1,7 +1,7 @@
 #TODO tensorflow version 2.X migration code changed the import tensorflow as tf line to two lines as seen below
-# import tensorflow.compat.v1 as tf
-# tf.disable_eager_execution()
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_eager_execution()
+# import tensorflow as tf
 import numpy as np
 import reconstruction_methods as rms
 import utils
@@ -64,9 +64,17 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
             'init_mu': 0,
             'init_sigma': 0.1,
             'mode': 'gaussian',
+
             'validation_patch': './Data/ValidationData_patch40.npy',
             'training_patch': './Data/TrainingData_patch40.npy',
-            'testing_patch': './Data/StandardTestData_256Res.npy'
+            'testing_patch': './Data/StandardTestData_256Res.npy',
+            'use_separate_val_patch': True,
+            'create_new_dataset': False,
+            'new_data': '/storage-t1/database/bigset/train/data/*.bmp',
+            'dataset_custom_name': 'bigset_train_data',
+            'create_new_testpatch': False,
+            'new_test_data': '/storage-t1/database/bigset/test/*.bmp',
+            'testset_custom_name': 'bigset_test'
         }
 
     if(not(n == input_channel * input_height * input_width)):
@@ -74,17 +82,18 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
     if(not(m == int(np.round(specifics['sampling_rate'] * input_channel * input_height * input_width)))):
         raise Exception("m must equal int(np.round(sampling_rate * input_channel * input_height * input_width))")
 
-    dset=utils.generate_dataset(dataset,input_channel,input_width,input_height,stage) # unused, just used to pass in
+    dset=utils.generate_dataset(dataset,input_channel,input_width,input_height,stage, specifics)
     sensing_method=sms.sensing_method(reconstruction,specifics) # unused, just used to pass in
     reconstruction_method=rms.reconstruction_method(dset, sensing,specifics)
     reconstruction_method.initialize(dset,sensing_method, stage)
     reconstruction_method.run()
 
 if __name__ == "__main__":
+    print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
     sampling_rate = .2
-    input_width = 40
-    input_height = 40
     input_channel = 1
+    input_width = 64 # 40
+    input_height = 64 # 40
     n = input_channel * input_height * input_width
     m = int(np.round(sampling_rate * input_channel * input_height * input_width))
 
@@ -122,7 +131,7 @@ if __name__ == "__main__":
             'max_Epoch_Fails': 3,  # How many training epochs to run without improvement in the validation error
             'ResumeTraining': False,  # Load weights from a network you've already trained a little
             'LayerbyLayer': True,
-            'DenoiserbyDenoiser': False,  # if this is true, overrides other two
+            'DenoiserbyDenoiser': True,  # if this is true, overrides other two
             'sigma_w_min': 25, # only used in denoiserbydenoiser training
             'sigma_w_max': 25, # only used in denoiserbydenoiser training
             'sigma_w': 1./255.,  # Noise std (LbL testing: 0, LbL training: 1./255., DbD test and train: 25./255.)
@@ -130,14 +139,31 @@ if __name__ == "__main__":
             'EPOCHS': 50,
             'n_Train_Images': 128 * 1600,  # 128*3000
             'n_Val_Images': 10000,  # 10000
+            'n_Test_Images': 5, # only for LbL
             'BATCH_SIZE':128, # 128 for training, 1 for testing
             'InitWeightsMethod': 'smaller_net', #Options are random, denoiser, smaller_net, and layer_by_layer.
             'loss_func': 'MSE',
             'init_mu': 0,
             'init_sigma': 0.1,
             'mode': sensingtype,
+
             'validation_patch': './Data/ValidationData_patch40.npy',
-            'training_patch': './Data/TrainingData_patch40.npy',
-            'testing_patch': './Data/StandardTestData_256Res.npy'
+            # 'training_patch': './Data/TrainingData_patch40.npy',
+            'training_patch': './Data/bigset_train_data.npy',
+            # 'testing_patch': './Data/StandardTestData_256Res.npy',
+            'testing_patch': './Data/bigset_test.npy',
+
+            # if True, will use 'validation_patch' to load val data, otherwise cut from training_patch
+            'use_separate_val_patch': False,
+
+            # if True, creates new dataset and uses it, False: uses 'training_patch'
+            'create_new_dataset': False,
+            'new_data': '/storage-t1/database/bigset/train/data/*.bmp',
+            'dataset_custom_name': 'bigset_train_data',
+
+            # if True, creates new dataset and uses it, False: uses 'testing_patch'
+            'create_new_testpatch': False,  # if False, ignore parameters below
+            'new_test_data': '/storage-t1/database/bigset/test/*.bmp',
+            'testset_custom_name': 'bigset_test'
         },
     )

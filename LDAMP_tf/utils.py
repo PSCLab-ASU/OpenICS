@@ -1,9 +1,11 @@
 #TODO tensorflow version 2.X migration code changed the import tensorflow as tf line to two lines as seen below
-# import tensorflow.compat.v1 as tf
-# tf.disable_eager_execution()
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_eager_execution()
+# import tensorflow as tf
 import numpy as np
 import os
+import glob
+from PIL import Image
 os.environ["CUDA_VISIBLE_DEVICES"]='0'
 
 def SetNetworkParams(new_height_img, new_width_img,new_channel_img, new_filter_height,new_filter_width,\
@@ -30,9 +32,68 @@ def SetNetworkParams(new_height_img, new_width_img,new_channel_img, new_filter_h
     adaptive_weights=use_adaptive_weights
     training=new_training
 
-def generate_dataset(dataset,input_channel,input_width,input_height,stage):
+def generate_dataset(dataset,input_channel,input_width,input_height,stage, specifics):
     # a function to generate the corresponding dataset with given parameters. return an instance of the dataset class.
-    return 1
+    if(specifics['create_new_dataset'] == False):
+        dataset_location = specifics['training_patch']
+        data = np.load(dataset_location)
+    else:
+
+        if os.path.exists('./Data/' + specifics['dataset_custom_name'] + '.npy'):
+            data = np.load('./Data/' + specifics['dataset_custom_name'] + '.npy')
+        else:
+            data = []
+            images = glob.glob(specifics['new_data'])
+            for image in images:
+                with open(image, 'rb') as file:
+                    img = Image.open(file)
+                    img = np.array(img)
+                    # convert to grayscale if in RGB
+                    if (len(img.shape) == 3):
+                        img = np.mean(img, 2)
+                    # scale to 1-dimensional vector between 0 and 1
+                    img = img.reshape((input_channel, input_width, input_height)) / 255
+                    data.append(img)
+            data = np.array(data)
+
+            if (not (os.path.exists("./Data"))):
+                os.mkdir("./Data")
+            np.save(os.path.join('./Data', specifics['dataset_custom_name']), data)
+            print("################################################################"
+                  + "\nCreated new file: ./Data/" + specifics['dataset_custom_name'] + ".npy"
+                  + "\n################################################################\n")
+    return data
+
+def generate_testset(input_channel,input_width,input_height,specifics):
+    # a function to generate the corresponding dataset with given parameters. return an instance of the dataset class.
+    if(specifics['create_new_testpatch'] == False):
+        dataset_location = specifics['testing_patch']
+        data = np.load(dataset_location)
+    else:
+        if os.path.exists('./Data/' + specifics['testset_custom_name'] + '.npy'):
+            data = np.load('./Data/' + specifics['testset_custom_name'] + '.npy')
+        else:
+            data = []
+            images = glob.glob(specifics['new_test_data'])
+            for image in images:
+                with open(image, 'rb') as file:
+                    img = Image.open(file)
+                    img = np.array(img)
+                    # convert to grayscale if in RGB
+                    if (len(img.shape) == 3):
+                        img = np.mean(img, 2)
+                    # scale to 1-dimensional vector between 0 and 1
+                    img = img.reshape((input_channel, input_width, input_height)) / 255
+                    data.append(img)
+            data = np.array(data)
+
+            if (not (os.path.exists("./Data"))):
+                os.mkdir("./Data")
+            np.save(os.path.join('./Data', specifics['testset_custom_name']), data)
+            print("################################################################"
+                  + "\nCreated new file: ./Data/" + specifics['testset_custom_name'] + ".npy"
+                  + "\n################################################################\n")
+    return data
 
 ## Evaluate Intermediate Error
 def EvalError(x_hat,x_true):
