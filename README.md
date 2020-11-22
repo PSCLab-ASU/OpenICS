@@ -9,11 +9,10 @@
 conda create -n CS_methods_environement python=3.7.9 </br>
 conda activate CS_methods_environement</br>
 </br>
-conda install pytorch==1.6.0 torchvision cudatoolkit=10.2 -c pytorch</br>
-conda install scipy==1.5.2</br>
+conda install pytorch==1.6.0 torchvision cudatoolkit=10.1 -c pytorch</br>
+conda install tensorflow-gpu=2.1.0</br>
 conda install opencv==3.4.2</br>
 conda install scikit-image==0.17.2</br>
-conda install tensorflow-gpu==1.15</br>
  
 ### Matlab:
 
