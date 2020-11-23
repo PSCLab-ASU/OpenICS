@@ -38,7 +38,6 @@ def generate_dataset(dataset,input_channel,input_width,input_height,stage, speci
         dataset_location = specifics['training_patch']
         data = np.load(dataset_location)
     else:
-
         if os.path.exists('./Data/' + specifics['dataset_custom_name'] + '.npy'):
             data = np.load('./Data/' + specifics['dataset_custom_name'] + '.npy')
         else:
@@ -48,10 +47,7 @@ def generate_dataset(dataset,input_channel,input_width,input_height,stage, speci
                 with open(image, 'rb') as file:
                     img = Image.open(file)
                     img = np.array(img)
-                    # convert to grayscale if in RGB
-                    if (len(img.shape) == 3):
-                        img = np.mean(img, 2)
-                    # scale to 1-dimensional vector between 0 and 1
+                    # scale to between 0 and 1
                     img = img.reshape((input_channel, input_width, input_height)) / 255
                     data.append(img)
             data = np.array(data)
@@ -79,10 +75,7 @@ def generate_testset(input_channel,input_width,input_height,specifics):
                 with open(image, 'rb') as file:
                     img = Image.open(file)
                     img = np.array(img)
-                    # convert to grayscale if in RGB
-                    if (len(img.shape) == 3):
-                        img = np.mean(img, 2)
-                    # scale to 1-dimensional vector between 0 and 1
+                    # scale to between 0 and 1
                     img = img.reshape((input_channel, input_width, input_height)) / 255
                     data.append(img)
             data = np.array(data)
@@ -94,6 +87,29 @@ def generate_testset(input_channel,input_width,input_height,specifics):
                   + "\nCreated new file: ./Data/" + specifics['testset_custom_name'] + ".npy"
                   + "\n################################################################\n")
     return data
+
+def splitDataset(dset, specifics):
+    # load independently
+    if (specifics['use_separate_val_patch'] == True):
+        train_images = dset[range(specifics['n_Train_Images']), 0, :, :]
+        assert (len(train_images) >= specifics['n_Train_Images']), "Requested too much training data"
+
+        val_images = np.load(specifics['validation_patch'])
+        val_images = val_images[:, 0, :, :]
+        assert (len(val_images) >= specifics['n_Val_Images']), "Requested too much validation data"
+
+    # else randomly shuffle, then split
+    else:
+        assert (len(dset) >= (specifics['n_Train_Images'] + specifics['n_Val_Images'])), "Not enough data to split into val and train"
+        np.random.shuffle(dset)
+        train_images = dset
+        train_images = train_images[range(specifics['n_Train_Images']), 0, :, :]
+
+        val_images = dset
+        val_images = val_images[-1 * specifics['n_Val_Images']:, 0, :, :]
+
+    return train_images, val_images
+
 
 ## Evaluate Intermediate Error
 def EvalError(x_hat,x_true):

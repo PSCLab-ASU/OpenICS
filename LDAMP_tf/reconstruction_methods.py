@@ -215,22 +215,8 @@ class LDAMP_wrapper():
                 CountParameters()
 
                 # TODO major change
-                ## Load and Preprocess Training Data
-                # train_images = np.load(training_patch + str(height_img) + '.npy')
-                # train_images = np.load(training_patch)
-                train_images = self.dset
-                train_images = train_images[range(n_Train_Images), 0, :, :]
-                assert (len(train_images) >= n_Train_Images), "Requested too much training data"
-
-                # val_images = np.load(validation_patch + str(height_img) + '.npy')
-                if (self.specifics['use_separate_val_patch'] == True):
-                    val_images = np.load(validation_patch)
-                    val_images = val_images[:, 0, :, :]
-                else:
-                    val_images = self.dset
-                    val_images = val_images[-1 * n_Val_Images:, 0, :, :]
-                assert (len(val_images) >= n_Val_Images), "Requested too much validation data"
-
+                # ## Load and Preprocess Training Data
+                train_images, val_images = utils.splitDataset(self.dset, self.specifics)
                 x_train = np.transpose(np.reshape(train_images, (-1, channel_img * height_img * width_img)))
                 x_val = np.transpose(np.reshape(val_images, (-1, channel_img * height_img * width_img)))
 
@@ -409,13 +395,8 @@ class LDAMP_wrapper():
 
                 CountParameters()
 
-                ## Load and Preprocess Test Data
-                # if height_img > 50:
-                #     test_im_name = "./TrainingData/StandardTestData_" + str(height_img) + "Res.npy"
-                # else:
-                #     test_im_name = "./TrainingData/TestData_patch" + str(height_img) + ".npy"
-                # test_im_name = self.specifics['testing_patch']
                 # TODO major change
+                ## Load and Preprocess Test Data
                 test_images = utils.generate_testset(channel_img, width_img, height_img, self.specifics)
                 test_images = test_images[:, 0, :, :]
                 assert (len(test_images) >= BATCH_SIZE), "Requested too much Test data"
@@ -600,22 +581,8 @@ class LDAMP_wrapper():
 
                     CountParameters()
                     #TODO major change
-                    ## Load and Preprocess Training Data
-                    # train_images = np.load(training_patch + str(height_img) + '.npy')
-                    # train_images = np.load(training_patch)
-                    train_images = self.dset
-                    train_images = train_images[range(n_Train_Images), 0, :, :]
-                    assert (len(train_images) >= n_Train_Images), "Requested too much training data"
-
-                    # val_images = np.load(validation_patch + str(height_img) + '.npy')
-                    if(self.specifics['use_separate_val_patch'] == True):
-                        val_images = np.load(validation_patch)
-                        val_images = val_images[:, 0, :, :]
-                    else:
-                        val_images = self.dset
-                        val_images = val_images[-1*n_Val_Images:, 0, :, :]
-                    assert (len(val_images) >= n_Val_Images), "Requested too much validation data"
-
+                    # ## Load and Preprocess Training Data
+                    train_images, val_images = utils.splitDataset(self.dset, self.specifics)
                     x_train = np.transpose(np.reshape(train_images, (-1, channel_img * height_img * width_img)))
                     x_val = np.transpose(np.reshape(val_images, (-1, channel_img * height_img * width_img)))
 

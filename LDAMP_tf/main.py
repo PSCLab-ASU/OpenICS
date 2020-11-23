@@ -127,11 +127,11 @@ if __name__ == "__main__":
             # Unless FLAGS.start_layer is set to this value or LayerbyLayer=false, the code will sequentially train larger and larger networks end-to-end.
 
             ## Training Parameters
-            'start_layer': 1,
+            'start_layer': 1, # used to define where to start when resuming
             'max_Epoch_Fails': 3,  # How many training epochs to run without improvement in the validation error
             'ResumeTraining': False,  # Load weights from a network you've already trained a little
             'LayerbyLayer': True,
-            'DenoiserbyDenoiser': True,  # if this is true, overrides other two
+            'DenoiserbyDenoiser': False,  # if this is true, overrides other two
             'sigma_w_min': 25, # only used in denoiserbydenoiser training
             'sigma_w_max': 25, # only used in denoiserbydenoiser training
             'sigma_w': 1./255.,  # Noise std (LbL testing: 0, LbL training: 1./255., DbD test and train: 25./255.)
@@ -139,7 +139,7 @@ if __name__ == "__main__":
             'EPOCHS': 50,
             'n_Train_Images': 128 * 1600,  # 128*3000
             'n_Val_Images': 10000,  # 10000
-            'n_Test_Images': 5, # only for LbL
+            'n_Test_Images': 50, # only for LbL
             'BATCH_SIZE':128, # 128 for training, 1 for testing
             'InitWeightsMethod': 'smaller_net', #Options are random, denoiser, smaller_net, and layer_by_layer.
             'loss_func': 'MSE',
@@ -154,7 +154,7 @@ if __name__ == "__main__":
             'testing_patch': './Data/bigset_test.npy',
 
             # if True, will use 'validation_patch' to load val data, otherwise cut from training_patch
-            'use_separate_val_patch': False,
+            'use_separate_val_patch': False, # TODO LOOK AT NOTES
 
             # if True, creates new dataset and uses it, False: uses 'training_patch'
             'create_new_dataset': False,
@@ -164,6 +164,6 @@ if __name__ == "__main__":
             # if True, creates new dataset and uses it, False: uses 'testing_patch'
             'create_new_testpatch': False,  # if False, ignore parameters below
             'new_test_data': '/storage-t1/database/bigset/test/*.bmp',
-            'testset_custom_name': 'bigset_test'
+            'testset_custom_name': 'bigset_test1'
         },
     )
