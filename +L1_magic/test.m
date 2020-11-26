@@ -9,8 +9,6 @@ run L1_magic.set_up.m;
 % reconstruction parameters
 reconstruction_method = 'L1_magic.reconstruction_tv';
 specifics = struct;
-specifics.constraint = 'eq';
-specifics.normalization = true;
 
 % image parameters and information
 img_path = fullfile(matlabroot, '/toolbox/images/imdata/cameraman.tif');
@@ -19,11 +17,10 @@ input_width = 256;
 input_height = 256;
 
 % sensing parameters
-sensing_method = 'L1_magic.sensing_linemasked_uhp_fourier';
-ratio = 0.1;
+sensing_method = 'L1_magic.sensing_scrambled_fourier';
+ratio = 1 / 32;
 n = input_width * input_height * input_channel;
 m = round(n * ratio);
-m = 22;
 
 % slicing parameters
 % specifics.slice_size = 64;

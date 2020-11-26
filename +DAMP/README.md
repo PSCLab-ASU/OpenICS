@@ -4,6 +4,8 @@ Note that the 'sensing_guassian_random_columnwise' sensing method also comes fro
 The 'sensing_guassian_random_columnwise' sensing method works significantly better for D-AMP than the 'sensing_guassian_random' sensing method.
 Unused files such as demos and the util folder have been removed from the source code.
 
+The original D-AMP implementation already supports colored reconstruction, so it will not reconstruct colored images in a channelwise fashion.
+
 The list of parameters for D-AMP include the following:
 * **denoiser** - The denoiser to use for D-AMP. Currently includes the following: 'NLM', 'Gauss', 'Bilateral', 'BLS-GSM', 'BM3D', 'fast-BM3D', and 'CBM3D'. Note that CBM3D is applied to colored images, which are not yet supported.
 * **iters** - The total number of iterations of D-AMP to run.

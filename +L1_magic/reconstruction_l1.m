@@ -2,7 +2,7 @@
 % 
 % Uses L1 reconstruction methods from l1-magic toolbox.
 % 
-% Usage: x_hat = reconstruction_l1(x,y,img_dims,A,At,specifics)
+% Usage: [x_hat,specifics,runtime] = reconstruction_l1(x,y,img_dims,A,At,specifics)
 %
 % x - nx1 vector, original signal
 %
@@ -51,7 +51,7 @@
 %       Default: false
 %
 
-function x_hat = reconstruction_l1(x, y, img_dims, A, At, specifics)
+function [x_hat,specifics,runtime] = reconstruction_l1(x, y, img_dims, A, At, specifics)
     % set default values
     if ~isfield(specifics, 'constraint')
         specifics.constraint = 'eq';

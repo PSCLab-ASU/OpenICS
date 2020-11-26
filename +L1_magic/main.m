@@ -27,6 +27,7 @@
 %
 
 function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_channel,input_width,input_height,m,n,specifics)
+    total_time0 = clock;
 
     if default
         % set all parameters with default values.
@@ -51,17 +52,25 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         
     end
     
+    if ~isfield(specifics, 'colored_reconstruction_mode')
+        specifics.colored_reconstruction_mode = 'channelwise';
+    end
+    
     method_name = strsplit(reconstruction,'.');
     method_name = method_name{end};
     [~,data_name,extension_name] = fileparts(img_path);
     
     if isfolder(img_path)
+        keyword = random_string(16);
+        [log_file, bmp_file] = generate_results(method_name, data_name, keyword);
+        log_file = fopen(log_file, 'a');
+        
         folder = dir(img_path);
         % Remove any files that start with '.', usually invisible files
         dot_files = regexp({folder.name},'^\.');
         folder = folder(cellfun(@isempty,dot_files));
         folder_size = numel(folder);
-        
+                
         % Pick total number of sample images to include in .bmp
         if folder_size < 4
             num_picks = 1;
@@ -109,29 +118,18 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
             fprintf('Reconstructing %s\n', file.name);
             file_x=im2double(imread(file_path));
             
-            % Reconstruct colored images as 3 grayscale images
-            % Exception for DAMP, which supports rgb images
-            if input_channel > 1 && ~strcmp(reconstruction,'DAMP.reconstruction_damp')
-                file_runtime = 0;
-                file_x_hat = zeros(input_height,input_width,input_channel);
-
-                for j = 1:input_channel
-                    [channel_x_hat,channel_metrics] = reconstruct(sensing,reconstruction,file_x(:,:,j),1,input_width,input_height,m,n,specifics);
-                    file_runtime = file_runtime + channel_metrics.runtime;
-                    file_x_hat(:,:,j) = channel_x_hat;
-                end
-
-                file_metrics.psnr = psnr(file_x_hat, file_x);
-                file_metrics.ssim = ssim(file_x_hat, file_x);
-                file_metrics.runtime = file_runtime;
-            else
-                [file_x_hat,file_metrics] = reconstruct(sensing,reconstruction,file_x,input_channel,input_width,input_height,m,n,specifics);
+            if ~all(size(file_x,[1,2,3]) == [input_height,input_width,input_channel])
+                error('ERROR: Image dimensions do not match input size!');
             end
             
+            [file_x_hat,file_metrics,specifics] = reconstruct(sensing,reconstruction,file_x,input_channel,input_width,input_height,m,n,specifics);
             metrics.psnr(i) = file_metrics.psnr;
             metrics.ssim(i) = file_metrics.ssim;
             metrics.runtime(i) = file_metrics.runtime;
             metrics.meta(i) = file.name;
+            
+            % Save to log file
+            fprintf(log_file, '%s: PSNR: %.3f, SSIM: %.3f, Runtime: %.3f\n', metrics.meta(i), metrics.psnr(i), metrics.ssim(i), metrics.runtime(i));
             
             if any(picks == i)
                 % save into array
@@ -151,47 +149,104 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         metrics.ssim(end) = sum(metrics.ssim(~isnan(metrics.ssim))) / (numel(~isnan(metrics.ssim)) - 1);
         metrics.runtime(end) = sum(metrics.runtime(~isnan(metrics.runtime))) / (numel(~isnan(metrics.runtime)) - 1);
         metrics.meta(end) = 'Average';
-        keyword = random_string(16);
+        
+        % Save averages to log file
+        fprintf(log_file, '%s: PSNR: %.3f, SSIM: %.3f, Runtime: %.3f\n', metrics.meta(end), metrics.psnr(end), metrics.ssim(end), metrics.runtime(end));
     else
+        keyword = data_name;
+        [log_file, bmp_file] = generate_results(method_name, data_name, keyword);
+        log_file = fopen(log_file, 'a');
+        
         x=im2double(imread(img_path)); % read image
         
-        % Reconstruct colored images as 3 grayscale images
-        % Exception for DAMP, which supports rgb images
-        if input_channel > 1 && ~strcmp(reconstruction,'DAMP.reconstruction_damp')
-            total_runtime = 0;
-            x_hat = zeros(input_height,input_width,input_channel);
-
-            for j = 1:input_channel
-                [channel_x_hat,channel_metrics] = reconstruct(sensing,reconstruction,x(:,:,j),1,input_width,input_height,m,n,specifics);
-                total_runtime = total_runtime + channel_metrics.runtime;
-                x_hat(:,:,j) = channel_x_hat;
-            end
-
-            metrics.psnr = psnr(x_hat, x);
-            metrics.ssim = ssim(x_hat, x);
-            metrics.runtime = total_runtime;
-        else
-            [x_hat,metrics] = reconstruct(sensing,reconstruction,x,input_channel,input_width,input_height,m,n,specifics);
+        if ~all(size(x,[1,2,3]) == [input_height,input_width,input_channel])
+            error('ERROR: Image dimensions do not match input size!');
         end
         
+        [x_hat,metrics,specifics] = reconstruct(sensing,reconstruction,x,input_channel,input_width,input_height,m,n,specifics);
         metrics.meta = string([data_name, extension_name]);
-        keyword = data_name;
+        
+        % Save to log file
+        fprintf(log_file, '%s: PSNR: %.3f, SSIM: %.3f, Runtime: %.3f\n', metrics.meta, metrics.psnr, metrics.ssim, metrics.runtime);
     end
     
-    % Save results
-    [log_file, bmp_file] = generate_results(method_name, data_name, keyword);
+    % Save further results
     imwrite([x, x_hat], bmp_file);
-    log_file = fopen(log_file, 'a');
     
-    for i = 1:numel(metrics.meta)
-        fprintf(log_file, '%s: PSNR: %.3f, SSIM: %.3f, Runtime: %.3f\n', metrics.meta(i), metrics.psnr(i), metrics.ssim(i), metrics.runtime(i));
+    f = fieldnames(specifics);
+    
+    fprintf(log_file, '\nParameters:\n');
+    fprintf(log_file, 'Image dimensions: %d x %d x %d\n', input_channel, input_width, input_height);
+    fprintf(log_file, 'Sensing method: %s\n', sensing);
+    fprintf(log_file, 'Measurements: %d\n', m);
+    fprintf(log_file, 'Compression ratio: %f\n', m / n);
+    fprintf(log_file, 'Specifics:\n');
+    
+    for i = 1:length(f)
+        fprintf(log_file, '\t%s: %s\n', f{i}, string(specifics.(f{i})));
+    end
+        
+    fprintf(log_file, '\nTotal time elapsed: %.3f\n', etime(clock, total_time0));
+end
+
+function [x_hat,metrics,specifics] = reconstruct(sensing,reconstruction,x,channel,width,height,m,n,specifics)
+% Selects a reconstruction mode before actually reconstructing a tensor.
+%
+% Usage: [x_hat,metrics,specifics] = reconstruct(sensing,reconstruction,x,channel,width,height,m,n,specifics)
+%
+% sensing - The sensing method to use.
+%
+% reconstuction - The reconstruction method to use.
+%
+% x - The tensor to use for reconstruction. Should represent an image.
+%
+% channel - The number of channels in the tensor.
+%
+% width - The width of the tensor.
+%
+% height - The height of the tensor.
+%
+% m - The measurement size.
+%
+% n - The total size of the tensor.
+%
+% specifics - Any specific parameters for reconstruction.
+%
+    % Reconstruction modes
+    %   Regular - For DAMP reconstruction or single-channel images,
+    %             reconstructs image as a whole.
+    %   Channelwise - For colored images, reconstructs each channel
+    %                 as a separate grayscale image.
+    %   Vectorized - For colored images, reconstructs whole image
+    %                by flattening all channels into one 2D tensor.
+    if channel == 1 || strcmp(reconstruction,'DAMP.reconstruction_damp')
+        [x_hat,metrics,specifics] = reconstruct_tensor(sensing,reconstruction,x,channel,width,height,m,n,specifics);
+    elseif strcmp(specifics.colored_reconstruction_mode,'channelwise')
+        total_runtime = 0;
+        x_hat = zeros(height,width,channel);
+
+        for j = 1:channel
+            [channel_x_hat,channel_metrics,specifics] = reconstruct_tensor(sensing,reconstruction,x(:,:,j),1,width,height,m,n,specifics);
+            total_runtime = total_runtime + channel_metrics.runtime;
+            x_hat(:,:,j) = channel_x_hat;
+        end
+
+        metrics.psnr = psnr(x_hat, x);
+        metrics.ssim = ssim(x_hat, x);
+        metrics.runtime = total_runtime;
+    elseif strcmp(specifics.colored_reconstruction_mode,'vectorized')
+        flattened_x = reshape(x,[height,width*channel]);
+        [x_hat,metrics,specifics] = reconstruct_tensor(sensing,reconstruction,flattened_x,1,width*channel,height,m,n,specifics);
+        x_hat = reshape(x_hat, size(x));
+    else
+        error('ERROR: Invalid reconstruction mode!');
     end
 end
 
-function [x_hat,metrics] = reconstruct(sensing,reconstruction,x,channel,width,height,m,n,specifics)
+function [x_hat,metrics,specifics] = reconstruct_tensor(sensing,reconstruction,x,channel,width,height,m,n,specifics)
 % Reconstruct a single tensor.
 %
-% Usage: [x_hat,metrics] = reconstruct(sensing,reconstruction,x,channel,width,height,m,n,specifics)
+% Usage: [x_hat,metrics,specifics] = reconstruct_tensor(sensing,reconstruction,x,channel,width,height,m,n,specifics)
 %
 % sensing - The sensing method to use.
 %
@@ -231,9 +286,8 @@ function [x_hat,metrics] = reconstruct(sensing,reconstruction,x,channel,width,he
         img_size=[channel,width,height]; % size vector ordered [c,w,h]
         [A,At]=sensing_method(img_size, m); % get sensing method function handles
         y=A(x(:)); % apply sensing to x
-        time0 = clock;
-        x_hat=reconstruction_method(x, y, img_size, A, At, specifics); % apply reconstruction method
-        metrics.runtime = etime(clock, time0);
+        [x_hat,specifics,runtime]=reconstruction_method(x, y, img_size, A, At, specifics); % apply reconstruction method
+        metrics.runtime = runtime;
     else
         disp("Slicing");
         metrics.runtime = 0;
@@ -248,9 +302,8 @@ function [x_hat,metrics] = reconstruct(sensing,reconstruction,x,channel,width,he
             disp("On slice " + i);
             temp_x=x_sliced{i}; % turn slice from x into matrix
             y=A(temp_x(:)); % apply sensing to temp_x
-            time0 = clock;
-            temp_x_hat=reconstruction_method(temp_x, y, img_size, A, At, specifics); % apply reconstruction method
-            metrics.runtime = metrics.runtime + etime(clock, time0);
+            [temp_x_hat,specifics,runtime]=reconstruction_method(temp_x, y, img_size, A, At, specifics); % apply reconstruction method
+            metrics.runtime = metrics.runtime + runtime;
             temp_x_hat=reshape(temp_x_hat, flip(img_size)); % reshape into original shape
             x_hat{i}=temp_x_hat; % add cell into x_hat
         end

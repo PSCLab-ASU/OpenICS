@@ -2,7 +2,7 @@
 % 
 % Uses TV (total variance) reconstruction methods from l1-magic toolbox.
 % 
-% Usage: x_hat = reconstruction_tv(x,y,img_dims,A,At,specifics)
+% Usage: [x_hat,specifics,runtime] = reconstruction_tv(x,y,img_dims,A,At,specifics)
 %
 % x - nx1 vector, original signal
 %
@@ -39,10 +39,10 @@
 %
 %   normalization - Whether the image should be normalized. May help make
 %                   the image sparser and improve reconstruction accuracy.
-%       Default: false
+%       Default: true
 %
 
-function x_hat = reconstruction_tv(x, y, img_dims, A, At, specifics)
+function [x_hat,specifics,runtime] = reconstruction_tv(x, y, img_dims, A, At, specifics)
 
     % set default values
     if ~isfield(specifics, 'constraint')
@@ -66,7 +66,7 @@ function x_hat = reconstruction_tv(x, y, img_dims, A, At, specifics)
     end
     
     if ~isfield(specifics, 'normalization')
-        specifics.normalization = false;
+        specifics.normalization = true;
     end
     
     % all constraints besides 'eq' require an epsilon argument

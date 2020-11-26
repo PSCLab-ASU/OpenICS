@@ -17,7 +17,7 @@ input_width = 256;
 input_height = 256;
 
 % sensing parameters
-sensing_method = 'NLRCS.sensing_rectmasked_uhp_fourier';
+sensing_method = 'NLRCS.sensing_scrambled_fourier';
 ratio = 0.2;
 n = input_width * input_height * input_channel;
 m = round(n * ratio);

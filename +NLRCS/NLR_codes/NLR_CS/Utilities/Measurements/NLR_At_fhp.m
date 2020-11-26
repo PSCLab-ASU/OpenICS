@@ -18,6 +18,7 @@
 % Email: jrom@acm.caltech.edu
 %
 % Renamed to NLR_At_fhp to distinguish from L1-magic implementations
+% Also added real() to last line to avoid complex measurements
 
 function x = NLR_At_fhp(y, OMEGA, h, w)
 
@@ -35,4 +36,4 @@ fx(OMEGA) = y(2:(K+1)/2) + i*y((K+3)/2:K);
 n = round(sqrt(h*w));
 %x = reshape(real(n*ifft2(fx)), h*w, 1);
 % x = reshape(n*ifft2(fx), h*w, 1);
-x = reshape(ifft2(fx), h*w, 1);
+x = reshape(real(ifft2(fx)), h*w, 1);

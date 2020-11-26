@@ -2,7 +2,7 @@
 % 
 % Uses D-AMP reconstruction method.
 % 
-% Usage: x_hat = reconstruction_damp(x,y,img_dims,A,At,specifics)
+% Usage: [x_hat,specifics,runtime] = reconstruction_damp(x,y,img_dims,A,At,specifics)
 %
 % x - nx1 vector, original signal
 %
@@ -25,7 +25,7 @@
 %       Default: 30
 %
 
-function x_hat = reconstruction_damp(x, y, img_dims, A, At, specifics)
+function [x_hat,specifics,runtime] = reconstruction_damp(x, y, img_dims, A, At, specifics)
 
     % set default values
     if ~isfield(specifics, 'denoiser')
@@ -34,6 +34,12 @@ function x_hat = reconstruction_damp(x, y, img_dims, A, At, specifics)
     
     if ~isfield(specifics, 'iters')
         specifics.iters = 30;
+    end
+    
+    % override with CBM3D if image is colored, display warning
+    if img_dims(1) > 1 && ~strcmp(specifics.denoiser, 'CBM3D')
+        disp('WARNING: D-AMP offers a colored denoiser CBM3D for colored images. Overriding user-defined denoiser.');
+        specifics.denoiser = 'CBM3D';
     end
     
     % D-AMP operates on 0-255, so modify y

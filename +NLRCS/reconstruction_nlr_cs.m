@@ -2,7 +2,7 @@
 % 
 % Uses NLR-CS method from original source code.
 % 
-% Usage: x_hat = reconstruction_nlr_cs(x,y,img_dims,A,At,specifics)
+% Usage: [x_hat,specifics,runtime] = reconstruction_nlr_cs(x,y,img_dims,A,At,specifics)
 %
 % x - nx1 vector, original signal
 %
@@ -44,10 +44,10 @@
 %       Default: Varies based on sampling ratio
 %
 
-function x_hat = reconstruction_nlr_cs(x, y, img_dims, A, At, specifics)
+function [x_hat,specifics,runtime] = reconstruction_nlr_cs(x, y, img_dims, A, At, specifics)
 
     % set default values based on Set_parameters method
-    defaults = Set_parameters(0.1, 0, 1);
+    defaults = Set_parameters(numel(y) / numel(x) / 2, 0, 1);
     
     f = fieldnames(defaults);
     for i = 1:length(f)
@@ -61,7 +61,7 @@ function x_hat = reconstruction_nlr_cs(x, y, img_dims, A, At, specifics)
     
     % set code-defined properties
     % note, NLR-CS uses 0-255 instead of 0-1, so multiply image data by 255
-    specifics.y = A(x .* 255);
+    specifics.y = y * 255;
     specifics.ori_im = x .* 255;
     specifics.s_model = 1;
     q = randperm(round(numel(x)/2)-1)+1;
@@ -72,4 +72,10 @@ function x_hat = reconstruction_nlr_cs(x, y, img_dims, A, At, specifics)
     x_hat = NLR_CS_Reconstruction(specifics, A, At) ./ 255;
     runtime = etime(clock, time0);
     fprintf('Total elapsed time = %f secs\n\n', runtime);
+    
+    % remove unnecessary fields
+    specifics = rmfield(specifics, 'y');
+    specifics = rmfield(specifics, 'ori_im');
+    specifics = rmfield(specifics, 's_model');
+    specifics = rmfield(specifics, 'picks');
 end

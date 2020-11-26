@@ -27,6 +27,8 @@ The TV methods have three different implementations which it can run, which are 
 * Quadratic constraints, or **'qc'**
 * Dantzig Selector, or **'dantzig'**
 
+Note that the TV methods will not work with non-square images due to the way the algorithm calculates total variation.
+
 Additional parameters include the following:
 * **lbtol** - The tolerance of the log-barrier algorithm.
 * **mu** - The factor by which to increase the barrier constant per iteration.

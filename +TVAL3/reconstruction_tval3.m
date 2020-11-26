@@ -2,7 +2,7 @@
 % 
 % Uses TVAL3 reconstruction method.
 % 
-% Usage: x_hat = reconstruction_tval3(x,y,img_dims,A,At,specifics)
+% Usage: [x_hat,specifics,runtime] = reconstruction_tval3(x,y,img_dims,A,At,specifics)
 %
 % x - nx1 vector, original signal
 %
@@ -87,12 +87,18 @@
 %       Default: false
 %
 
-function x_hat = reconstruction_tval3(x, y, img_dims, A, At, specifics)
+function [x_hat,specifics,runtime] = reconstruction_tval3(x, y, img_dims, A, At, specifics)
 
     % set default values
     if ~isfield(specifics, 'normalization')
         specifics.normalization = false;
     end
+    
+    if ~isfield(specifics,'TVL2')
+        specifics.TVL2 = false;
+    end
+    
+    specifics = ftvcs_al_opts(specifics);
     
     % TVAL3 implementation structures function differently
     function out = A_handles(z, mode)

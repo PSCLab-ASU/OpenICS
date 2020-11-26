@@ -9,20 +9,9 @@ run TVAL3.set_up.m;
 % reconstruction parameters
 reconstruction_method = 'TVAL3.reconstruction_tval3';
 specifics = struct;
-specifics.normalization = true;
-specifics.TVnorm = 2;
-specifics.nonneg = false;
-specifics.mu = 2^12;
-specifics.beta = 2^6;
-specifics.maxcnt = 10;
-specifics.tol_inn = 1e-3;
-specifics.tol = 1E-6;
-specifics.maxit = 300;
 
 specifics.mu0 = 2^4;       % trigger continuation shceme
 specifics.beta0 = 2^-2;    % trigger continuation shceme
-
-specifics.isreal = false;
 
 % image parameters and information
 img_path = '~/Downloads/color_512';
@@ -30,8 +19,8 @@ input_channel = 3;
 input_width = 512;
 input_height = 512;
 
-img_path = fullfile(matlabroot, '/toolbox/images/imdata/autumn.tif');
-[input_height, input_width, input_channel] = size(imread(img_path));
+% img_path = fullfile(matlabroot, '/toolbox/images/imdata/autumn.tif');
+% [input_height, input_width, input_channel] = size(imread(img_path));
 
 % sensing parameters
 sensing_method = 'TVAL3.sensing_walsh_hadamard';
@@ -41,6 +30,8 @@ m = round(n * ratio);
 
 % slicing parameters
 % specifics.slice_size = 64;
+
+% specifics.colored_reconstruction_mode = 'vectorized';
 
 % if slicing, recalculate number of measurements
 if isfield(specifics, 'slice_size')
