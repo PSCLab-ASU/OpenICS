@@ -251,7 +251,7 @@ class csgan():
               'optimizer_state_dict': self.optimizer.state_dict(),
             }, self.output_file)
           iter+=1
-      elif (stage == 'testing'): ##NOT IMPLEMENTED YET
+      elif (stage == 'testing'): 
         iter = -1
         if os.path.exists(self.output_file):
           checkpoint = torch.load(self.output_file)
@@ -266,6 +266,8 @@ class csgan():
           print("DATSET LENGTH: " ,len(self.dataset))
           print(type(self.testloader))
           for images,_ in self.testloader:
+            if images.shape[0] <self.batch_size:
+              continue
             iter+=1
             #images, _ = self.testloader.__iter__().__next__() 
             images = images.cuda()
@@ -290,6 +292,7 @@ class csgan():
               self.sensing_method.zero_grad()
               print("\n\n\n test iteration: ", iter)
               print("z_step_size: ", self.s.item())
+
              # print("Images mean: ", torch.mean(images).item())
               #print("Initial samples mean: ", torch.mean(initial_samples).item())
               #print("Samples mean: ", torch.mean(samples).item())
@@ -297,11 +300,14 @@ class csgan():
               #print("Optimised z mean: ", torch.mean(optimised_z).item())
               #print("m_targets mean: ", torch.mean(self.m_targets).item())
               #print("m_samples mean: ", torch.mean(self.m_samples).item())
+
               print("opt_cost: ", optimisation_cost.item())
               print("gen loss:", generator_loss.item())
+
               #print("r1 mean: ", torch.mean(r1).item())
               #print("r2 mean: ", torch.mean(r2).item())
               #print("r3 mean: ", torch.mean(r3).item())
+              
               print("rip loss: ", rip_loss.item())
               
               print("recons_loss: ", recons_loss.item())
