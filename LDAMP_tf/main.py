@@ -72,9 +72,11 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
             'create_new_dataset': False,
             'new_data': '/storage-t1/database/bigset/train/data/*.bmp',
             'dataset_custom_name': 'bigset_train_data',
+            'custom_type_of_image': '',
             'create_new_testpatch': False,
             'new_test_data': '/storage-t1/database/bigset/test/*.bmp',
-            'testset_custom_name': 'bigset_test'
+            'testset_custom_name': 'bigset_test',
+            'testing_data_type': ''
         }
 
     if(not(n == input_channel * input_height * input_width)):
@@ -131,7 +133,7 @@ if __name__ == "__main__":
             'max_Epoch_Fails': 3,  # How many training epochs to run without improvement in the validation error
             'ResumeTraining': False,  # Load weights from a network you've already trained a little
             'LayerbyLayer': True,
-            'DenoiserbyDenoiser': False,  # if this is true, overrides other two
+            'DenoiserbyDenoiser': True,  # if this is true, overrides other two
             'sigma_w_min': 25, # only used in denoiserbydenoiser training
             'sigma_w_max': 25, # only used in denoiserbydenoiser training
             'sigma_w': 1./255.,  # Noise std (LbL testing: 0, LbL training: 1./255., DbD test and train: 25./255.)
@@ -151,19 +153,21 @@ if __name__ == "__main__":
             # 'training_patch': './Data/TrainingData_patch40.npy',
             'training_patch': './Data/bigset_train_data.npy',
             # 'testing_patch': './Data/StandardTestData_256Res.npy',
-            'testing_patch': './Data/bigset_test.npy',
+            'testing_patch': './Data/benchmark_bigset_train.npy',
 
             # if True, will use 'validation_patch' to load val data, otherwise cut from training_patch
             'use_separate_val_patch': False, # TODO LOOK AT NOTES
 
             # if True, creates new dataset and uses it, False: uses 'training_patch'
-            'create_new_dataset': False,
-            'new_data': '/storage-t1/database/bigset/train/data/*.bmp',
-            'dataset_custom_name': 'bigset_train_data',
+            'create_new_dataset': True,
+            'new_data': '/storage-t1/database/cs-framework-database/bigset_gray/train',
+            'dataset_custom_name': 'benchmark_bigset_gray_train',
+            'custom_type_of_image': 'bmp',  # bmp, tif, jpg, png
 
             # if True, creates new dataset and uses it, False: uses 'testing_patch'
             'create_new_testpatch': False,  # if False, ignore parameters below
-            'new_test_data': '/storage-t1/database/bigset/test/*.bmp',
-            'testset_custom_name': 'bigset_test1'
+            'new_test_data': '/storage-t1/database/bigset/test',
+            'testset_custom_name': 'bigset_test1',
+            'testing_data_type': 'bmp'  # bmp, tif, jpg, png
         },
     )

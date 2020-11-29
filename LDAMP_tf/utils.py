@@ -42,7 +42,14 @@ def generate_dataset(dataset,input_channel,input_width,input_height,stage, speci
             data = np.load('./Data/' + specifics['dataset_custom_name'] + '.npy')
         else:
             data = []
-            images = glob.glob(specifics['new_data'])
+            if(specifics['custom_type_of_image'] == "bmp"):
+                images = glob.glob(specifics['new_data'] + "/*.bmp")
+            if (specifics['custom_type_of_image'] == "tif"):
+                images = glob.glob(specifics['new_data'] + "/*.tif")
+            if (specifics['custom_type_of_image'] == "jpg"):
+                images = glob.glob(specifics['new_data'] + "/*.jpg")
+            if (specifics['custom_type_of_image'] == "png"):
+                images = glob.glob(specifics['new_data'] + "/*.png")
             for image in images:
                 with open(image, 'rb') as file:
                     img = Image.open(file)
@@ -70,7 +77,14 @@ def generate_testset(input_channel,input_width,input_height,specifics):
             data = np.load('./Data/' + specifics['testset_custom_name'] + '.npy')
         else:
             data = []
-            images = glob.glob(specifics['new_test_data'])
+            if (specifics['custom_type_of_image'] == "bmp"):
+                images = glob.glob(specifics['new_data'] + "/*.bmp")
+            if (specifics['custom_type_of_image'] == "tif"):
+                images = glob.glob(specifics['new_data'] + "/*.tif")
+            if (specifics['custom_type_of_image'] == "jpg"):
+                images = glob.glob(specifics['new_data'] + "/*.jpg")
+            if (specifics['custom_type_of_image'] == "png"):
+                images = glob.glob(specifics['new_data'] + "/*.png")
             for image in images:
                 with open(image, 'rb') as file:
                     img = Image.open(file)
