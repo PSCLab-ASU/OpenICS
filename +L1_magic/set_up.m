@@ -6,3 +6,4 @@
 % Add l1magic folders to path
 path(path, strcat(folder, '/l1magic/Measurements'));
 path(path, strcat(folder, '/l1magic/Optimization'));
+disp('Finished L1-magic set up!');

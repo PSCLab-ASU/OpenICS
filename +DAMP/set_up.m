@@ -12,5 +12,6 @@ path(path, genpath(strcat(folder, '/D-AMP_Toolbox/Packages')));
 cd(folder);
 cd D-AMP_Toolbox/Packages/rwt/bin;
 compile;
+disp('Finished compiling the C++ code for the rwt toolbox!\n');
 cd(original_folder);
-fprintf('Finished compiling the C++ code for the rwt toolbox!\n');
+disp('Finished D-AMP set up!');

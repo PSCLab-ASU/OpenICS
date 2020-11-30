@@ -15,6 +15,9 @@ conda install opencv==3.4.2</br>
 conda install scikit-image==0.17.2</br>
  
 ### Matlab:
+IN MATLAB:<br>
+cd \<path to CS_Framework directory\><br>
+run set_up.m<br>
 
 
 
@@ -33,6 +36,11 @@ input_height: Height of training/testing images</br>
 m: # of measurements/outputs of sensing matrix</br>
 n: # of inputs to sensing matrix</br>
 specifics: Specific parameter settings of chosen reconstruction method</br>
+
+### Matlab:
+To quickly modify parameters, make changes to demo.m. Refer to the README.md
+located in the directory of each Matlab reconstruction method for more details
+on method-specific parameters.
 
 
 

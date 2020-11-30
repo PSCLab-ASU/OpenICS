@@ -6,3 +6,4 @@
 % Add NLR_CS folders to path
 path(path, strcat(folder, '/NLR_codes/NLR_CS/Utilities'));
 path(path, strcat(folder, '/NLR_codes/NLR_CS/Utilities/Measurements'));
+disp('Finished NLR-CS set up!');

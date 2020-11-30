@@ -13,5 +13,6 @@ path(path, strcat(folder, '/TVAL3_v1.0/Utilities'));
 cd(folder);
 cd TVAL3_v1.0/Fast_Walsh_Hadamard_Transform;
 mex -O fWHtrans.cpp
-fprintf('Finished compiling the C++ code for fast Walsh-Hadamard transform!\n');
+disp('Finished compiling the C++ code for fast Walsh-Hadamard transform!\n');
 cd(original_folder);
+disp('Finished TVAL3 set up!');

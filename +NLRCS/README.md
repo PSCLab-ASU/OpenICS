@@ -9,14 +9,28 @@ Unused files such as data, demos, and the MRI version have been removed from the
 
 The list of parameters for NLR-CS include the following:
 * **win** - The size of each patch.
+  * Default: 6
 * **nblk** - The number of similar patches in each grouping.
+  * Default: 45
 * **step** - The steps between patches.
+  * Default: 5
 * **K0** - Iterations of NLR-CS after which to apply adaptive weights to SVT.
+  * Default: 3
 * **K** - Iterations of NLR-CS to run.
+  * Default: 18
 * **t0** - Threshold for DCT-thresholding.
+  * Default: Varies based on compression ratio
 * **nSig** - Threshold modifier for DCT-thresholding.
+  * Default: Varies based on compression ratio
 * **c0** - Threshold for non-weighted SVT.
+  * Default: Varies based on compression ratio
 * **c1** - Threshold for weighted SVT.
+  * Default: Varies based on compression ratio
+
+ More details about the default values of t0, nSig, c0, and c1 may be found at the bottom of the file *reconstruction_nlr_cs.m*.
 
 Other non-method specific parameters include the following:
 * **slice_size** - The size of each slice of the image to reconstruct. Scalar or 2-element vector ordered [width, height].
+  * Default: none
+* **colored_reconstruction_mode** - The manner through which to reconstruct multi-channel images. Can be either 'channelwise' or 'vectorized'.
+  * Default: 'channelwise'

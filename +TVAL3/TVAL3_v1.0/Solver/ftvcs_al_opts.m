@@ -4,7 +4,7 @@ function opts = ftvcs_al_opts(opts)
 % Written by: Chengbo Li
 %
 % Modified to use experimental settings defined in his paper for noisy
-% images, specifically mu, tol, maxit, and nonneg
+% images, specifically mu, tol, maxit, isreal, and nonneg
 if isfield(opts,'mu')
     if ~isscalar(opts.mu) || opts.mu <0
         error('opts.mu must be positive.');
@@ -216,7 +216,8 @@ if isfield(opts,'isreal')
         error('opts.isreal should be true or false.');
     end
 else
-    opts.isreal = false;
+    % opts.isreal = false;
+    opts.isreal = true;
 end
 
 

@@ -1,6 +1,6 @@
 % main.m
 % 
-% Entry point for the CS_Framework.
+% Entry point for the MATLAB portion of the CS_Framework.
 % Calls the main functions from each package, which may differ in the future.
 % 
 % Usage: [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_channel,input_width,input_height,m,n,specifics)

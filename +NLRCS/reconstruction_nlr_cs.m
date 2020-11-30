@@ -43,10 +43,14 @@
 %   c1 - Threshold for weighted SVT.
 %       Default: Varies based on sampling ratio
 %
+% More details about their default values may be found at the bottom of this file.
+%
 
 function [x_hat,specifics,runtime] = reconstruction_nlr_cs(x, y, img_dims, A, At, specifics)
 
     % set default values based on Set_parameters method
+    % to define the ratio to use for parameter setting as we do in our
+    % framework, divide it by two
     defaults = Set_parameters(numel(y) / numel(x) / 2, 0, 1);
     
     f = fieldnames(defaults);
@@ -79,3 +83,46 @@ function [x_hat,specifics,runtime] = reconstruction_nlr_cs(x, y, img_dims, A, At
     specifics = rmfield(specifics, 's_model');
     specifics = rmfield(specifics, 'picks');
 end
+
+% If ratio <= 0.1:
+%   t0 = 3.8
+%   nSig = 4.66
+%   c0 = 0.6
+%   c1 = 2.2
+%
+% Else if ratio <= 0.2:
+%   t0 = 2.4
+%   nSig = 3.25
+%   c0 = 0.49
+%   c1 = 1.55
+%
+% Else if ratio <= 0.3:
+%   t0 = 1.8
+%   nSig = 2.65
+%   c0 = 0.49
+%   c1 = 1.35
+%
+% Else if ratio <= 0.4:
+%   t0 = 1.4
+%   nSig = 2.35
+%   c0 = 0.49
+%   c1 = 1.32
+%
+% Else if ratio <= 0.5:
+%   t0 = 1.0
+%   nSig = 2.1
+%   c0 = 0.49
+%   c1 = 1.15
+%
+% Else if ratio <= 0.6:
+%   t0 = 0.8
+%   nSig = 1.8
+%   c0 = 0.49
+%   c1 = 0.9
+%
+% Otherwise:
+%   t0 = 0.8
+%   nSig = 1.4
+%   c0 = 0.49
+%   c1 = 0.75
+%

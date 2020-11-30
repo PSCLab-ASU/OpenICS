@@ -23,28 +23,28 @@
 %       Default: 2
 %
 %   nonneg - Whether to use nonnegative models.
-%       Default: false
+%       Default: true
 %
 %   mu - The primary penalty parameter.
-%       Default: 2^8
+%       Default: 2^5
 %
 %   beta - The secondary penalty parameter.
 %       Default: 2^5
 %
 %   tol - The outer stopping tolerance.
-%       Default: 1e-6
+%       Default: 1e-3
 %
 %   tol_inn - The inner stopping tolerance.
 %       Default: 1e-3
 %
 %   maxit - The maximum total iterations.
-%       Default: 1025
+%       Default: 300
 %
 %   maxcnt - The maximum outer iterations.
 %       Default: 10
 %
 %   isreal - If the signal is real.
-%       Default: false
+%       Default: true
 %
 %   disp - Whether info should be printed each iteration.
 %       Default: false
@@ -100,7 +100,7 @@ function [x_hat,specifics,runtime] = reconstruction_tval3(x, y, img_dims, A, At,
     
     specifics = ftvcs_al_opts(specifics);
     
-    % TVAL3 implementation structures function differently
+    % TVAL3 implementation structures the sensing function differently
     function out = A_handles(z, mode)
         switch mode
             case 1
