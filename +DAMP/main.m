@@ -226,7 +226,7 @@ function [x_hat,metrics,specifics] = reconstruct(sensing,reconstruction,x,channe
         x_hat = zeros(height,width,channel);
 
         for j = 1:channel
-            [channel_x_hat,channel_metrics,specifics] = reconstruct_tensor(sensing,reconstruction,x(:,:,j),1,width,height,m,n,specifics);
+            [channel_x_hat,channel_metrics,specifics] = reconstruct_tensor(sensing,reconstruction,x(:,:,j),1,width,height,round(m/channel),n,specifics);
             total_runtime = total_runtime + channel_metrics.runtime;
             x_hat(:,:,j) = channel_x_hat;
         end

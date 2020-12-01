@@ -5,7 +5,7 @@
 %
 
 % Run setup
-run set_up.m;
+% run set_up.m;
 
 % To modify which methods are used for reconstruction/sensing, edit the two
 % variables below. The name of the method must match its file within the
@@ -37,7 +37,7 @@ input_height = 256;
 % Sensing parameters
 % To modify the compression ratio, change ratio to the desired compression
 % ratio. It should usually not exceed 1.
-ratio = 1 / 16;
+ratio = 1 / 8;
 
 n = input_width * input_height * input_channel;
 m = round(n * ratio);
@@ -50,5 +50,4 @@ end
 % Main execution
 [x,x_hat,metrics] = main(sensing_method,reconstruction_method,false,img_path,input_channel,input_width,input_height,m,n,specifics);
 imshow([x, x_hat]); % Display images side by side
-img_dif = x - x_hat;
-fprintf("Reconstruction Percent Error: %.2f %%, PSNR: %.2f, SSIM: %.4f\n", 100 * norm(img_dif(:), 1) / norm(x(:), 1), metrics.psnr, metrics.ssim);
+fprintf("Reconstruction PSNR: %.2f, SSIM: %.4f\n", metrics.psnr(end), metrics.ssim(end));
