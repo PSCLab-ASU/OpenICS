@@ -6,18 +6,18 @@
 # Section 1: Setting up environment
 
 ### Datadriven using conda:
-conda create -n CS_methods_environement python=3.7.9 </br>
-conda activate CS_methods_environement</br>
+`conda create -n CS_methods_environement python=3.7.9` </br>
+`conda activate CS_methods_environement`</br>
 </br>
-conda install pytorch==1.6.0 torchvision cudatoolkit=10.1 -c pytorch</br>
-conda install tensorflow-gpu=2.1.0</br>
-conda install opencv==3.4.2</br>
-conda install scikit-image==0.17.2</br>
+`conda install pytorch==1.6.0 torchvision cudatoolkit=10.1 -c pytorch`</br>
+`conda install tensorflow-gpu=2.1.0`</br>
+`conda install opencv==3.4.2`</br>
+`conda install scikit-image==0.17.2`</br>
  
 ### Matlab:
 IN MATLAB:<br>
-cd \<path to CS_Framework directory\><br>
-run set_up.m<br>
+`cd \<path to CS_Framework directory\>`<br>
+`run set_up.m`<br>
 
 
 
