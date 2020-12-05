@@ -5,7 +5,7 @@
 %
 
 % Run setup
-% run set_up.m;
+run set_up.m;
 
 % To modify which methods are used for reconstruction/sensing, edit the two
 % variables below. The name of the method must match its file within the
@@ -13,8 +13,8 @@
 % the +TVAL3 directory, reconstruction_method should be 'TVAL3.reconstruction_tval3'
 % Methods implemented in Python CANNOT be called from here. MATLAB methods
 % have a '+' character appended to the beginning of their directory names.
-reconstruction_method = 'TVAL3.reconstruction_tval3';
-sensing_method = 'TVAL3.sensing_walsh_hadamard';
+reconstruction_method = 'DAMP.reconstruction_damp';
+sensing_method = 'DAMP.sensing_guassian_random_columnwise';
 
 % Reconstruction parameters
 specifics = struct;
