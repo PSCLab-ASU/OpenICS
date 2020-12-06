@@ -44,6 +44,8 @@
 % Email: jrom@acm.caltech.edu
 % Created: October 2005
 %
+% Added setting xp to nan to ensure the function still returns a value if
+% lbiter is -Inf
 
 function xp = tvdantzig_logbarrier(x0, A, At, b, epsilon, lbtol, mu, cgtol, cgmaxiter)  
 
@@ -102,6 +104,7 @@ tau = 3*N/sum(sqrt(Dhx.^2+Dvx.^2));
 lbiter = ceil((log(3*N)-log(lbtol)-log(tau))/log(mu));
 disp(sprintf('Number of log barrier iterations = %d\n', lbiter));
 totaliter = 0;
+xp = nan(size(x0));
 for ii = 1:lbiter
   
   [xp, tp, ntiter] = tvdantzig_newton(x, t, A, At, b, epsilon, tau, newtontol, newtonmaxiter, cgtol, cgmaxiter);

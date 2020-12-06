@@ -41,6 +41,8 @@
 % Email: jrom@acm.caltech.edu
 % Created: October 2005
 %
+% Added setting xp to nan to ensure the function still returns a value if
+% lbiter is -Inf
 
 function xp = tveq_logbarrier(x0, A, At, b, lbtol, mu, slqtol, slqmaxiter)  
 
@@ -100,6 +102,7 @@ tau = N/sum(sqrt(Dhx.^2+Dvx.^2));
 lbiter = ceil((log(N)-log(lbtol)-log(tau))/log(mu));
 disp(sprintf('Number of log barrier iterations = %d\n', lbiter));
 totaliter = 0;
+xp = nan(size(x0));
 for ii = 1:lbiter
   
   [xp, tp, ntiter] = tveq_newton(x, t, A, At, b, tau, newtontol, newtonmaxiter, slqtol, slqmaxiter);

@@ -44,6 +44,8 @@
 % Email: jrom@acm.caltech.edu
 % Created: October 2005
 %
+% Added setting xp to nan to ensure the function still returns a value if
+% lbiter is -Inf
 
 function xp = l1qc_logbarrier(x0, A, At, b, epsilon, lbtol, mu, cgtol, cgmaxiter)  
 
@@ -98,6 +100,7 @@ lbiter = ceil((log(2*N+1)-log(lbtol)-log(tau))/log(mu));
 disp(sprintf('Number of log barrier iterations = %d\n', lbiter));
 
 totaliter = 0;
+xp = nan(size(x0));
 
 for ii = 1:lbiter
 
