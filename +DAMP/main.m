@@ -61,10 +61,6 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
     [~,data_name,extension_name] = fileparts(img_path);
     
     if isfolder(img_path)
-        keyword = random_string(16);
-        [log_file, bmp_file] = generate_results(method_name, data_name, keyword);
-        log_file = fopen(log_file, 'a');
-        
         folder = dir(img_path);
         % Remove any files that start with '.', usually invisible files
         dot_files = regexp({folder.name},'^\.');
@@ -94,7 +90,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         specifics_history = cell(folder_size,1);
         
         % Loop through directory
-        parfor i = 1:folder_size
+        for i = 1:folder_size
             file = folder(i);
             file_path = fullfile(file.folder, file.name);
             
@@ -129,9 +125,6 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
             runtime(i) = file_metrics.runtime;
             meta(i) = file.name;
             
-            % Save to log file
-            fprintf(log_file, '%s: PSNR: %.3f, SSIM: %.3f, Runtime: %.3f\n', meta(i), psnr(i), ssim(i), runtime(i));
-            
             if picks_saved(i) > 0
                 % save into array
                 x{i} = file_x;
@@ -146,22 +139,26 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         specifics = specifics_history{1};
         
         % Calculate averages, last entry in all metrics
+        psnr(end) = sum(psnr(~isnan(psnr))) / (numel(~isnan(psnr)) - 1);
+        ssim(end) = sum(ssim(~isnan(ssim))) / (numel(~isnan(ssim)) - 1);
+        runtime(end) = sum(runtime(~isnan(runtime))) / (numel(~isnan(runtime)) - 1);
+        meta(end) = 'Average';
+        
+        % Save to log file
+        keyword = random_string(16);
+        [log_file, bmp_file] = generate_results(method_name, data_name, keyword);
+        log_file = fopen(log_file, 'a');
+        
+        % Log all results in a loop
+        for i = 1:folder_size+1
+            fprintf(log_file, '%s: PSNR: %.3f, SSIM: %.3f, Runtime: %.3f\n', meta(i), psnr(i), ssim(i), runtime(i));
+        end
+        
         metrics.psnr = psnr;
         metrics.ssim = ssim;
         metrics.runtime = runtime;
         metrics.meta = meta;
-        metrics.psnr(end) = sum(metrics.psnr(~isnan(metrics.psnr))) / (numel(~isnan(metrics.psnr)) - 1);
-        metrics.ssim(end) = sum(metrics.ssim(~isnan(metrics.ssim))) / (numel(~isnan(metrics.ssim)) - 1);
-        metrics.runtime(end) = sum(metrics.runtime(~isnan(metrics.runtime))) / (numel(~isnan(metrics.runtime)) - 1);
-        metrics.meta(end) = 'Average';
-        
-        % Save averages to log file
-        fprintf(log_file, '%s: PSNR: %.3f, SSIM: %.3f, Runtime: %.3f\n', metrics.meta(end), metrics.psnr(end), metrics.ssim(end), metrics.runtime(end));
     else
-        keyword = data_name;
-        [log_file, bmp_file] = generate_results(method_name, data_name, keyword);
-        log_file = fopen(log_file, 'a');
-        
         x=im2double(imread(img_path)); % read image
         
         if ~all(size(x,[1,2,3]) == [input_height,input_width,input_channel])
@@ -172,6 +169,9 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         metrics.meta = string([data_name, extension_name]);
         
         % Save to log file
+        keyword = data_name;
+        [log_file, bmp_file] = generate_results(method_name, data_name, keyword);
+        log_file = fopen(log_file, 'a');
         fprintf(log_file, '%s: PSNR: %.3f, SSIM: %.3f, Runtime: %.3f\n', metrics.meta, metrics.psnr, metrics.ssim, metrics.runtime);
     end
     
