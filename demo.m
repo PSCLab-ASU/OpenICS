@@ -29,10 +29,10 @@ specifics.colored_reconstruction_mode = 'channelwise';
 % The size of the images within the directory should all be the same.
 % Change input_channel, input_width, and input_height to the dimensions of
 % the images to reconstruct.
-img_path = fullfile(matlabroot, '/toolbox/images/imdata/cameraman.tif');
+img_path = '~/Downloads/gray_512';
 input_channel = 1;
-input_width = 256;
-input_height = 256;
+input_width = 512;
+input_height = 512;
 
 % Sensing parameters
 % To modify the compression ratio, change ratio to the desired compression

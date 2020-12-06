@@ -95,7 +95,8 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
             file_path = fullfile(file.folder, file.name);
             
             try
-                imread(file_path);
+                file_x=im2double(imread(file_path));
+                assert(numel(file_x) == input_height * input_width * input_channel);
             catch
                 % Note that failed to read image
                 psnr(i) = NaN;
@@ -113,7 +114,6 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
             end
             
             fprintf('Reconstructing %s\n', file.name);
-            file_x=im2double(imread(file_path));
             
             if ~all(size(file_x,[1,2,3]) == [input_height,input_width,input_channel])
                 error('ERROR: Image dimensions do not match input size!');
@@ -136,7 +136,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         % Convert cells
         x = cell2mat(reshape(x(~cellfun(@isempty,x)),[sqrt(num_picks),sqrt(num_picks)]));
         x_hat = cell2mat(reshape(x_hat(~cellfun(@isempty,x_hat)),[sqrt(num_picks),sqrt(num_picks)]));
-        specifics = specifics_history{1};
+        specifics = specifics_history{find(~cellfun(@isempty, specifics_history), 1)};
         
         % Calculate averages, last entry in all metrics
         psnr(end) = sum(psnr(~isnan(psnr))) / (numel(~isnan(psnr)) - 1);
