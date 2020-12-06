@@ -83,16 +83,18 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         end
         
         picks = randperm(folder_size, num_picks);
-        picks_saved = 0;
-        x = cell([sqrt(num_picks), sqrt(num_picks)]);
-        x_hat = cell([sqrt(num_picks), sqrt(num_picks)]);
-        metrics.psnr = zeros(folder_size+1,1);
-        metrics.ssim = zeros(folder_size+1,1);
-        metrics.runtime = zeros(folder_size+1,1);
-        metrics.meta = strings(folder_size+1,1);
+        picks_saved = zeros(folder_size, 1);
+        picks_saved(picks) = 1:num_picks;
+        x = cell(folder_size,1);
+        x_hat = cell(folder_size,1);
+        psnr = zeros(folder_size+1,1);
+        ssim = zeros(folder_size+1,1);
+        runtime = zeros(folder_size+1,1);
+        meta = strings(folder_size+1,1);
+        specifics_history = cell(folder_size,1);
         
         % Loop through directory
-        for i = 1:folder_size
+        parfor i = 1:folder_size
             file = folder(i);
             file_path = fullfile(file.folder, file.name);
             
@@ -100,16 +102,15 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
                 imread(file_path);
             catch
                 % Note that failed to read image
-                metrics.psnr(i) = NaN;
-                metrics.ssim(i) = NaN;
-                metrics.runtime(i) = NaN;
-                metrics.meta{i} = file.name;
+                psnr(i) = NaN;
+                ssim(i) = NaN;
+                runtime(i) = NaN;
+                meta{i} = file.name;
                 
                 % If picked as a sample image, fill with black square
-                if any(picks == i)
-                    picks_saved = picks_saved + 1;
-                    x{picks_saved} = zeros(input_height,input_width,input_channel);
-                    x_hat{picks_saved} = zeros(input_height,input_width,input_channel);
+                if picks_saved(i) > 0
+                    x{i} = zeros(input_height,input_width,input_channel);
+                    x_hat{i} = zeros(input_height,input_width,input_channel);
                 end
                 
                 continue;
@@ -122,29 +123,33 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
                 error('ERROR: Image dimensions do not match input size!');
             end
             
-            [file_x_hat,file_metrics,specifics] = reconstruct(sensing,reconstruction,file_x,input_channel,input_width,input_height,m,n,specifics);
-            metrics.psnr(i) = file_metrics.psnr;
-            metrics.ssim(i) = file_metrics.ssim;
-            metrics.runtime(i) = file_metrics.runtime;
-            metrics.meta(i) = file.name;
+            [file_x_hat,file_metrics,specifics_history{i}] = reconstruct(sensing,reconstruction,file_x,input_channel,input_width,input_height,m,n,specifics);
+            psnr(i) = file_metrics.psnr;
+            ssim(i) = file_metrics.ssim;
+            runtime(i) = file_metrics.runtime;
+            meta(i) = file.name;
             
             % Save to log file
-            fprintf(log_file, '%s: PSNR: %.3f, SSIM: %.3f, Runtime: %.3f\n', metrics.meta(i), metrics.psnr(i), metrics.ssim(i), metrics.runtime(i));
+            fprintf(log_file, '%s: PSNR: %.3f, SSIM: %.3f, Runtime: %.3f\n', meta(i), psnr(i), ssim(i), runtime(i));
             
-            if any(picks == i)
+            if picks_saved(i) > 0
                 % save into array
-                picks_saved = picks_saved + 1;
-                x{picks_saved} = file_x;
-                x_hat{picks_saved} = file_x_hat;
+                x{i} = file_x;
+                x_hat{i} = file_x_hat;
             end
             
         end
         
-        % Convert cells back to tensors
-        x = cell2mat(x);
-        x_hat = cell2mat(x_hat);
+        % Convert cells
+        x = cell2mat(reshape(x(~cellfun(@isempty,x)),[sqrt(num_picks),sqrt(num_picks)]));
+        x_hat = cell2mat(reshape(x_hat(~cellfun(@isempty,x_hat)),[sqrt(num_picks),sqrt(num_picks)]));
+        specifics = specifics_history{1};
         
         % Calculate averages, last entry in all metrics
+        metrics.psnr = psnr;
+        metrics.ssim = ssim;
+        metrics.runtime = runtime;
+        metrics.meta = meta;
         metrics.psnr(end) = sum(metrics.psnr(~isnan(metrics.psnr))) / (numel(~isnan(metrics.psnr)) - 1);
         metrics.ssim(end) = sum(metrics.ssim(~isnan(metrics.ssim))) / (numel(~isnan(metrics.ssim)) - 1);
         metrics.runtime(end) = sum(metrics.runtime(~isnan(metrics.runtime))) / (numel(~isnan(metrics.runtime)) - 1);

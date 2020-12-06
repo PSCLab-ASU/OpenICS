@@ -13,8 +13,8 @@ run set_up.m;
 % the +TVAL3 directory, reconstruction_method should be 'TVAL3.reconstruction_tval3'
 % Methods implemented in Python CANNOT be called from here. MATLAB methods
 % have a '+' character appended to the beginning of their directory names.
-reconstruction_method = 'DAMP.reconstruction_damp';
-sensing_method = 'DAMP.sensing_guassian_random_columnwise';
+reconstruction_method = 'TVAL3.reconstruction_tval3';
+sensing_method = 'TVAL3.sensing_walsh_hadamard';
 
 % Reconstruction parameters
 specifics = struct;
