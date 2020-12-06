@@ -139,9 +139,10 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         specifics = specifics_history{find(~cellfun(@isempty, specifics_history), 1)};
         
         % Calculate averages, last entry in all metrics
-        psnr(end) = sum(psnr(~isnan(psnr))) / (numel(~isnan(psnr)) - 1);
-        ssim(end) = sum(ssim(~isnan(ssim))) / (numel(~isnan(ssim)) - 1);
-        runtime(end) = sum(runtime(~isnan(runtime))) / (numel(~isnan(runtime)) - 1);
+        avg_entries = and(~isnan(psnr), ~isinf(psnr));
+        psnr(end) = sum(psnr(avg_entries)) / (numel(avg_entries) - 1);
+        ssim(end) = sum(ssim(avg_entries)) / (numel(avg_entries) - 1);
+        runtime(end) = sum(runtime(avg_entries)) / (numel(avg_entries) - 1);
         meta(end) = 'Average';
         
         % Save to log file
