@@ -38,7 +38,7 @@
 %       Default: 1e-5
 %
 %   maxit - The maximum total iterations.
-%       Default: 1025
+%       Default: 300
 %
 %   maxcnt - The maximum outer iterations.
 %       Default: 10

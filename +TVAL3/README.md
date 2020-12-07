@@ -18,7 +18,7 @@ The list of parameters for TVAL3 include the following:
 * **tol_inn** - The inner stopping tolerance.
   * Default: 1e-5
 * **maxit** - The maximum total iterations.
-  * Default: 1025
+  * Default: 300
 * **maxcnt** - The maximum outer iterations.
   * Default: 10
 * **isreal** - If the signal is composed solely of real values.

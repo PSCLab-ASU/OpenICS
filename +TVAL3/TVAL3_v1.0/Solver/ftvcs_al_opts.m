@@ -4,7 +4,7 @@ function opts = ftvcs_al_opts(opts)
 % Written by: Chengbo Li
 %
 % Modified to use experimental settings defined in his paper for phantom
-% image, specifically tol_inn, tol, isreal, and nonneg
+% image, specifically tol_inn, tol, maxit, isreal, and nonneg
 if isfield(opts,'mu')
     if ~isscalar(opts.mu) || opts.mu <0
         error('opts.mu must be positive.');
@@ -67,7 +67,8 @@ if isfield(opts,'maxit')
         error('opts.maxit should be a positive integer.');
     end
 else
-    opts.maxit = 1025;
+    %opts.maxit = 1025;
+    opts.maxit = 300;
 end
 
 
