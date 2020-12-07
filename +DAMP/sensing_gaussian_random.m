@@ -1,4 +1,4 @@
-function [A, At] = sensing_guassian_random(img_dims,m)
+function [A, At] = sensing_gaussian_random(img_dims,m)
     % returns two function handles:
     % one for regular sensing and one for transposed sensing
     % WARNING: significantly slower on large images due to sensing matrix

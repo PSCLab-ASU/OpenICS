@@ -30,7 +30,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
     total_time0 = clock;
 
     if default
-        % set all parameters with default values.
+        % Set all parameters with default values.
         img_path = fullfile(matlabroot, '/toolbox/images/imdata/cameraman.tif');
         input_channel = 1;
         input_width = 256;
@@ -40,25 +40,35 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         specifics = struct;
         sensing = default_sensing(reconstruction);
     else
-        % check parameters are valid
+        % Check parameters are valid
         
+        % Ensure specific sizes match n
         if input_channel * input_height * input_width ~= n
             error('ERROR: Input dimensions do not match n!');
         end
         
+        % Ensure specifics exists
         if ~exist('specifics', 'var')
             specifics = struct;
         end
         
+        % Ensure slice_size has 2 elements
+        if isfield(specifics, 'slice_size') && numel(specifics.slice_size) == 1
+            specifics.slice_size = repelem(specifics.slice_size, 2);
+        end
+        
     end
     
-    if ~isfield(specifics, 'colored_reconstruction_mode')
+    % Set default colored reconstruction mode
+    if ~isfield(specifics, 'colored_reconstruction_mode') && input_channel > 1
         specifics.colored_reconstruction_mode = 'channelwise';
     end
     
     method_name = strsplit(reconstruction,'.');
     method_name = method_name{end};
     [~,data_name,extension_name] = fileparts(img_path);
+    [A,At] = get_sensing_handles(sensing,input_channel,input_width,input_height,m,specifics);
+    reconstruction_method = str2func(reconstruction);
     
     if isfolder(img_path)
         folder = dir(img_path);
@@ -119,7 +129,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
                 error('ERROR: Image dimensions do not match input size!');
             end
             
-            [file_x_hat,file_metrics,specifics_history{i}] = reconstruct(sensing,reconstruction,file_x,input_channel,input_width,input_height,m,n,specifics);
+            [file_x_hat,file_metrics,specifics_history{i}] = reconstruct(reconstruction_method,A,At,file_x,input_channel,input_width,input_height,specifics);
             psnr(i) = file_metrics.psnr;
             ssim(i) = file_metrics.ssim;
             runtime(i) = file_metrics.runtime;
@@ -166,7 +176,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
             error('ERROR: Image dimensions do not match input size!');
         end
         
-        [x_hat,metrics,specifics] = reconstruct(sensing,reconstruction,x,input_channel,input_width,input_height,m,n,specifics);
+        [x_hat,metrics,specifics] = reconstruct(reconstruction_method,A,At,x,input_channel,input_width,input_height,specifics);
         metrics.meta = string([data_name, extension_name]);
         
         % Save to log file
@@ -195,14 +205,59 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
     fprintf(log_file, '\nTotal time elapsed: %.3f\n', etime(clock, total_time0));
 end
 
-function [x_hat,metrics,specifics] = reconstruct(sensing,reconstruction,x,channel,width,height,m,n,specifics)
+function [A, At] = get_sensing_handles(sensing,channel,width,height,m,specifics)
+% Gets A, At handles from sensing method. Implemented to reduce time spent
+% regenerating already-existing sensing handles.
+%
+% Usage: [A,At] = get_sensing_handles(sensing,channel,width,height,m,specifics)
+%
+% sensing - The sensing method to use
+%
+% channel - The number of channels in the image
+%
+% width - The width of the image
+%
+% height - The height of the image
+%
+% m - The number of measurements
+%
+% specifics - Specific parameters for reconstruction
+%
+    slicing = isfield(specifics, 'slice_size');
+    sensing = str2func(sensing);
+
+    if channel > 1 && strcmp(specifics.colored_reconstruction_mode,'channelwise')
+        m = round(m / channel);
+        
+        if slicing
+            img_dims = [1, specifics.slice_size];
+        else
+            img_dims = [1, width, height];
+        end
+        
+    else
+        
+        if slicing
+            img_dims = [channel, specifics.slice_size];
+        else
+            img_dims = [channel, width, height];
+        end
+        
+    end
+    
+    [A, At] = sensing(img_dims, m);
+end
+
+function [x_hat,metrics,specifics] = reconstruct(reconstruction_method,A,At,x,channel,width,height,specifics)
 % Selects a reconstruction mode before actually reconstructing a tensor.
 %
-% Usage: [x_hat,metrics,specifics] = reconstruct(sensing,reconstruction,x,channel,width,height,m,n,specifics)
+% Usage: [x_hat,metrics,specifics] = reconstruct(reconstruction_method,A,At,x,channel,width,height,m,n,specifics)
 %
-% sensing - The sensing method to use.
+% reconstruction_method - The reconstruction method handle.
 %
-% reconstuction - The reconstruction method to use.
+% A - The sensing method handle.
+%
+% At - The transposed sensing method handle.
 %
 % x - The tensor to use for reconstruction. Should represent an image.
 %
@@ -211,10 +266,6 @@ function [x_hat,metrics,specifics] = reconstruct(sensing,reconstruction,x,channe
 % width - The width of the tensor.
 %
 % height - The height of the tensor.
-%
-% m - The measurement size.
-%
-% n - The total size of the tensor.
 %
 % specifics - Any specific parameters for reconstruction.
 %
@@ -226,37 +277,42 @@ function [x_hat,metrics,specifics] = reconstruct(sensing,reconstruction,x,channe
     %   Vectorized - For colored images, reconstructs whole image
     %                by flattening all channels into one 2D tensor.
     if channel == 1 || strcmp(reconstruction,'DAMP.reconstruction_damp')
-        [x_hat,metrics,specifics] = reconstruct_tensor(sensing,reconstruction,x,channel,width,height,m,n,specifics);
+        [x_hat,metrics,specifics] = reconstruct_tensor(reconstruction_method,A,At,x,channel,width,height,specifics);
     elseif strcmp(specifics.colored_reconstruction_mode,'channelwise')
         total_runtime = 0;
         x_hat = zeros(height,width,channel);
 
         for j = 1:channel
-            [channel_x_hat,channel_metrics,specifics] = reconstruct_tensor(sensing,reconstruction,x(:,:,j),1,width,height,round(m/channel),n,specifics);
+            [channel_x_hat,channel_metrics,specifics] = reconstruct_tensor(reconstruction_method,A,At,x(:,:,j),1,width,height,specifics);
             total_runtime = total_runtime + channel_metrics.runtime;
             x_hat(:,:,j) = channel_x_hat;
         end
 
-        metrics.psnr = min(48, psnr(x_hat, x));
+        metrics.psnr = psnr(x_hat, x);
         metrics.ssim = ssim(x_hat, x);
         metrics.runtime = total_runtime;
     elseif strcmp(specifics.colored_reconstruction_mode,'vectorized')
         flattened_x = reshape(x,[height,width*channel]);
-        [x_hat,metrics,specifics] = reconstruct_tensor(sensing,reconstruction,flattened_x,1,width*channel,height,m,n,specifics);
+        [x_hat,metrics,specifics] = reconstruct_tensor(reconstruction_method,A,At,flattened_x,1,width*channel,height,specifics);
         x_hat = reshape(x_hat, size(x));
     else
         error('ERROR: Invalid reconstruction mode!');
     end
+    
+    % Ensure psnr <= 48
+    metrics.psnr = min(48, metrics.psnr);
 end
 
-function [x_hat,metrics,specifics] = reconstruct_tensor(sensing,reconstruction,x,channel,width,height,m,n,specifics)
+function [x_hat,metrics,specifics] = reconstruct_tensor(reconstruction_method,A,At,x,channel,width,height,specifics)
 % Reconstruct a single tensor.
 %
-% Usage: [x_hat,metrics,specifics] = reconstruct_tensor(sensing,reconstruction,x,channel,width,height,m,n,specifics)
+% Usage: [x_hat,metrics,specifics] = reconstruct_tensor(reconstruction_method,A,At,x,channel,width,height,m,n,specifics)
 %
-% sensing - The sensing method to use.
+% reconstruction_method - The reconstruction method handle.
 %
-% reconstuction - The reconstruction method to use.
+% A - The sensing method handle.
+%
+% At - The transposed sensing method handle.
 %
 % x - The tensor to use for reconstruction. Should represent an image.
 %
@@ -266,41 +322,18 @@ function [x_hat,metrics,specifics] = reconstruct_tensor(sensing,reconstruction,x
 %
 % height - The height of the tensor.
 %
-% m - The measurement size.
-%
-% n - The total size of the tensor.
-%
 % specifics - Any specific parameters for reconstruction.
-%
-    if isfield(specifics, 'slice_size')
-        slice = true;
-        
-        if numel(specifics.slice_size) == 1
-            slice_size = repelem(specifics.slice_size, 2);
-        else
-            slice_size = specifics.slice_size;
-        end
-        
-    else
-        slice = false;
-    end
-    
-    sensing_method=str2func(sensing); % convert to function handle
-    reconstruction_method=str2func(reconstruction); % convert to function handle
-    
-    if ~slice
+%    
+    if ~isfield(specifics, 'slice_size')
         img_size=[channel,width,height]; % size vector ordered [c,w,h]
-        [A,At]=sensing_method(img_size, m); % get sensing method function handles
         y=A(x(:)); % apply sensing to x
         [x_hat,specifics,runtime]=reconstruction_method(x, y, img_size, A, At, specifics); % apply reconstruction method
         metrics.runtime = runtime;
     else
         disp("Slicing");
         metrics.runtime = 0;
-        img_size=[channel,slice_size(1),slice_size(2)]; % size vector ordered [c,w,h]
-        n=prod(img_size); % calculate new n
-        [A,At]=sensing_method(img_size, m); % get sensing method function handles
-        x_sliced=imslice(x, channel, width, height, slice_size); % slice image into cell array
+        img_size=[channel,specifics.slice_size]; % size vector ordered [c,w,h]
+        x_sliced=imslice(x, channel, width, height, specifics.slice_size); % slice image into cell array
         x_hat=cell(size(x_sliced)); % create empty cell array for x_hat
         
         % iterate over each slice in cell array
@@ -406,9 +439,9 @@ function sensing = default_sensing(reconstruction_method)
         case 'L1_magic.reconstruction_l1'
             sensing = 'L1_magic.sensing_uhp_fourier';
         case 'DAMP.reconstruction_damp'
-            sensing = 'DAMP.sensing_guassian_random_columnwise';
+            sensing = 'DAMP.sensing_gaussian_random_columnwise';
         otherwise
-            sensing = 'L1_magic.sensing_guassian_random';
+            sensing = 'L1_magic.sensing_gaussian_random';
     end
 
 end
