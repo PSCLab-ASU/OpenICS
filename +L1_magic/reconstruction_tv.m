@@ -21,10 +21,10 @@
 %
 %   lbtol - The tolerance of the log-barrier algorithm, which terminates
 %           when duality gap <= lbtol.
-%       Default: 1e-3
+%       Default: 1e-2
 %
 %   mu - Factor by which to increase the barrier constant per iteration.
-%       Default: 10
+%       Default: 2
 %
 %   lintol - The tolerance of the linear equation solving algorithm. Either
 %            Conjugated Gradients or Symmetric LQ method.
@@ -39,7 +39,7 @@
 %
 %   normalization - Whether the image should be normalized. May help make
 %                   the image sparser and improve reconstruction accuracy.
-%       Default: true
+%       Default: false
 %
 
 function [x_hat,specifics,runtime] = reconstruction_tv(x, y, img_dims, A, At, specifics)
@@ -50,11 +50,11 @@ function [x_hat,specifics,runtime] = reconstruction_tv(x, y, img_dims, A, At, sp
     end
     
     if ~isfield(specifics, 'lbtol')
-        specifics.lbtol = 1e-3;
+        specifics.lbtol = 1e-2;
     end
     
     if ~isfield(specifics, 'mu')
-        specifics.mu = 10;
+        specifics.mu = 2;
     end
     
     if ~isfield(specifics, 'lintol')
@@ -66,7 +66,7 @@ function [x_hat,specifics,runtime] = reconstruction_tv(x, y, img_dims, A, At, sp
     end
     
     if ~isfield(specifics, 'normalization')
-        specifics.normalization = true;
+        specifics.normalization = false;
     end
     
     % all constraints besides 'eq' require an epsilon argument

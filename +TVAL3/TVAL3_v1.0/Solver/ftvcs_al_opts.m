@@ -3,8 +3,8 @@ function opts = ftvcs_al_opts(opts)
 % Set default options.
 % Written by: Chengbo Li
 %
-% Modified to use experimental settings defined in his paper for noisy
-% images, specifically mu, tol, maxit, isreal, and nonneg
+% Modified to use experimental settings defined in his paper for phantom
+% image, specifically tol_inn, tol, isreal, and nonneg
 if isfield(opts,'mu')
     if ~isscalar(opts.mu) || opts.mu <0
         error('opts.mu must be positive.');
@@ -13,8 +13,7 @@ if isfield(opts,'mu')
         end
     end
 else
-    %opts.mu = 2^8;
-    opts.mu = 2^5;
+    opts.mu = 2^8;
 end
 % mu is mainly decided by noise level. Set mu big when b is noise-free
 % whereas set mu small when b is very noisy.
@@ -39,7 +38,7 @@ if isfield(opts,'tol')
     end
 else
     %opts.tol = 1.e-6;
-    opts.tol = 1e-3;
+    opts.tol = 1e-4;
 end;
 
 
@@ -49,7 +48,8 @@ if isfield(opts,'tol_inn')
         error('opts.tol_inn should be a positive small number.');
     end
 else
-    opts.tol_inn = 1.e-3;
+    %opts.tol_inn = 1.e-3;
+    opts.tol_inn = 1.e-5;
 end;
 
 
@@ -67,8 +67,7 @@ if isfield(opts,'maxit')
         error('opts.maxit should be a positive integer.');
     end
 else
-    %opts.maxit = 1025;
-    opts.maxit = 300;
+    opts.maxit = 1025;
 end
 
 

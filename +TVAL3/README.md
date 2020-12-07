@@ -10,15 +10,15 @@ The list of parameters for TVAL3 include the following:
 * **nonneg** - Whether to use non-negative models, such that by the termination of the algorithm u >= 0.
   * Default: true
 * **mu** - The primary penalty parameter.
-  * Default: 2^5
+  * Default: 2^8
 * **beta** - The secondary penalty parameter.
   * Default: 2^5
 * **tol** - The outer stopping tolerance.
-  * Default: 1e-3
+  * Default: 1e-4
 * **tol_inn** - The inner stopping tolerance.
-  * Default: 1e-3
+  * Default: 1e-5
 * **maxit** - The maximum total iterations.
-  * Default: 300
+  * Default: 1025
 * **maxcnt** - The maximum outer iterations.
   * Default: 10
 * **isreal** - If the signal is composed solely of real values.
@@ -33,9 +33,9 @@ The list of parameters for TVAL3 include the following:
   * Default: true
 * **consist_mu** - Whether mu should be scaled along with A and b.
   * Default: false
-* **mu0** - The initial value of mu. Defaults to mu. Set much lower than mu to trigger the 'continuation scheme,' which increases the number of iterations and should increase convergence.
+* **mu0** - The initial value of mu. Defaults to mu. Set much lower than mu to trigger the 'continuation scheme,' which increases the number of iterations and could increase convergence.
   * Default: mu
-* **beta0** - The initial value of beta. Defaults to beta. Set much lower than beta to trigger the 'continuation scheme,' which increases the number of iterations and should increase convergence.
+* **beta0** - The initial value of beta. Defaults to beta. Set much lower than beta to trigger the 'continuation scheme,' which increases the number of iterations and could increase convergence.
   * Default: beta
 * **rate_ctn** - The continuation rate of the penalty parameters.
   * Default: 2

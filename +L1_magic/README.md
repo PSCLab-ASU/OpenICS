@@ -43,9 +43,9 @@ The default constraint is 'eq'.
 
 Additional parameters include the following:
 * **lbtol** - The tolerance of the log-barrier algorithm.
-  * Default: 1e-3
+  * Default: 1e-2
 * **mu** - The factor by which to increase the barrier constant per iteration.
-  * Default: 10
+  * Default: 2
 * **lintol** - The tolerance of the linear equation solving algorithm.
   * Default: 1e-8
 * **linmaxiter** - The maximum number of iterations of the linear equation solving algorithm. For 'eq', it is the Symmetric LQ method, while 'qc' and 'dantzig' utilize the Conjugated Gradients method.
@@ -53,7 +53,7 @@ Additional parameters include the following:
 * **epsilon** - The allowed error for the initial point x0 of the 'qc' and 'dantzig' constraints. Must be a scalar.
   * Default: 5e-3
 * **normalization** - Whether the image should be normalized prior to sensing and reconstruction. Normalization consists of dividing by the L2-norm and subtracting the mean, and then inverting this transformation after reconstruction. This allows images to become sparser and may improve reconstruction accuracy.
-  * Default: true
+  * Default: false
 
 Other non-method specific parameters include the following:
 * **slice_size** - The size of each slice of the image to reconstruct. Scalar or 2-element vector ordered [width, height].

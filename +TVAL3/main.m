@@ -237,7 +237,7 @@ function [x_hat,metrics,specifics] = reconstruct(sensing,reconstruction,x,channe
             x_hat(:,:,j) = channel_x_hat;
         end
 
-        metrics.psnr = psnr(x_hat, x);
+        metrics.psnr = min(48, psnr(x_hat, x));
         metrics.ssim = ssim(x_hat, x);
         metrics.runtime = total_runtime;
     elseif strcmp(specifics.colored_reconstruction_mode,'vectorized')

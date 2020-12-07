@@ -26,19 +26,19 @@
 %       Default: true
 %
 %   mu - The primary penalty parameter.
-%       Default: 2^5
+%       Default: 2^8
 %
 %   beta - The secondary penalty parameter.
 %       Default: 2^5
 %
 %   tol - The outer stopping tolerance.
-%       Default: 1e-3
+%       Default: 1e-4
 %
 %   tol_inn - The inner stopping tolerance.
-%       Default: 1e-3
+%       Default: 1e-5
 %
 %   maxit - The maximum total iterations.
-%       Default: 300
+%       Default: 1025
 %
 %   maxcnt - The maximum outer iterations.
 %       Default: 10
