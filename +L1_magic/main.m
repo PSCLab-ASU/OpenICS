@@ -60,7 +60,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
     end
     
     % Set default colored reconstruction mode
-    if ~isfield(specifics, 'colored_reconstruction_mode') && input_channel > 1
+    if ~isfield(specifics, 'colored_reconstruction_mode') && input_channel > 1 && ~strcmp(reconstruction, 'DAMP.reconstruction_damp')
         specifics.colored_reconstruction_mode = 'channelwise';
     end
     
@@ -276,7 +276,7 @@ function [x_hat,metrics,specifics] = reconstruct(reconstruction_method,A,At,x,ch
     %                 as a separate grayscale image.
     %   Vectorized - For colored images, reconstructs whole image
     %                by flattening all channels into one 2D tensor.
-    if channel == 1 || strcmp(reconstruction,'DAMP.reconstruction_damp')
+    if channel == 1 || ~isfield(specifics, 'colored_reconstruction_mode')
         [x_hat,metrics,specifics] = reconstruct_tensor(reconstruction_method,A,At,x,channel,width,height,specifics);
     elseif strcmp(specifics.colored_reconstruction_mode,'channelwise')
         total_runtime = 0;
