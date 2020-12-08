@@ -1,8 +1,9 @@
 import torch
-import scipy.io as sio
+from torchvision import datasets, transforms, utils
 from torch.utils.data import Dataset, DataLoader
-import platform
 import numpy as np
+import scipy.io as sio
+import platform
 import copy
 import math
 
@@ -10,13 +11,14 @@ import glob
 from PIL import Image
 import os
 
-def generate_dataset(stage, specifics):
+
+def generate_dataset(input_channel,input_width,input_height, stage, specifics):
     # a function to generate the corresponding dataset with given parameters. return an instance of the dataset class.
     if(stage == 'testing'):
         return 1
 
 
-    Training_labels = getTrainingLabels(stage, specifics)
+    Training_labels = getTrainingLabels(input_channel,input_width,input_height, stage, specifics)
 
     nrtrain = specifics['nrtrain']
     batch_size = specifics['batch_size']
@@ -108,12 +110,39 @@ def psnr(img1, img2):
     PIXEL_MAX = 255.0
     return 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
 
-def getTrainingLabels(stage, specifics):
+def getTrainingLabels(input_channel,input_width,input_height, stage, specifics):
     if (specifics['create_custom_dataset'] == True):
         Training_data = createTrainingLabels(stage, specifics)
     else:
         Training_data = specifics['training_data_fileName']
-        if(specifics['training_data_type'] == 'mat'):
+        if specifics['training_data_fileName'] == 'mnist':
+            Training_data = datasets.MNIST(root='./data/testDatasetDownload', train=True, download=True,
+                                           transform=transforms.Compose([
+                                               transforms.Resize(input_width),
+                                               transforms.CenterCrop(input_width),
+                                               transforms.ToTensor()
+                                           ]))
+            Training_data = Training_data.data.numpy()
+            Training_data = Training_data.reshape((-1, input_channel*input_width*input_height)) / 255
+        elif specifics['training_data_fileName'] == 'cifar10/testDatasetDownload':
+            Training_data = datasets.CIFAR10(root='./data', train=True, download=True,
+                                             transform=transforms.Compose([
+                                                 transforms.Resize(input_width),
+                                                 transforms.CenterCrop(input_width),
+                                                 transforms.ToTensor()
+                                             ]))
+            Training_data = Training_data.data.numpy()
+            Training_data = Training_data.reshape((-1, input_channel*input_width*input_height)) / 255
+        elif specifics['training_data_fileName'] == 'celeba/testDatasetDownload':
+            Training_data = datasets.CelebA(root='./data', split="train", download=True,
+                                            transform=transforms.Compose([
+                                                transforms.Resize(input_width),
+                                                transforms.CenterCrop(input_width),
+                                                transforms.ToTensor()
+                                            ]))
+            Training_data = Training_data.data.numpy()
+            Training_data = Training_data.reshape((-1, input_channel*input_width*input_height)) / 255
+        elif(specifics['training_data_type'] == 'mat'):
             Training_data = sio.loadmat('./%s/%s.mat' % (specifics['data_dir'], Training_data))
             Training_data = Training_data['labels']
         elif(specifics['training_data_type'] == 'npy'):
@@ -140,8 +169,8 @@ def createTrainingLabels(stage, specifics):
             img = Image.open(file)
             img = np.array(img)
             # convert to grayscale if in RGB
-            if (len(img.shape) == 3):
-                img = np.mean(img, 2)
+            # if (len(img.shape) == 3):
+            #     img = np.mean(img, 2)
             # scale to 1-dimensional vector between 0 and 1
             img = img.reshape((-1)) / 255
             Training_labels.append(img)

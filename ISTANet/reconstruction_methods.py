@@ -89,7 +89,10 @@ class ISTANet_wrapper():
             #     Phi_input, Qinit = sensing_methods.computInitMxScratch(Training_labels=Training_labels,
             #                                                            specifics=self.specifics)
             # else:
-            Training_labels = utils.getTrainingLabels(self.specifics['stage'], self.specifics)
+            input_channel = 1
+            input_width = self.specifics['input_width']
+            input_height = self.specifics['input_width']
+            Training_labels = utils.getTrainingLabels(input_channel,input_width,input_height,self.specifics['stage'], self.specifics)
             Phi_input, Qinit = sensing_methods.computInitMx(Training_labels=Training_labels,
                                                             specifics=self.specifics)
 
@@ -185,7 +188,11 @@ class ISTANet_wrapper():
             PSNR_All = np.zeros([1, ImgNum], dtype=np.float32)
             SSIM_All = np.zeros([1, ImgNum], dtype=np.float32)
 
-            Training_labels = utils.getTrainingLabels(self.specifics['stage'], self.specifics)
+            input_channel = 1
+            input_width = self.specifics['input_width']
+            input_height = self.specifics['input_width']
+            Training_labels = utils.getTrainingLabels(input_channel, input_width, input_height, self.specifics['stage'],
+                                                      self.specifics)
             Phi_input, Qinit = sensing_methods.computInitMx(Training_labels=Training_labels, specifics=self.specifics)
 
             Phi = torch.from_numpy(Phi_input).type(torch.FloatTensor)
