@@ -10,42 +10,43 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
         input_height = 33 # restricted to 33
         m = 1089
         n = 272 # ratio_dict = {1: 10, 4: 43, 10: 109, 25: 272, 30: 327, 40: 436, 50: 545}
-        # specifics = {
-        #     'stage': stage,
-        #     'start_epoch': 0,
-        #     'end_epoch': 200,
-        #     'testing_epoch_num': 60,
-        #     'learning_rate': 1e-4,
-        #     'layer_num': 9,
-        #     'group_num': 2, # check to make sure group matches folder
-        #     'cs_ratio': 25,
-        #     'input_width': input_width,
-        #     'n': n,
-        #     'm': m,
-        #     'nrtrain': 88912,
-        #     'batch_size': 64,
-        #
-        #     'model_dir': 'model',
-        #     'log_dir': 'log',
-        #     'data_dir': 'data',
-        #     'result_dir': 'result',
-        #     'matrix_dir': 'sampling_matrix',
-        #
-        #     'use_universal_matrix': False, # unused in original
-        #     'create_custom_dataset': False, # unused in original
-        #     'custom_dataset_name': "", # unused in original
-        #     'custom_training_data_location': '', # unused in original
-        #     'custom_type_of_image': '', # unused in original
-        #
-        #     'training_data_fileName': 'Training_Data',
-        #     'training_data_type': 'mat',
-        #     'Testing_data_location': 'Set11',
-        #     'testing_data_isFolderImages': True,
-        #     'testing_data_type': 'tif',
-        # }
+        specifics = {
+            'stage': stage,
+            'start_epoch': 0,
+            'end_epoch': 200,
+            'testing_epoch_num': 60,
+            'learning_rate': 1e-4,
+            'layer_num': 9,
+            'group_num': 2, # check to make sure group matches folder
+            'cs_ratio': 25,
+            'input_channel': input_channel,
+            'input_width': input_width,
+            'n': n,
+            'm': m,
+            'nrtrain': 88912,
+            'batch_size': 64,
 
-        with open('./original_specifics.json', 'r') as fp:
-            specifics = json.load(fp)
+            'model_dir': 'model',
+            'log_dir': 'log',
+            'data_dir': 'data',
+            'result_dir': 'result',
+            'matrix_dir': 'sampling_matrix',
+
+            'use_universal_matrix': False, # unused in original
+            'create_custom_dataset': False, # unused in original
+            'custom_dataset_name': "", # unused in original
+            'custom_training_data_location': '', # unused in original
+            'custom_type_of_image': '', # unused in original
+
+            'training_data_fileName': 'Training_Data',
+            'training_data_type': 'mat',
+            'Testing_data_location': 'Set11',
+            'testing_data_isFolderImages': True,
+            'testing_data_type': 'tif',
+        }
+
+        # with open('./original_specifics.json', 'r') as fp:
+        #     specifics = json.load(fp)
 
 
     dset = utils.generate_dataset(input_channel,input_width,input_height, stage, specifics)
@@ -55,6 +56,7 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
     reconstruction_method.run()
         
 if __name__ == "__main__":
+    input_channel = 1
     input_width = 28
     ratio = 25
     stage = 'testing'
@@ -81,6 +83,7 @@ if __name__ == "__main__":
             'layer_num': 9,
             'group_num': 69, # organizational purposes
             'cs_ratio': ratio,
+            'input_channel': input_channel,
             'input_width': input_width,
             'n': n,
             'm': m,

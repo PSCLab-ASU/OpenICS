@@ -89,7 +89,7 @@ class ISTANet_wrapper():
             #     Phi_input, Qinit = sensing_methods.computInitMxScratch(Training_labels=Training_labels,
             #                                                            specifics=self.specifics)
             # else:
-            input_channel = 1
+            input_channel = self.specifics['input_channel']
             input_width = self.specifics['input_width']
             input_height = self.specifics['input_width']
             Training_labels = utils.getTrainingLabels(input_channel,input_width,input_height,self.specifics['stage'], self.specifics)
@@ -188,7 +188,7 @@ class ISTANet_wrapper():
             PSNR_All = np.zeros([1, ImgNum], dtype=np.float32)
             SSIM_All = np.zeros([1, ImgNum], dtype=np.float32)
 
-            input_channel = 1
+            input_channel = self.specifics['input_channel']
             input_width = self.specifics['input_width']
             input_height = self.specifics['input_width']
             Training_labels = utils.getTrainingLabels(input_channel, input_width, input_height, self.specifics['stage'],
