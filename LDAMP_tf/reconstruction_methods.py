@@ -9,7 +9,7 @@ import random
 import sensing_methods
 import utils
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]='0'
+os.environ["CUDA_VISIBLE_DEVICES"]='0,1,2'
 def reconstruction_method(dset,sensing_method,specifics):
     method = LDAMP_wrapper(sensing_method, specifics)
     return method
@@ -242,7 +242,7 @@ class LDAMP_wrapper():
                         print("Load Initial Weights ...")
                         if ResumeTraining or learning_rate != learning_rates[0]:
                             ##Load previous values for the weights and BNs
-                            saver_initvars_name_chckpt = utils.GenDnCNNFilename(sigma_w_min, sigma_w_max,useSURE=useSURE) + ".ckpt"
+                            saver_initvars_name_chckpt = utils.GenDnCNNFilename(sigma_w_min, sigma_w_max,useSURE=useSURE, specifics=self.specifics) + ".ckpt"
                             for l in range(0, n_DnCNN_layers):
                                 saver_dict.update({"l" + str(l) + "/w": theta_dncnn[0][l]})
                             for l in range(1, n_DnCNN_layers - 1):  # Associate variance, means, and beta
@@ -268,7 +268,7 @@ class LDAMP_wrapper():
 
                         print("Training ...")
                         print()
-                        save_name = utils.GenDnCNNFilename(sigma_w_min, sigma_w_max, useSURE=useSURE)
+                        save_name = utils.GenDnCNNFilename(sigma_w_min, sigma_w_max, useSURE=useSURE, specifics=self.specifics)
                         save_name_chckpt = save_name + ".ckpt"
                         val_values = []
                         print("Initial Weights Validation Value:")
@@ -398,8 +398,9 @@ class LDAMP_wrapper():
                 # TODO major change
                 ## Load and Preprocess Test Data
                 test_images = utils.generate_testset(channel_img, width_img, height_img, self.specifics)
-                test_images = test_images[:, 0, :, :]
+                # test_images = test_images[:, 0, :, :]
                 assert (len(test_images) >= BATCH_SIZE), "Requested too much Test data"
+
 
                 x_test = np.transpose(
                     np.reshape(test_images[0:BATCH_SIZE], (BATCH_SIZE, height_img * width_img * channel_img)))
@@ -440,7 +441,7 @@ class LDAMP_wrapper():
                     # sigma_w_min = sigma_w * 255.
                     # sigma_w_max = sigma_w * 255.
 
-                    save_name = utils.GenDnCNNFilename(sigma_w_min / 255., sigma_w_max / 255., useSURE=useSURE)
+                    save_name = utils.GenDnCNNFilename(sigma_w_min / 255., sigma_w_max / 255., useSURE=useSURE, specifics=self.specifics)
                     save_name_chckpt = save_name + ".ckpt"
                     saver.restore(sess, save_name_chckpt)
 
@@ -448,20 +449,53 @@ class LDAMP_wrapper():
                     start_time = time.time()
                     [reconstructed_test_images] = sess.run([x_hat], feed_dict={y_measured: y_test})
                     time_taken = time.time() - start_time
-                    fig1 = plt.figure()
-                    plt.imshow(np.transpose(np.reshape(x_test[:, 0], (height_img, width_img))), interpolation='nearest',
-                               cmap='gray')
-                    plt.show()
-                    fig2 = plt.figure()
-                    plt.imshow(np.transpose(np.reshape(y_test[:, 0], (height_img, width_img))), interpolation='nearest',
-                               cmap='gray')
-                    plt.show()
-                    fig3 = plt.figure()
-                    plt.imshow(np.transpose(np.reshape(reconstructed_test_images[:, 0], (height_img, width_img))),
-                               interpolation='nearest', cmap='gray')
-                    plt.show()
-                    [_, _, PSNR] = utils.EvalError_np(x_test[:, 0], reconstructed_test_images[:, 0])
-                    print(" PSNR: ", PSNR)
+
+                    # take first image in batch and display
+                    if (self.specifics['sudo_rgb']):
+                        fig1 = plt.figure()
+                        x_recombined = np.reshape(np.transpose(x_test)[:3], (height_img * width_img * 3))
+                        plt.imshow(np.reshape(x_recombined, (height_img, width_img, 3)))
+                        plt.show()
+                        fig2 = plt.figure()
+                        x_recombined = np.reshape(np.transpose(y_test)[:3], (height_img * width_img * 3))
+                        plt.imshow(np.reshape(x_recombined, (height_img, width_img, 3)))
+                        plt.show()
+                        fig3 = plt.figure()
+                        x_recombined = np.reshape(np.transpose(reconstructed_test_images)[:3],
+                                                  (height_img * width_img * 3))
+                        plt.imshow(np.reshape(x_recombined, (height_img, width_img, 3)))
+                        plt.show()
+                        [_, _, PSNR] = utils.EvalError_np(x_test, reconstructed_test_images)
+                        print(" PSNR: ", PSNR)
+                        print(" Average: ", np.average(PSNR))
+                    elif(channel_img == 1):
+                        fig1 = plt.figure()
+                        plt.imshow(np.transpose(np.reshape(x_test[:, 0], (height_img, width_img))), interpolation='nearest')
+                        plt.show()
+                        fig2 = plt.figure()
+                        plt.imshow(np.transpose(np.reshape(y_test[:, 0], (height_img, width_img))), interpolation='nearest',
+                                   cmap='gray')
+                        plt.show()
+                        fig3 = plt.figure()
+                        plt.imshow(np.transpose(np.reshape(reconstructed_test_images[:, 0], (height_img, width_img))),
+                                   interpolation='nearest', cmap='gray')
+                        plt.show()
+                        [_, _, PSNR] = utils.EvalError_np(x_test[:, 0], reconstructed_test_images[:, 0])
+                        print(" PSNR: ", PSNR)
+                        print(" Average: ", np.average(PSNR))
+                    else:
+                        fig1 = plt.figure()
+                        plt.imshow(np.reshape(x_test[:, 0], (height_img, width_img, 3)))
+                        plt.show()
+                        fig2 = plt.figure()
+                        plt.imshow(np.reshape(y_test[:, 0], (height_img, width_img, 3)))
+                        plt.show()
+                        fig3 = plt.figure()
+                        plt.imshow(np.reshape(reconstructed_test_images[:, 0], (height_img, width_img, 3)))
+                        plt.show()
+                        [_, _, PSNR] = utils.EvalError_np(x_test, reconstructed_test_images)
+                        print(" PSNR: ", PSNR)
+                        print(" Average: ", np.average(PSNR))
         else:
             if (stage == 'training'):
                 for n_DAMP_layers in range(start_layer, max_n_DAMP_layers + 1, 1):
@@ -616,7 +650,7 @@ class LDAMP_wrapper():
                             print("Load Initial Weights ...")
                             if ResumeTraining or learning_rate != learning_rates[0]:
                                 ##Load previous values for the weights
-                                saver_initvars_name_chckpt = utils.GenLDAMPFilename(alg, tie_weights, LayerbyLayer,loss_func=loss_func) + ".ckpt"
+                                saver_initvars_name_chckpt = utils.GenLDAMPFilename(alg, tie_weights, LayerbyLayer,loss_func=loss_func, specifics=self.specifics) + ".ckpt"
                                 for iter in range(n_layers_trained):  # Create a dictionary with all the variables except those associated with the optimizer.
                                     for l in range(0, n_DnCNN_layers):
                                         saver_dict.update({"Iter" + str(iter) + "/l" + str(l) + "/w": theta[iter][0][l]})  # ,
@@ -644,7 +678,7 @@ class LDAMP_wrapper():
                                 # To confirm weights were actually loaded, run sess.run(theta[0][0][0][0][0])[0][0]) before and after this statement. (Requires running sess.run(tf.global_variables_initializer()) first
                                 if InitWeightsMethod == 'layer_by_layer':
                                     # load the weights from an identical network that was trained layer-by-layer
-                                    saver_initvars_name_chckpt = utils.GenLDAMPFilename(alg, tie_weights, LayerbyLayer=True,loss_func=loss_func) + ".ckpt"
+                                    saver_initvars_name_chckpt = utils.GenLDAMPFilename(alg, tie_weights, LayerbyLayer=True,loss_func=loss_func, specifics=self.specifics) + ".ckpt"
                                     for iter in range(n_layers_trained):  # Create a dictionary with all the variables except those associated with the optimizer.
                                         for l in range(0, n_DnCNN_layers):
                                             saver_dict.update(
@@ -669,7 +703,7 @@ class LDAMP_wrapper():
                                         saver_initvars.restore(sess, saver_initvars_name_chckpt)
                                 if InitWeightsMethod == 'denoiser':
                                     # load initial weights that were trained on a denoising problem
-                                    saver_initvars_name_chckpt = utils.GenDnCNNFilename(300. / 255., 500. / 255.) + ".ckpt"
+                                    saver_initvars_name_chckpt = utils.GenDnCNNFilename(300. / 255., 500. / 255., specifics=self.specifics) + ".ckpt"
                                     iter = 0
                                     for l in range(0, n_DnCNN_layers):
                                         saver_dict.update({"l" + str(l) + "/w": theta[iter][0][
@@ -693,7 +727,8 @@ class LDAMP_wrapper():
                                     # Initialize wieghts using a smaller network's weights
                                     saver_initvars_name_chckpt = utils.GenLDAMPFilename(alg, tie_weights, LayerbyLayer,
                                                                                         n_DAMP_layer_override=n_DAMP_layers - 1,
-                                                                                        loss_func=loss_func) + ".ckpt"
+                                                                                        loss_func=loss_func,
+                                                                                        specifics=self.specifics) + ".ckpt"
 
                                     # Load the first n-1 iterations weights from a previously learned network
                                     for iter in range(n_DAMP_layers - 1):
@@ -748,7 +783,7 @@ class LDAMP_wrapper():
 
                             print("Training ...")
                             print()
-                            save_name = utils.GenLDAMPFilename(alg, tie_weights, LayerbyLayer, loss_func=loss_func)
+                            save_name = utils.GenLDAMPFilename(alg, tie_weights, LayerbyLayer, loss_func=loss_func, specifics=self.specifics)
                             save_name_chckpt = save_name + ".ckpt"
                             val_values = []
                             print("Initial Weights Validation Value:")
@@ -933,7 +968,7 @@ class LDAMP_wrapper():
                 # test_im_name = self.specifics['testing_patch']
                 # TODO major change
                 test_images = utils.generate_testset(channel_img, width_img, height_img, self.specifics)
-                test_images = test_images[:n_Test_Images, 0, :, :]
+                # test_images = test_images[:n_Test_Images, 0, :, :]
                 assert (len(test_images) >= n_Test_Images), "Requested too much Test data"
 
                 x_test = np.transpose(np.reshape(test_images, (-1, height_img * width_img * channel_img)))
@@ -951,7 +986,7 @@ class LDAMP_wrapper():
 
                 with tf.Session(config=config) as sess:
                     if tie_weights == 1:  # Load weights from pretrained denoiser
-                        save_name = utils.GenDnCNNFilename(80. / 255.) + ".ckpt"
+                        save_name = utils.GenDnCNNFilename(80. / 255., specifics=self.specifics) + ".ckpt"
                         for l in range(0, n_DnCNN_layers):
                             saver_dict.update(
                                 {"l" + str(l) + "/w": theta[0][0][l]})  # , "l" + str(l) + "/b": theta[0][1][l]})
@@ -974,7 +1009,7 @@ class LDAMP_wrapper():
                         for noise_level in range(len(noise_min_stds)):
                             noise_min_std = noise_min_stds[noise_level]
                             noise_max_std = noise_max_stds[noise_level]
-                            save_name = utils.GenDnCNNFilename(noise_min_std / 255., noise_max_std / 255.) + ".ckpt"
+                            save_name = utils.GenDnCNNFilename(noise_min_std / 255., noise_max_std / 255., specifics=self.specifics) + ".ckpt"
                             for l in range(0, n_DnCNN_layers):
                                 saver_dict.update({"l" + str(l) + "/w": theta[noise_level][0][
                                     l]})  # , "l" + str(l) + "/b": theta[noise_level][1][l]})
@@ -997,7 +1032,8 @@ class LDAMP_wrapper():
                         # save_name = LDAMP.GenLDAMPFilename(alg, tie_weights, LayerbyLayer) + ".ckpt"
                         save_name = utils.GenLDAMPFilename(alg, tie_weights, LayerbyLayer,
                                                            sampling_rate_override=sampling_rate_train,
-                                                           loss_func=TrainLoss) + ".ckpt"
+                                                           loss_func=TrainLoss,
+                                                           specifics=self.specifics) + ".ckpt"
                         saver.restore(sess, save_name)
 
                     print("Reconstructing Signal")
@@ -1033,6 +1069,47 @@ class LDAMP_wrapper():
                     plt.plot(range(n_DAMP_layers + 1), np.mean(batch_PSNR_hist, axis=1))
                     plt.title("PSNR over " + str(alg) + " layers")
                     plt.show()
+                    if (self.specifics['sudo_rgb']):
+                        fig1 = plt.figure()
+                        x_recombined = np.reshape(np.transpose(x_test)[:n_Test_Images - 1],
+                                                  (height_img * width_img * 3))
+                        plt.imshow(np.reshape(x_recombined, (height_img, width_img, 3)))
+                        plt.show()
+                        fig2 = plt.figure()
+                        x_recombined = np.reshape(np.transpose(batch_x_recon)[:3], (height_img * width_img * 3))
+                        plt.imshow(np.reshape(x_recombined, (height_img, width_img, 3)))
+                        plt.show()
+                        fig3 = plt.figure()
+                        plt.plot(range(n_DAMP_layers + 1), np.mean(batch_PSNR_hist, axis=1))
+                        plt.title("PSNR over " + str(alg) + " layers")
+                        plt.show()
+                    elif(channel_img == 1):
+                        fig1 = plt.figure()
+                        plt.imshow(np.transpose(np.reshape(x_test[:, n_Test_Images - 1], (height_img, width_img))),
+                                   interpolation='nearest')
+                        plt.show()
+                        fig2 = plt.figure()
+                        plt.imshow(np.transpose(np.reshape(batch_x_recon[:, 0], (height_img, width_img))),
+                                   interpolation='nearest',
+                                   cmap='gray')
+                        plt.show()
+                        fig3 = plt.figure()
+                        plt.plot(range(n_DAMP_layers + 1), np.mean(batch_PSNR_hist, axis=1))
+                        plt.title("PSNR over " + str(alg) + " layers")
+                        plt.show()
+                    else:
+                        fig1 = plt.figure()
+                        plt.imshow(x_test[:, n_Test_Images - 1], (height_img, width_img, 3))
+                        plt.show()
+                        fig2 = plt.figure()
+                        plt.imshow(np.reshape(batch_x_recon[:, 0], (height_img, width_img, 3)))
+                        plt.show()
+                        fig3 = plt.figure()
+                        plt.show()
+                        fig3 = plt.figure()
+                        plt.plot(range(n_DAMP_layers + 1), np.mean(batch_PSNR_hist, axis=1))
+                        plt.title("PSNR over " + str(alg) + " layers")
+                        plt.show()
 
 __author__ = 'cmetzler&alimousavi'
 

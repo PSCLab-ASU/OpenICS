@@ -2,11 +2,12 @@
 import tensorflow.compat.v1 as tf
 tf.disable_eager_execution()
 # import tensorflow as tf
+
 import numpy as np
 import os
 import glob
 from PIL import Image
-os.environ["CUDA_VISIBLE_DEVICES"]='0'
+os.environ["CUDA_VISIBLE_DEVICES"]='0,1,2'
 
 def SetNetworkParams(new_height_img, new_width_img,new_channel_img, new_filter_height,new_filter_width,\
                      new_num_filters,new_n_DnCNN_layers,new_n_DAMP_layers, new_sampling_rate,\
@@ -54,9 +55,16 @@ def generate_dataset(dataset,input_channel,input_width,input_height,stage, speci
                 with open(image, 'rb') as file:
                     img = Image.open(file)
                     img = np.array(img)
-                    # scale to between 0 and 1
-                    img = img.reshape((input_channel, input_width, input_height)) / 255
-                    data.append(img)
+                    if(specifics['sudo_rgb']):
+                        # scale to between 0 and 1
+                        img = img.reshape((3, input_width, input_height)) / 255
+                        data.append(img[0].reshape((1, input_width, input_height)))
+                        data.append(img[1].reshape((1, input_width, input_height)))
+                        data.append(img[2].reshape((1, input_width, input_height)))
+                    else:
+                        # scale to between 0 and 1
+                        img = img.reshape((input_channel, input_width, input_height)) / 255
+                        data.append(img)
             data = np.array(data)
 
             if (not (os.path.exists("./Data"))):
@@ -77,21 +85,28 @@ def generate_testset(input_channel,input_width,input_height,specifics):
             data = np.load('./Data/' + specifics['testset_custom_name'] + '.npy')
         else:
             data = []
-            if (specifics['custom_type_of_image'] == "bmp"):
-                images = glob.glob(specifics['new_data'] + "/*.bmp")
-            if (specifics['custom_type_of_image'] == "tif"):
-                images = glob.glob(specifics['new_data'] + "/*.tif")
-            if (specifics['custom_type_of_image'] == "jpg"):
-                images = glob.glob(specifics['new_data'] + "/*.jpg")
-            if (specifics['custom_type_of_image'] == "png"):
-                images = glob.glob(specifics['new_data'] + "/*.png")
+            if (specifics['testing_data_type'] == "bmp"):
+                images = glob.glob(specifics['new_test_data'] + "/*.bmp")
+            if (specifics['testing_data_type'] == "tif"):
+                images = glob.glob(specifics['new_test_data'] + "/*.tif")
+            if (specifics['testing_data_type'] == "jpg"):
+                images = glob.glob(specifics['new_test_data'] + "/*.jpg")
+            if (specifics['testing_data_type'] == "png"):
+                images = glob.glob(specifics['new_test_data'] + "/*.png")
             for image in images:
                 with open(image, 'rb') as file:
                     img = Image.open(file)
                     img = np.array(img)
-                    # scale to between 0 and 1
-                    img = img.reshape((input_channel, input_width, input_height)) / 255
-                    data.append(img)
+                    if (specifics['sudo_rgb']):
+                        # scale to between 0 and 1
+                        img = img.reshape((3, input_width, input_height)) / 255
+                        data.append(img[0].reshape((1, input_width, input_height)))
+                        data.append(img[1].reshape((1, input_width, input_height)))
+                        data.append(img[2].reshape((1, input_width, input_height)))
+                    else:
+                        # scale to between 0 and 1
+                        img = img.reshape((input_channel, input_width, input_height)) / 255
+                        data.append(img)
             data = np.array(data)
 
             if (not (os.path.exists("./Data"))):
@@ -100,6 +115,7 @@ def generate_testset(input_channel,input_width,input_height,specifics):
             print("################################################################"
                   + "\nCreated new file: ./Data/" + specifics['testset_custom_name'] + ".npy"
                   + "\n################################################################\n")
+
     return data
 
 def splitDataset(dset, specifics):
@@ -204,7 +220,7 @@ def AddNoise_np(clean,sigma):
     return noisy
 
 ##Create a string that generates filenames. Ensures consitency between functions
-def GenLDAMPFilename(alg,tie_weights,LayerbyLayer,n_DAMP_layer_override=None,sampling_rate_override=None,loss_func='MSE'):
+def GenLDAMPFilename(alg,tie_weights,LayerbyLayer,n_DAMP_layer_override=None,sampling_rate_override=None,loss_func='MSE', specifics=None):
     if n_DAMP_layer_override:
         n_DAMP_layers_save=n_DAMP_layer_override
     else:
@@ -213,21 +229,41 @@ def GenLDAMPFilename(alg,tie_weights,LayerbyLayer,n_DAMP_layer_override=None,sam
         sampling_rate_save=sampling_rate_override
     else:
         sampling_rate_save=sampling_rate
+    filename = "./saved_models/"
+    if (not (os.path.exists(filename))):
+        os.mkdir(filename)
+    filename = "./saved_models/" + specifics['save_folder_name']
+    if (not (os.path.exists(filename))):
+        os.mkdir(filename)
+    filename = "./saved_models/" + specifics['save_folder_name'] + "/LDAMP"
+    if (not (os.path.exists(filename))):
+        os.mkdir(filename)
+
     if loss_func=='SURE':
-        filename = "./saved_models/LDAMP/SURE_"+alg+"_" + str(n_DnCNN_layers) + "DnCNNL_" + str(int(n_DAMP_layers_save)) + "DAMPL_Tie"+str(tie_weights)+"_LbyL"+str(LayerbyLayer)+"_SR" +str(int(sampling_rate_save*100))
+        filename = filename + "/SURE_"+alg+"_" + str(n_DnCNN_layers) + "DnCNNL_" + str(int(n_DAMP_layers_save)) + "DAMPL_Tie"+str(tie_weights)+"_LbyL"+str(LayerbyLayer)+"_SR" +str(int(sampling_rate_save*100))
     elif loss_func=='GSURE':
-        filename = "./saved_models/LDAMP/GSURE_"+alg+"_" + str(n_DnCNN_layers) + "DnCNNL_" + str(int(n_DAMP_layers_save)) + "DAMPL_Tie"+str(tie_weights)+"_LbyL"+str(LayerbyLayer)+"_SR" +str(int(sampling_rate_save*100))
+        filename = filename + "/GSURE_"+alg+"_" + str(n_DnCNN_layers) + "DnCNNL_" + str(int(n_DAMP_layers_save)) + "DAMPL_Tie"+str(tie_weights)+"_LbyL"+str(LayerbyLayer)+"_SR" +str(int(sampling_rate_save*100))
     else:
-        filename = "./saved_models/LDAMP/"+alg+"_" + str(n_DnCNN_layers) + "DnCNNL_" + str(int(n_DAMP_layers_save)) + "DAMPL_Tie"+str(tie_weights)+"_LbyL"+str(LayerbyLayer)+"_SR" +str(int(sampling_rate_save*100))
+        filename = filename + "/"+alg+"_" + str(n_DnCNN_layers) + "DnCNNL_" + str(int(n_DAMP_layers_save)) + "DAMPL_Tie"+str(tie_weights)+"_LbyL"+str(LayerbyLayer)+"_SR" +str(int(sampling_rate_save*100))
     return filename
 
 ##Create a string that generates filenames. Ensures consitency between functions
-def GenDnCNNFilename(sigma_w_min,sigma_w_max,useSURE=False):
+def GenDnCNNFilename(sigma_w_min,sigma_w_max,useSURE=False, specifics=None):
+    filename = "./saved_models/"
+    if (not (os.path.exists(filename))):
+        os.mkdir(filename)
+    filename = "./saved_models/" + specifics['save_folder_name']
+    if (not (os.path.exists(filename))):
+        os.mkdir(filename)
+    filename = "./saved_models/" + specifics['save_folder_name'] + "/DnCNN"
+    if (not (os.path.exists(filename))):
+        os.mkdir(filename)
+
     if useSURE:
-        filename = "./saved_models/DnCNN/SURE_DnCNN_" + str(n_DnCNN_layers) + "L_sigmaMin" + str(
+        filename = filename + "/SURE_DnCNN_" + str(n_DnCNN_layers) + "L_sigmaMin" + str(
             int(255. * sigma_w_min)) + "_sigmaMax" + str(int(255. * sigma_w_max))
     else:
-        filename="./saved_models/DnCNN/DnCNN_" + str(n_DnCNN_layers) + "L_sigmaMin" + str(int(255.*sigma_w_min))+"_sigmaMax" + str(int(255.*sigma_w_max))
+        filename = filename + "/DnCNN_" + str(n_DnCNN_layers) + "L_sigmaMin" + str(int(255.*sigma_w_min))+"_sigmaMax" + str(int(255.*sigma_w_max))
     return filename
 
 ## Calculate Monte Carlo SURE Loss
