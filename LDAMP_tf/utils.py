@@ -7,7 +7,7 @@ import numpy as np
 import os
 import glob
 from PIL import Image
-os.environ["CUDA_VISIBLE_DEVICES"]='0,1,2'
+os.environ["CUDA_VISIBLE_DEVICES"]='2'
 
 def SetNetworkParams(new_height_img, new_width_img,new_channel_img, new_filter_height,new_filter_width,\
                      new_num_filters,new_n_DnCNN_layers,new_n_DAMP_layers, new_sampling_rate,\
@@ -137,6 +137,7 @@ def splitDataset(dset, specifics):
 
         val_images = dset
         val_images = val_images[-1 * specifics['n_Val_Images']:, 0, :, :]
+    
 
     return train_images, val_images
 

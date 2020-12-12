@@ -9,7 +9,7 @@ import random
 import sensing_methods
 import utils
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]='0,1,2'
+os.environ["CUDA_VISIBLE_DEVICES"]='2'
 def reconstruction_method(dset,sensing_method,specifics):
     method = LDAMP_wrapper(sensing_method, specifics)
     return method
@@ -146,6 +146,7 @@ class LDAMP_wrapper():
 
         train_start_time = time.time()
         print('Denoiser by Denoiser: ', self.DenoiserbyDenoiser)
+        print('sudo_rgb: ', self.specifics['sudo_rgb'])
         if(self.DenoiserbyDenoiser):
             if(stage == "training"):
                 if loss_func == 'SURE':
