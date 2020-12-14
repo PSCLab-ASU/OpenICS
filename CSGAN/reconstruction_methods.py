@@ -8,6 +8,7 @@ import utils
 from PIL import Image
 from numpy.random import randn
 import os
+import time
 def reconstruction_method(reconstruction,input_channel, input_width, input_height, m, n,sensing, specifics):
     # a function to return the reconstruction method with given parameters. It's a class with two methods: initialize and run.
     if (reconstruction == 'csgan' or reconstruction == 'CSGAN'):
@@ -23,7 +24,7 @@ class csgan():
         self.n = n
         self.batch_size = specifics["batch_size"]
         self.learnedSensing = specifics["learned_sensing_parameters"]
-        self.datasetName = specifics["dataset"]
+        self.generatorType = specifics["generator"]
         self.lr = specifics['lr']
         self.num_latents = specifics['num_latents']
         self.num_training_iterations = specifics['num_training_iterations']
@@ -50,14 +51,14 @@ class csgan():
          # self.discriminator.apply(init_weights)
         #self.sensing_matrix = torch.normal(mean = 0.0, std = 0.05, size = [self.m,self.n]).cuda() #torch.normal(mean = 0.0, std = 0.05, size = [2,9]).cuda()
 
-        if (self.datasetName == "mnist"):
+        if (self.generatorType == "MLP"):
           self.generator = MLPGeneratorNet(self.num_latents,self.n,self.channels,self.input_width).cuda()
-        elif(self.datasetName == "cifar10" or self.datasetName =="celeba"):
+        elif(self.generatorType == "DCGAN"):
           self.generator = csgm_dcgan_gen(self.num_latents,self.n).cuda()
         self.generator.apply(init_weights)
 
         self.sensing_method = sensing_method(self.n,self.m,self.input_width,self.channels).cuda()
-        if (self.sensing =="NN_mnist" or self.sensing =="NN_celeba"): #if sensing is NN, initialize the weights appropriatelly 
+        if (self.sensing =="NN_MLP" or self.sensing =="NN_DCGAN"): #if sensing is NN, initialize the weights appropriatelly 
          # self.discriminator = sensing_method(self.n, self.m, self.input_width, self.channels).cuda()
           self.sensing_method.apply(init_weights)
 
@@ -83,7 +84,7 @@ class csgan():
     def get_measurement_error(self,target_img,sample_img):
       self.m_targets = self.measure(target_img)
       self.m_samples = self.measure(sample_img)
-
+      
       return torch.sum(torch.square(self.m_targets-self.m_samples),dim=-1)
     def get_rip_loss(self, img1,img2):
       m1 = self.measure(img1)
@@ -125,6 +126,7 @@ class csgan():
       return samples, z_final
     def run(self, stage):
       if (stage == 'training'):
+        trainStartTime = time.time()
         if (self.learnedSensing):
           metric_params = self.sensing_method.parameters()
         else:
@@ -152,9 +154,11 @@ class csgan():
           images, _ = self.trainloader.__iter__().__next__()
           images = images.cuda()
           
+          benchmarkTimeStart = time.time()
           generator_inputs = prior.sample([self.batch_size]).cuda()
           generator_inputs.requires_grad = True
           samples, optimised_z = self.optimise_and_sample(generator_inputs,images,True)   
+          benchmarkTimeEnd = time.time()
           
           optimisation_cost = torch.mean(torch.sum((optimised_z-generator_inputs)**2,-1))
           initial_samples = self.generator.forward(generator_inputs)
@@ -171,9 +175,17 @@ class csgan():
           self.optimizer.step()
 
           recons_loss = torch.mean(torch.norm(torch.flatten(samples,start_dim=1)-torch.flatten(images,start_dim=1),dim=-1,p = None))
-          if (iter % self.summary_every_step ==0):            
-              print("\n\n\niteration: ", iter)
-              print("z_step_size: ", self.s.item())
+          if (iter % self.summary_every_step ==0):    
+              PSNR = utils.compute_average_psnr(images,samples)
+              logOutput = "\n\n\niteration:" +str(iter)
+              logOutput += "\n" + "z_step_size: " + str(self.s.item())
+              logOutput += "\n" + "reconstruction time: " +str((benchmarkTimeEnd-benchmarkTimeStart)/self.batch_size)
+              logOutput += "\n" + "Time since training started:" + (str(time.time()-trainStartTime))
+              logOutput += "\n" + "recons_loss: "+ str(recons_loss.item())   
+              logOutput += "\n" + "PSNR:" +str(PSNR)
+
+              #print("\n\n\niteration: ", iter)
+              #print("z_step_size: ", self.s.item())
              # print("Images mean: ", torch.mean(images).item())
               #print("Initial samples mean: ", torch.mean(initial_samples).item())
               #print("Samples mean: ", torch.mean(samples).item())
@@ -182,13 +194,19 @@ class csgan():
               #print("m_targets mean: ", torch.mean(self.m_targets).item())
               #print("m_samples mean: ", torch.mean(self.m_samples).item())
               #print("opt_cost: ", optimisation_cost.item())
-              print("gen loss:", generator_loss.item())
+              #print("gen loss:", generator_loss.item())
               #print("r1 mean: ", torch.mean(r1).item())
               #print("r2 mean: ", torch.mean(r2).item())
               #print("r3 mean: ", torch.mean(r3).item())
-              print("rip loss: ", rip_loss.item())
+              #print("rip loss: ", rip_loss.item())
               
-              print("recons_loss: ", recons_loss.item())
+              #print("recons_loss: ", recons_loss.item())
+
+              print(logOutput)
+              logFile = open(self.specifics["log_file"],"a") 
+              logFile.write(logOutput)
+              logFile.close()
+
               torchvision.utils.save_image(utils.postprocess(images), "images "+".png")
               torchvision.utils.save_image(utils.postprocess(samples), "samples "+".png")
           if (iter % self.val_every_step == 0):

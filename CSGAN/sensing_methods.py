@@ -7,9 +7,9 @@ def sensing_method(method_name,n,m,imgdim,channel,path = None):
     sensing_method = None
     if method_name == "sensing_matrix":
         sensing_method = random_sensing
-    elif method_name == "NN_mnist":
+    elif method_name == "NN_MLP":
         sensing_method = MLPMetricNet
-    elif method_name == "NN_celeba":
+    elif method_name == "NN_DCGAN":
         sensing_method = csgm_dcgan_disc
     return sensing_method
 

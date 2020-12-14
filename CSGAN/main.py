@@ -20,7 +20,7 @@ def main(reconstruction,sensing,stage,default,dataset,input_channel,input_width,
         input_height = 28 # height
 
 
-    dset=utils.generate_dataset(dataset,input_channel,input_width,input_height,stage=stage)
+    dset=utils.generate_dataset(dataset,input_channel,input_width,input_height,stage,specifics)
     sensing_method= sms.sensing_method(sensing,None, None, None, None)
     reconstruction_method=rms.reconstruction_method(reconstruction,input_channel, input_width, input_height, m, n,sensing, specifics)
 
@@ -39,16 +39,21 @@ if __name__ == "__main__":
             'val_every_step' :500 , #interval for validation
             'num_validation_batches' : 50,
             'num_eval_samples': 10000, ##NOT USED ATM
-            'dataset': 'mnist', # 'The dataset used for learning (cifar10|mnist)'
             'num_z_iters': 3, # 'The number of latent optimisation steps. It falls back to vanilla GAN when num_z_iters is set to 0.'
             'z_step_size': 0.01, # 'Step size for latent optimisation.'
             'lr': 1e-4,
             'z_project_method': 'norm', #The method to project z
-            'output_file': 'saved_models/mytest.pth'  #location where to save output files 
+            'output_file': 'saved_models/mytest.pth',  #location where to save output files 
+            'log_file': 'saved_models/mytest.txt',
+            'generator': "MLP", #should be either MLP (originally used for MNIST) or DCGAN (originally used for CelebA)
+
+            'copy_dataset_source_folder': "C:/Users/PSI497/Desktop/PSClab/datasets/mnist_benchmark",
+            'dataset': './data/mnist',  #train/val/test sets will be loaded from here by default. If the folder does not exist, the program will attempt to create the dataset from the copy_dataset_source_folder, where it assumes a test and train subfolder is present
+            'n_Val_Images': 10000
         }
     main(
         reconstruction= "CSGAN",
-        sensing = "sensing_matrix", #Can be either sensing_matrix or a neural network (NN_mnist or NN_celeba)
+        sensing = "sensing_matrix", #Can be either sensing_matrix or a neural network (NN_MLP or NN_DCGAN)
         stage = "training",
         default = "False",
         dataset = "mnist",

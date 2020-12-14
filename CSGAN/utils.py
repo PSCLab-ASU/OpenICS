@@ -7,102 +7,79 @@ import skimage.measure as skim
 from skimage import io, transform
 import torch
 import os
+import shutil
 import pandas 
 import matplotlib.pyplot as plt
 from PIL import Image
 from typing import Any, Callable, cast, Dict, List, Optional, Tuple
-def generate_dataset(dataset,input_channel,input_width,input_height,stage):
+def generate_dataset(dataset,input_channel,input_width,input_height,stage,specifics):
     trans = PreprocessTransform()
-
-    
-   
+    if not os.path.exists(specifics['dataset']):
+        print("Dataset folder given in specifics does not exist. Attempting to create dataset from source folder...")
+        createDataset(specifics)
     if stage == "testing":
-        test_dataset = None
-        if dataset == 'mnist':
-            test_dataset = datasets.MNIST('./data', train=False, download = True,
-                                        transform=transforms.Compose([
-                                            transforms.Resize(input_width),
-                                            transforms.CenterCrop(input_width),
-                                            transforms.ToTensor(),
-                                            transforms.Lambda(trans)
-                                        ]))
-        elif dataset == 'cifar10':
-            test_dataset = datasets.CIFAR10(root='./data', train=False, download=True,
-                                            transform=transforms.Compose([
-                                                transforms.Resize(input_width),
-                                                transforms.CenterCrop(input_width),
-                                                transforms.ToTensor(),
-                                            transforms.Lambda(trans)
-                                            ]))
-        elif dataset == 'celeba':
-            test_dataset = datasets.CelebA(root='./data', split="test", download=True,
-                                            transform=transforms.Compose([
-                                                transforms.Resize(input_width),
-                                                transforms.CenterCrop(input_width),
-                                                transforms.ToTensor(),
-                                            transforms.Lambda(trans)
-                                            ]))
+        if (not os.path.exists(specifics['dataset']+"/test")):
+            print("Test set could not be found. Please make sure the test set is in the test subfolder.")
+            exit()
+        test_dataset = CustomDataset(specifics["dataset"]+"/test",transform=transforms.Compose([
+                                        transforms.Grayscale(),
+                                        transforms.Resize(input_width),
+                                        transforms.CenterCrop(input_width),
+                                        transforms.ToTensor(),
+                                        transforms.Lambda(trans)                                            
+                                    ]))
         return test_dataset
     elif stage == "training":
-        train_dataset = None
-        val_dataset = None
-        if dataset == 'mnist':
-            custom2 = CustomDataset("data/mnist_benchmark/test",transform=transforms.Compose([
-                                            transforms.Grayscale(),
-                                            transforms.Resize(input_width),
-                                            transforms.CenterCrop(input_width),
-                                            transforms.ToTensor(),
-                                            transforms.Lambda(trans)                                            
-                                        ]))
-            return (custom2, custom2)
-            train_dataset = datasets.MNIST(root='./data', train=True, download=True,
-                                        transform=transforms.Compose([
-                                            transforms.Resize(input_width),
-                                            transforms.CenterCrop(input_width),
-                                            transforms.ToTensor(),
-                                            transforms.Lambda(trans)                                            
-                                        ]))
-            val_dataset = datasets.MNIST(root='./data/val', train=False, download=True,
-                                        transform=transforms.Compose([
-                                            transforms.Resize(input_width),
-                                            transforms.CenterCrop(input_width),
-                                            transforms.ToTensor(),
-                                            transforms.Lambda(trans)
-                                        ]))
-        elif dataset == 'cifar10':
-            train_dataset = datasets.CIFAR10(root='./data',train=True, download=True,
-                                            transform=transforms.Compose([
-                                                transforms.Resize(input_width),
-                                                transforms.CenterCrop(input_width),
-                                                transforms.ToTensor(),
-                                                transforms.Lambda(trans)
-                                            ]))
-
-            val_dataset = datasets.CIFAR10(root='./data',train=False, download=True,
-                                        transform=transforms.Compose([
-                                            transforms.Resize(input_width),
-                                            transforms.CenterCrop(input_width),
-                                            transforms.ToTensor(),
-                                            transforms.Lambda(trans)
-                                        ]))
-        elif dataset == 'celeba':
-            train_dataset = datasets.CelebA(root='./data',split="train", download=True,
-                                            transform=transforms.Compose([
-                                                transforms.Resize(input_width),
-                                                transforms.CenterCrop(input_width),
-                                                transforms.ToTensor(),
-                                                transforms.Lambda(trans)
-                                            ]))
-
-            val_dataset = datasets.CelebA(root='./data',split="valid", download=True,
-                                        transform=transforms.Compose([
-                                            transforms.Resize(input_width),
-                                            transforms.CenterCrop(input_width),
-                                            transforms.ToTensor(),
-                                            transforms.Lambda(trans)
-                                        ]))
+        if (not os.path.exists(specifics['dataset']+"/val")):
+            print("Validation set could not be found. Please make sure the val set is in the val subfolder.")
+            exit()
+        if (not os.path.exists(specifics['dataset']+"/train")):
+            print("Train set could not be found. Please make sure the train set is in the train subfolder.")
+            exit()
+        train_dataset = CustomDataset(specifics["dataset"]+"/train",transform=transforms.Compose([
+                                        transforms.Grayscale(),
+                                        transforms.Resize(input_width),
+                                        transforms.CenterCrop(input_width),
+                                        transforms.ToTensor(),
+                                        transforms.Lambda(trans)                                            
+                                    ]))
+        val_dataset = CustomDataset(specifics["dataset"]+"/val",transform=transforms.Compose([
+                                        transforms.Grayscale(),
+                                        transforms.Resize(input_width),
+                                        transforms.CenterCrop(input_width),
+                                        transforms.ToTensor(),
+                                        transforms.Lambda(trans)                                            
+                                    ]))
         return (train_dataset, val_dataset)
+        
+        
+def createDataset(specifics):
+    
+    if (os.path.exists(specifics['copy_dataset_source_folder']) and  os.path.exists(specifics['copy_dataset_source_folder']+"/train") and  os.path.exists(specifics['copy_dataset_source_folder']+"/test")):
+        from pathlib import Path
+        Path(specifics['dataset']+"/train").mkdir(parents=True, exist_ok=True)
+        Path(specifics['dataset']+"/val").mkdir(parents=True, exist_ok=True)
+        Path(specifics['dataset']+"/test").mkdir(parents=True, exist_ok=True)
+        datapaths = os.listdir(specifics["copy_dataset_source_folder"]+"/train")
+        np.random.shuffle(datapaths)
+        cutoff = len(datapaths) - specifics['n_Val_Images']
+        for i in range (len(datapaths)):
+            filename = str(datapaths[i])
+            source = specifics["copy_dataset_source_folder"]+"/train/" + filename
+            if (i < cutoff):
+                shutil.copyfile(source,specifics['dataset'] + "/train/"+ filename)
+            else:
+                shutil.copyfile(source,specifics['dataset'] + "/val/"+ filename)
+        datapaths = os.listdir(specifics["copy_dataset_source_folder"]+"/test")
+        for i in range (len(datapaths)):
+            filename = str(datapaths[i])
+            source = specifics["copy_dataset_source_folder"]+"/test/" + filename
+            shutil.copyfile(source,specifics['dataset'] + "/test/"+ filename)
+    else:
+        print("Could not find source folder to create datasets from. Please make sure the source folder has both test and train subfolders")
+        exit()
 
+    return
 class PreprocessTransform: 
     def __call__(self, x):
         x = x*2-1
@@ -118,6 +95,8 @@ def addNoise(clean, sigma):
     return noisy
 def compute_average_psnr(img,img_hat):
     sz=img.size(0)
+    img = img.cpu()
+    img_hat = img_hat.cpu().detach()
     return sum([skim.compare_psnr(img[i,:,:,:].numpy()/2.0+0.5,img_hat[i,:,:,:].numpy()/2.0+0.5,data_range=1.0) for i in range(sz)])/sz
 
 def make_prior(num_latents):
