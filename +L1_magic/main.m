@@ -60,15 +60,18 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
     end
     
     % Set default colored reconstruction mode
-    if ~isfield(specifics, 'colored_reconstruction_mode') && input_channel > 1 && ~strcmp(reconstruction, 'DAMP.reconstruction_damp')
+    if ~isfield(specifics, 'colored_reconstruction_mode')
         specifics.colored_reconstruction_mode = 'channelwise';
+    end
+    
+    if strcmp(reconstruction, 'DAMP.reconstruction_damp')
+        specifics.colored_reconstruction_mode = 'vectorized';
     end
     
     method_name = strsplit(reconstruction,'.');
     method_name = method_name{end};
     [~,data_name,extension_name] = fileparts(img_path);
     [A,At] = get_sensing_handles(sensing,input_channel,input_width,input_height,m,specifics);
-    reconstruction_method = str2func(reconstruction);
     
     if isfolder(img_path)
         folder = dir(img_path);
@@ -88,6 +91,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
             num_picks = 16;
         end
         
+        % Variable initialization
         picks = randperm(folder_size, num_picks);
         picks_saved = zeros(folder_size, 1);
         picks_saved(picks) = 1:num_picks;
@@ -99,8 +103,13 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         meta = strings(folder_size+1,1);
         specifics_history = cell(folder_size,1);
         
+        % Set number of workers to 0 (sequential) if unspecified
+        if ~isfield(specifics, 'workers')
+            specifics.workers = 0;
+        end
+        
         % Loop through directory
-        for i = 1:folder_size
+        parfor (i = 1:folder_size, specifics.workers)
             file = folder(i);
             file_path = fullfile(file.folder, file.name);
             
@@ -129,7 +138,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
                 error('ERROR: Image dimensions do not match input size!');
             end
             
-            [file_x_hat,file_metrics,specifics_history{i}] = reconstruct(reconstruction_method,A,At,file_x,input_channel,input_width,input_height,specifics);
+            [file_x_hat,file_metrics,specifics_history{i}] = reconstruct(reconstruction,A,At,file_x,input_channel,input_width,input_height,specifics);
             psnr(i) = file_metrics.psnr;
             ssim(i) = file_metrics.ssim;
             runtime(i) = file_metrics.runtime;
@@ -150,9 +159,9 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         
         % Calculate averages, last entry in all metrics
         avg_entries = and(~isnan(psnr), ~isinf(psnr));
-        psnr(end) = sum(psnr(avg_entries)) / (numel(avg_entries) - 1);
-        ssim(end) = sum(ssim(avg_entries)) / (numel(avg_entries) - 1);
-        runtime(end) = sum(runtime(avg_entries)) / (numel(avg_entries) - 1);
+        psnr(end) = sum(psnr(avg_entries)) / (nnz(avg_entries) - 1);
+        ssim(end) = sum(ssim(avg_entries)) / (nnz(avg_entries) - 1);
+        runtime(end) = sum(runtime(avg_entries)) / (nnz(avg_entries) - 1);
         meta(end) = 'Average';
         
         % Save to log file
@@ -176,7 +185,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
             error('ERROR: Image dimensions do not match input size!');
         end
         
-        [x_hat,metrics,specifics] = reconstruct(reconstruction_method,A,At,x,input_channel,input_width,input_height,specifics);
+        [x_hat,metrics,specifics] = reconstruct(reconstruction,A,At,x,input_channel,input_width,input_height,specifics);
         metrics.meta = string([data_name, extension_name]);
         
         % Save to log file
@@ -226,7 +235,7 @@ function [A, At] = get_sensing_handles(sensing,channel,width,height,m,specifics)
     slicing = isfield(specifics, 'slice_size');
     sensing = str2func(sensing);
 
-    if channel > 1 && strcmp(specifics.colored_reconstruction_mode,'channelwise')
+    if isfield(specifics, 'colored_reconstruction_mode') && strcmp(specifics.colored_reconstruction_mode,'channelwise')
         m = round(m / channel);
         
         if slicing
@@ -248,12 +257,12 @@ function [A, At] = get_sensing_handles(sensing,channel,width,height,m,specifics)
     [A, At] = sensing(img_dims, m);
 end
 
-function [x_hat,metrics,specifics] = reconstruct(reconstruction_method,A,At,x,channel,width,height,specifics)
+function [x_hat,metrics,specifics] = reconstruct(reconstruction,A,At,x,channel,width,height,specifics)
 % Selects a reconstruction mode before actually reconstructing a tensor.
 %
 % Usage: [x_hat,metrics,specifics] = reconstruct(reconstruction_method,A,At,x,channel,width,height,m,n,specifics)
 %
-% reconstruction_method - The reconstruction method handle.
+% reconstruction - The name of the reconstruction method.
 %
 % A - The sensing method handle.
 %
@@ -269,6 +278,8 @@ function [x_hat,metrics,specifics] = reconstruct(reconstruction_method,A,At,x,ch
 %
 % specifics - Any specific parameters for reconstruction.
 %
+    reconstruction_method = str2func(reconstruction);
+
     % Reconstruction modes
     %   Regular - For DAMP reconstruction or single-channel images,
     %             reconstructs image as a whole.
@@ -276,7 +287,7 @@ function [x_hat,metrics,specifics] = reconstruct(reconstruction_method,A,At,x,ch
     %                 as a separate grayscale image.
     %   Vectorized - For colored images, reconstructs whole image
     %                by flattening all channels into one 2D tensor.
-    if channel == 1 || ~isfield(specifics, 'colored_reconstruction_mode')
+    if channel == 1 || ~isfield(specifics, 'colored_reconstruction_mode') || strcmp(reconstruction, 'DAMP.reconstruction_damp')
         [x_hat,metrics,specifics] = reconstruct_tensor(reconstruction_method,A,At,x,channel,width,height,specifics);
     elseif strcmp(specifics.colored_reconstruction_mode,'channelwise')
         total_runtime = 0;

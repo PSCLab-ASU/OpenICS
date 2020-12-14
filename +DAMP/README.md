@@ -17,3 +17,5 @@ Other non-method specific parameters include the following:
   * Default: none
 * **colored_reconstruction_mode** - The manner through which to reconstruct multi-channel images. Can be either 'channelwise' or 'vectorized'.
   * Default: 'channelwise'
+* **workers** - The number of parallel instances of a method to run over a directory of images. Requires Parallel Computing Toolbox.
+  * Default: 0
