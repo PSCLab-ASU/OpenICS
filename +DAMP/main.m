@@ -212,6 +212,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
     end
         
     fprintf(log_file, '\nTotal time elapsed: %.3f\n', etime(clock, total_time0));
+    fclose(log_file);
 end
 
 function [A, At] = get_sensing_handles(sensing,channel,width,height,m,specifics)
@@ -421,14 +422,14 @@ function [log_file, bmp_file] = generate_results(method_name, data_name, keyword
 %
 % keyword - The name of the files in results
 %
-    result_dir = ['./results/', method_name, '/', data_name, '/'];
+    result_dir = strcat('./results/', method_name, '/', data_name, '/');
     
     if ~isfolder(result_dir)
         mkdir(result_dir);
     end
     
-    log_file = [result_dir, keyword, '.txt'];
-    bmp_file = [result_dir, keyword, '.bmp'];
+    log_file = strcat(result_dir, keyword, '.txt');
+    bmp_file = strcat(result_dir, keyword, '.bmp');
 end
 
 function sensing = default_sensing(reconstruction_method)
