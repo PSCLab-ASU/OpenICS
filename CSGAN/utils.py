@@ -3,6 +3,7 @@ from torchvision import datasets, transforms, utils
 from torch.utils.data import Dataset,DataLoader
 from torchvision.datasets.vision import VisionDataset
 import numpy as np
+import skimage
 import skimage.measure as skim
 from skimage import io, transform
 import torch
@@ -98,6 +99,16 @@ def compute_average_psnr(img,img_hat):
     img = img.cpu()
     img_hat = img_hat.cpu().detach()
     return sum([skim.compare_psnr(img[i,:,:,:].numpy()/2.0+0.5,img_hat[i,:,:,:].numpy()/2.0+0.5,data_range=1.0) for i in range(sz)])/sz
+
+def compute_average_SSIM(img,img_hat):
+    sz=img.size(0)
+    channels = img.size(1)
+    img_reshaped = img.reshape((sz,img.size(2),img.size(3),channels))
+    img_hat_reshaped = img_hat.reshape((sz,img.size(2),img.size(3),channels))
+    img_reshaped = img_reshaped.cpu()
+    img_hat_reshaped = img_hat_reshaped.cpu().detach()
+
+    return sum([skim.compare_ssim(img_reshaped[i,:,:,:].numpy()/2.0+0.5,img_hat_reshaped[i,:,:,:].numpy()/2.0+0.5,data_range=1.0,multichannel=True) for i in range(sz)])/sz
 
 def make_prior(num_latents):
     prior_mean = torch.zeros(num_latents, dtype=torch.float32)

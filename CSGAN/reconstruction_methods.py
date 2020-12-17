@@ -32,11 +32,11 @@ class csgan():
         self.z_project_method = specifics['z_project_method']
         self.summary_every_step = specifics['summary_every_step']
         self.output_file = specifics["output_file"]
+        self.output_file_best = specifics["output_file_best"]
         self.save_every_step = specifics["save_every_step"]
         self.sensing = sensing
         self.specifics=specifics
         self.val_every_step = specifics["val_every_step"]
-        self.num_validation_batches = specifics["num_validation_batches"]
 
     def initialize(self,dset,sensing_method,stage,specifics):
       
@@ -137,6 +137,9 @@ class csgan():
         prior = utils.make_prior(self.num_latents) 
 
         iter = 0
+        best_iter = 0 #iteration for which the model performed the best (on the validation set)
+        best_recons_loss = math.inf #the recons_loss that was measured for the best iteration of the model
+
         if os.path.exists(self.output_file):
           checkpoint = torch.load(self.output_file)
           self.generator.load_state_dict(checkpoint['generator_state_dict'])
@@ -144,6 +147,8 @@ class csgan():
           self._log_step_size_module.load_state_dict(checkpoint['_log_step_size_module_state_dict'])
           self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])      
           iter = checkpoint['iter']
+          best_iter = checkpoint['best_iter']
+          best_recons_loss = checkpoint['best_recons_loss']
           self.generator.train()
           self._log_step_size_module.train()
           if (self.learnedSensing):
@@ -177,13 +182,15 @@ class csgan():
           recons_loss = torch.mean(torch.norm(torch.flatten(samples,start_dim=1)-torch.flatten(images,start_dim=1),dim=-1,p = None))
           if (iter % self.summary_every_step ==0):    
               PSNR = utils.compute_average_psnr(images,samples)
+              SSIM = utils.compute_average_SSIM(images,samples)
               logOutput = "\n\n\niteration:" +str(iter)
+              logOutput += "\nNumber of measurements: " + str(self.m)
               logOutput += "\n" + "z_step_size: " + str(self.s.item())
               logOutput += "\n" + "reconstruction time: " +str((benchmarkTimeEnd-benchmarkTimeStart)/self.batch_size)
               logOutput += "\n" + "Time since training started:" + (str(time.time()-trainStartTime))
               logOutput += "\n" + "recons_loss: "+ str(recons_loss.item())   
               logOutput += "\n" + "PSNR:" +str(PSNR)
-
+              logOutput += "\n" + "SSIM:" +str(SSIM)
               #print("\n\n\niteration: ", iter)
               #print("z_step_size: ", self.s.item())
              # print("Images mean: ", torch.mean(images).item())
@@ -213,11 +220,18 @@ class csgan():
             
             #self.generator.eval()
             #self.sensing_method.eval()
-            recons_losses = []
-            for valiter in range(self.num_validation_batches):
-              valimages, _ = self.valloader.__iter__().__next__() 
-              valimages = valimages.cuda()
             
+
+      
+            recons_losses = []
+            PSNRs = []
+            SSIMs = []
+            valiter = 0
+            for valimages,_ in self.valloader:
+              if valimages.shape[0] <self.batch_size:
+                continue
+              valimages = valimages.cuda()
+              valiter +=1
               generator_inputs = prior.sample([self.batch_size]).cuda()
               generator_inputs.requires_grad = True
               samples, optimised_z = self.optimise_and_sample(generator_inputs,valimages,False)   
@@ -234,8 +248,18 @@ class csgan():
                 total_loss = generator_loss+rip_loss
 
                 recons_loss = torch.mean(torch.norm(torch.flatten(samples,start_dim=1)-torch.flatten(valimages,start_dim=1),dim=-1,p = None))
-                print("VALIDATION: "+ str(valiter)+ "/"+str(self.num_validation_batches) +"   recons_loss:", recons_loss.item())
+                PSNR = utils.compute_average_psnr(valimages,samples)
+                SSIM = utils.compute_average_SSIM(valimages,samples)
+                logOutput = "\nVALIDATION: "+ str(valiter)+ "/"+str(len(self.valloader)) +"   recons_loss:"+ str(recons_loss.item())
+                logOutput += "\nVALIDATION: "+ str(valiter)+ "/"+str(len(self.valloader)) +"   PSNR:"+ str(PSNR)
+                logOutput += "\nVALIDATION: "+ str(valiter)+ "/"+str(len(self.valloader)) +"   SSIM:"+ str(SSIM)
+                print(logOutput)
+                logFile = open(self.specifics["log_file"],"a") 
+                logFile.write(logOutput)
+                logFile.close()
                 recons_losses.append(recons_loss)
+                PSNRs.append(PSNR)
+                SSIMs.append(SSIM)
               self.generator.zero_grad()
               self.sensing_method.zero_grad()
               #print("z_step_size: ", self.s.item())
@@ -252,9 +276,43 @@ class csgan():
               #print("r2 mean: ", torch.mean(r2).item())
               #print("r3 mean: ", torch.mean(r3).item())
               #print("rip loss: ", rip_loss.item())
+
+
+              print(logOutput)
+              logFile = open(self.specifics["log_file"],"a") 
+              logFile.write(logOutput)
+              logFile.close()
               
              # print("recons_loss: ", recons_loss.item())
-            print("\nVALIDATION AVERAGE RECONSTRUCTION LOSS: ", (sum(recons_losses)/len(recons_losses)).item())
+            
+            avg_recons_loss = (sum(recons_losses)/len(recons_losses)).item()
+            logOutput = "\nRESULTS FOR ITERATION " + str(iter)
+            logOutput += "\nVALIDATION AVERAGE RECONSTRUCTION LOSS: "+str(avg_recons_loss)
+            logOutput += "\nBEST AVERAGE SO FAR: " +str(best_recons_loss) + " from iteration " + str(best_iter)
+            logOutput += "\nDIFFERENCE: " +str(avg_recons_loss- best_recons_loss)
+            logOutput += "\nVALIDATION AVERAGE PSNR: "+ str(sum(PSNRs)/len(PSNRs))
+            logOutput += "\nVALIDATION AVERAGE SSIM: "+ str(sum(SSIMs)/len(SSIMs))
+
+            if (avg_recons_loss <= best_recons_loss):
+              logOutput += "\nSaving current iteration as best iteration..."
+              best_iter = iter
+              best_recons_loss = avg_recons_loss
+              torch.save({
+              'iter': iter,
+              'best_iter':best_iter,
+              'best_recons_loss': best_recons_loss,
+              'loss': total_loss,
+              'generator_state_dict': self.generator.state_dict(),
+              'sensing_method_state_dict': self.sensing_method.state_dict(),
+              '_log_step_size_module_state_dict': self._log_step_size_module.state_dict(),
+              'optimizer_state_dict': self.optimizer.state_dict(),
+              }, self.output_file_best)
+            
+
+            print(logOutput)
+            logFile = open(self.specifics["log_file"],"a") 
+            logFile.write(logOutput)
+            logFile.close()
             torchvision.utils.save_image(utils.postprocess(valimages), "valimages "+".png")
             torchvision.utils.save_image(utils.postprocess(samples), "valsamples "+".png")
             #self.generator.train()
@@ -262,6 +320,8 @@ class csgan():
           if (iter % self.save_every_step ==0):
             torch.save({
               'iter': iter,
+              'best_iter':best_iter,
+              'best_recons_loss': best_recons_loss,
               'loss': total_loss,
               'generator_state_dict': self.generator.state_dict(),
               'sensing_method_state_dict': self.sensing_method.state_dict(),
@@ -281,18 +341,22 @@ class csgan():
           #self.sensing_method.eval()
           prior = utils.make_prior(self.num_latents) 
           recons_losses = []
-          print("DATSET LENGTH: " ,len(self.dataset))
-          print(type(self.testloader))
+          PSNRs = []
+          SSIMs = []
+          reconst_times = []
           for images,_ in self.testloader:
             if images.shape[0] <self.batch_size:
               continue
             iter+=1
             #images, _ = self.testloader.__iter__().__next__() 
             images = images.cuda()
-          
+
+            benchmarkTimeStart = time.time()
+
             generator_inputs = prior.sample([self.batch_size]).cuda()
             generator_inputs.requires_grad = True
             samples, optimised_z = self.optimise_and_sample(generator_inputs,images,False)   
+            benchmarkTimeEnd = time.time()
             with torch.no_grad():      
               optimisation_cost = torch.mean(torch.sum((optimised_z-generator_inputs)**2,-1))
               initial_samples = self.generator.forward(generator_inputs)
@@ -305,12 +369,18 @@ class csgan():
               total_loss = generator_loss+rip_loss
 
               recons_loss = torch.mean(torch.norm(torch.flatten(samples,start_dim=1)-torch.flatten(images,start_dim=1),dim=-1,p = None))
+              PSNR = utils.compute_average_psnr(images,samples)
+              SSIM = utils.compute_average_SSIM(images,samples)
+              reconst_time = benchmarkTimeEnd-benchmarkTimeStart
               recons_losses.append(recons_loss)
+              PSNRs.append(PSNR)
+              SSIMs.append(SSIM)
+              reconst_times.append(reconst_time)
               self.generator.zero_grad()
               self.sensing_method.zero_grad()
-              print("\n\n\n test iteration: ", iter)
-              print("z_step_size: ", self.s.item())
-
+              print("\n\ntest iteration: ", iter)
+            #  print("z_step_size: ", self.s.item())
+              
              # print("Images mean: ", torch.mean(images).item())
               #print("Initial samples mean: ", torch.mean(initial_samples).item())
               #print("Samples mean: ", torch.mean(samples).item())
@@ -319,19 +389,25 @@ class csgan():
               #print("m_targets mean: ", torch.mean(self.m_targets).item())
               #print("m_samples mean: ", torch.mean(self.m_samples).item())
 
-              print("opt_cost: ", optimisation_cost.item())
-              print("gen loss:", generator_loss.item())
+              #print("opt_cost: ", optimisation_cost.item())
+              #print("gen loss:", generator_loss.item())
 
               #print("r1 mean: ", torch.mean(r1).item())
               #print("r2 mean: ", torch.mean(r2).item())
               #print("r3 mean: ", torch.mean(r3).item())
               
-              print("rip loss: ", rip_loss.item())
+              #print("rip loss: ", rip_loss.item())
               
               print("recons_loss: ", recons_loss.item())
+              print("PSNR: ", str(PSNR))
+              print("SSIM: "+ str(SSIM))
+              print("reconstruction time per image: " +str((reconst_time)/self.batch_size))
               torchvision.utils.save_image(utils.postprocess(images), "testimages "+".png")
               torchvision.utils.save_image(utils.postprocess(samples), "testsamples "+".png")
           print("AVERAGE RECONSTRUCTION LOSS: ", (sum(recons_losses)/len(recons_losses)).item())
+          print("AVERAGE PSNR: ", sum(PSNRs)/len(PSNRs))
+          print("AVERAGE SSIM: ", sum(SSIMs)/len(SSIMs))
+          print("AVERAGE RECONSTRUCTION TIME PER IMAGE: " +str((sum(reconst_times)/(len(reconst_times)*self.batch_size))))
         else:
           print("Error: "+ self.output_file+ " was not found")
       
@@ -396,8 +472,6 @@ class DCGAN(nn.Module):
 
   def forward(self, inputs):
     out = self.main(inputs)
-    print("ASDAADDA  ", out.shape)
-    #print("OOO",out.shape)
     return out
 class csgm_dcgan_gen(nn.Module): #DCGAN used in the CSGM paper
   """MNIST generator net."""
