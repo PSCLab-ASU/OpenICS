@@ -54,7 +54,13 @@ class csgan():
         if (self.generatorType == "MLP"):
           self.generator = MLPGeneratorNet(self.num_latents,self.n,self.channels,self.input_width).cuda()
         elif(self.generatorType == "DCGAN"):
-          self.generator = csgm_dcgan_gen(self.num_latents,self.n).cuda()
+          if (self.input_width == 64):
+            self.generator = csgm_dcgan_gen(self.num_latents,self.n,self.channels).cuda()
+          elif(self.input_width == 32):
+            self.generator = csgm_dcgan_gen32x32(self.num_latents,self.n,self.channels).cuda()
+          else:
+            print("DCGAN only supports input images with dimensions 32x32 and 64x64")
+            exit()
         self.generator.apply(init_weights)
 
         self.sensing_method = sensing_method(self.n,self.m,self.input_width,self.channels).cuda()
@@ -84,7 +90,7 @@ class csgan():
     def get_measurement_error(self,target_img,sample_img):
       self.m_targets = self.measure(target_img)
       self.m_samples = self.measure(sample_img)
-      
+
       return torch.sum(torch.square(self.m_targets-self.m_samples),dim=-1)
     def get_rip_loss(self, img1,img2):
       m1 = self.measure(img1)
@@ -227,10 +233,10 @@ class csgan():
             PSNRs = []
             SSIMs = []
             valiter = 0
-            for valimages,_ in self.valloader:
-              if valimages.shape[0] <self.batch_size:
+            for _valimages,_ in self.valloader:
+              if _valimages.shape[0] <self.batch_size:
                 continue
-              valimages = valimages.cuda()
+              valimages = _valimages.cuda()
               valiter +=1
               generator_inputs = prior.sample([self.batch_size]).cuda()
               generator_inputs.requires_grad = True
@@ -475,8 +481,7 @@ class DCGAN(nn.Module):
     return out
 class csgm_dcgan_gen(nn.Module): #DCGAN used in the CSGM paper
   """MNIST generator net."""
-
-  def __init__(self, num_inputs, num_outputs, name='sngennet'):
+  def __init__(self, num_inputs, num_outputs,channels, name='sngennet'):
     super(csgm_dcgan_gen, self).__init__() #super(MLPGeneratorNet, self).__init__(name=name)
     self.lin = nn.Linear(num_inputs,8192,True)
     self.main = nn.Sequential(
@@ -489,7 +494,7 @@ class csgm_dcgan_gen(nn.Module): #DCGAN used in the CSGM paper
         nn.ConvTranspose2d(128,64,5,2,padding=2,output_padding=1),
         nn.BatchNorm2d(64,0.1e-5,0.9,True),
         nn.ReLU(),
-        nn.ConvTranspose2d(64,3,5,2,padding=2,output_padding=1),
+        nn.ConvTranspose2d(64,channels,5,2,padding=2,output_padding=1),
         nn.Tanh()
     )
 
@@ -498,7 +503,31 @@ class csgm_dcgan_gen(nn.Module): #DCGAN used in the CSGM paper
     up_tensor = self.lin(inputs)
     first_tensor = torch.reshape(up_tensor,(batch_size, 512, 4,4))
     out = self.main(first_tensor)
+    return out
+class csgm_dcgan_gen32x32(nn.Module): #DCGAN used in the CSGM paper
+  """MNIST generator net."""
+  def __init__(self, num_inputs, num_outputs,channels, name='sngennet'):
+    super(csgm_dcgan_gen32x32, self).__init__() #super(MLPGeneratorNet, self).__init__(name=name)
+    self.lin = nn.Linear(num_inputs,2048,True)
+    self.main = nn.Sequential(
+        nn.ConvTranspose2d(512,256,5,2,padding=2,output_padding=1),
+        nn.BatchNorm2d(256,1e-5,0.9,True),
+        nn.ReLU(),
+        nn.ConvTranspose2d(256,128,5,2,padding=2,output_padding=1),
+        nn.BatchNorm2d(128,1e-5,0.9,True),
+        nn.ReLU(),
+        nn.ConvTranspose2d(128,64,5,2,padding=2,output_padding=1),
+        nn.BatchNorm2d(64,0.1e-5,0.9,True),
+        nn.ReLU(),
+        nn.ConvTranspose2d(64,channels,5,2,padding=2,output_padding=1),
+        nn.Tanh()
+    )
 
+  def forward(self, inputs):
+    batch_size = inputs.shape[0]
+    up_tensor = self.lin(inputs)
+    first_tensor = torch.reshape(up_tensor,(batch_size, 512, 2,2))
+    out = self.main(first_tensor)
     return out
 class SNGenNet(nn.Module):
   """MNIST generator net."""

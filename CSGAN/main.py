@@ -30,9 +30,9 @@ def main(reconstruction,sensing,stage,default,dataset,input_channel,input_width,
 
 if __name__ == "__main__":
     specifics = {
-            'num_training_iterations': 3000,
+            'num_training_iterations': 1000000,
             'learned_sensing_parameters': False, #Whether or not to add the sensing parameters (of a random sensing matrix or a Discriminator network) to the list of parameters of the optimizer
-            'batch_size': 1,
+            'batch_size': 64,
             'num_latents': 100,
             'summary_every_step': 100, # The interval at which to log debug ops.
             'save_every_step': 1000, # The interval at which to save model dicts
@@ -44,7 +44,7 @@ if __name__ == "__main__":
             'output_file': 'saved_models/mnist_16_sensing_matrix_notlearned.pth',  #output file for latest model checkpoint
             'output_file_best': 'saved_models/mnist_16_sensing_matrix_notlearned_BEST.pth',  #output file for best model evaluated on the validation set
             'log_file': 'saved_models/mnist_16_sensing_matrix_notlearned.txt',
-            'generator': "MLP", #should be either MLP (originally used for MNIST) or DCGAN (originally used for CelebA)
+            'generator': "DCGAN", #should be either MLP (originally used for MNIST) or DCGAN (originally used for CelebA)
 
             'copy_dataset_source_folder': "/storage-t1/database/cs-framework-database/mnist",
             'dataset': './data/mnist',  #train/val/test sets will be loaded from here by default. If the folder does not exist, the program will attempt to create the dataset from the copy_dataset_source_folder, where it assumes a test and train subfolder is present
@@ -53,13 +53,13 @@ if __name__ == "__main__":
     main(
         reconstruction= "CSGAN",
         sensing = "sensing_matrix", #Can be either sensing_matrix or a neural network (NN_MLP or NN_DCGAN)
-        stage = "testing",
+        stage = "training",
         default = "False",
         dataset = "mnist",
         input_channel = 1,
         input_width = 32,
         input_height = 32,
         n = 32*32*1,
-        m = 64,
+        m = 10,
         specifics = specifics
     )
