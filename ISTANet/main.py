@@ -12,6 +12,7 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
         n = 272 # ratio_dict = {1: 10, 4: 43, 10: 109, 25: 272, 30: 327, 40: 436, 50: 545}
         specifics = {
             'stage': stage,
+            'sudo_rgb': False,
             'start_epoch': 0,
             'end_epoch': 200,
             'testing_epoch_num': 60,
@@ -49,20 +50,23 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
         #     specifics = json.load(fp)
 
 
-    dset = utils.generate_dataset(input_channel,input_width,input_height, stage, specifics)
+    dset, Training_Labels = utils.generate_dataset(input_channel,input_width,input_height, stage, specifics)
     # sensing_method=sms.sensing_method(sensing, specifics) # not used
     reconstruction_method=rms.reconstruction_method(reconstruction,specifics)
-    reconstruction_method.initialize(dset, specifics)
+    reconstruction_method.initialize(dset, Training_Labels, specifics)
     reconstruction_method.run()
-        
+
 if __name__ == "__main__":
     input_channel = 1
-    input_width = 28
-    ratio = 25
-    stage = 'testing'
+    input_width = 64
+    ratio = 8
+    stage = 'training'
 
     m = input_width*input_width
-    n = int(ratio/100 * m)
+    # n = int(ratio/100 * m)
+    n = int(1/ratio * m)
+
+    print("Ratio: " + str(m/n)) # it is multiplied in from the right not the left
     main(
         "random",
         "ISTANetPlus", # "ISTANet", "ISTANetPlus"
@@ -76,19 +80,20 @@ if __name__ == "__main__":
         n,
         specifics={
             'stage': stage,
+            'sudo_rgb': True,
             'start_epoch': 0,
             'end_epoch': 50,
-            'testing_epoch_num': 5,
+            'testing_epoch_num': 50,
             'learning_rate': 1e-4,
             'layer_num': 9,
-            'group_num': 69, # organizational purposes
+            'group_num': 901, # organizational purposes
             'cs_ratio': ratio,
             'input_channel': input_channel,
             'input_width': input_width,
             'n': n,
             'm': m,
-            'nrtrain': 60000, #224000, #88912, 867, 224000
-            'batch_size': 64, # 64 for train
+            'nrtrain': 60000 * 3, #224000, #88912, 867, 224000, 50000 * 3
+            'batch_size': 128, # 64 for train
 
             # customize your directory names
             'model_dir': 'model',
@@ -101,22 +106,22 @@ if __name__ == "__main__":
             # (set to False to use original paper's preloaded matrices which only supports imgs 33x33)
             'use_universal_matrix': True,
 
-            # (Training only) set to True and define custom name, location, and type.
-            # Will then create and train on this new dataset
-            'create_custom_dataset': False,
-            'custom_dataset_name': "bigset_train_data",
-            'custom_training_data_location': '/storage-t1/database/bigset/train/data',
-            'custom_type_of_image': 'bmp', # bmp, tif
-
             # (Training only) if not creating new dataset, input file name and type.
             # Will then train on this dataset
-            'training_data_fileName': 'mnist', # 'Training_Data', 'bigset_train_data', special cases: 'mnist','cifar10','celeba'
-            'training_data_type': 'npy', # mat, npy
+            'training_data_fileName': 'benchmark_cifar10_train',
+            # 'Training_Data', 'bigset_train_data', special cases: 'mnist','cifar10','celeba'
+            'training_data_type': 'npy',  # mat, npy
+
+            # (Training only) set to True and define custom name, location, and type.
+            # Will then create and train on this new dataset
+            'create_custom_dataset': True,
+            'custom_dataset_name': "benchmark_celebA_64x64_train",
+            'custom_training_data_location': '/storage-t1/database/cs-framework-database/celebA_64x64/train',
+            'custom_type_of_image': 'jpg', # bmp, tif, celebA: jpg, mnist, cifar10: png
 
             # (Testing only) if testing, use these parameters to define where and what type of images testing on
-            'Testing_data_location': '/storage-t1/database/bigset/test',# '/storage-t1/database/bigset/test', # 'Set11'
+            'Testing_data_location': '/storage-t1/database/cs-framework-database/cifar10/test',# 'Set11'
             'testing_data_isFolderImages': True,
-            'testing_data_type': 'bmp',  # bmp, tif
+            'testing_data_type': 'png',  # bigset: bmp, tif, celebA: jpg, mnist, cifar10: png
         }
     )
-        

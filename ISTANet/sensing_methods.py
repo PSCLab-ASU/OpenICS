@@ -37,6 +37,7 @@ def computInitMxScratch(Training_labels, specifics):
     Phi_input = np.random.normal(0, 1./specifics['input_width'], size=(specifics['n'], specifics['m']))
     mean = np.mean(Phi_input)
     std_dev = np.std(Phi_input)
+    # X_data = Training_labels.data.numpy().transpose()
     X_data = Training_labels.transpose()
     Y_data = np.dot(Phi_input, X_data)
     Y_YT = np.dot(Y_data, Y_data.transpose())

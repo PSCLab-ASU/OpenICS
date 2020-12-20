@@ -7,7 +7,7 @@ import numpy as np
 import os
 import glob
 from PIL import Image
-os.environ["CUDA_VISIBLE_DEVICES"]='2'
+os.environ["CUDA_VISIBLE_DEVICES"]='0'
 
 def SetNetworkParams(new_height_img, new_width_img,new_channel_img, new_filter_height,new_filter_width,\
                      new_num_filters,new_n_DnCNN_layers,new_n_DAMP_layers, new_sampling_rate,\
@@ -57,10 +57,9 @@ def generate_dataset(dataset,input_channel,input_width,input_height,stage, speci
                     img = np.array(img)
                     if(specifics['sudo_rgb']):
                         # scale to between 0 and 1
-                        img = img.reshape((3, input_width, input_height)) / 255
-                        data.append(img[0].reshape((1, input_width, input_height)))
-                        data.append(img[1].reshape((1, input_width, input_height)))
-                        data.append(img[2].reshape((1, input_width, input_height)))
+                        data.append(img[:, :, 0].reshape((1, input_width, input_height)))
+                        data.append(img[:, :, 1].reshape((1, input_width, input_height)))
+                        data.append(img[:, :, 2].reshape((1, input_width, input_height)))
                     else:
                         # scale to between 0 and 1
                         img = img.reshape((input_channel, input_width, input_height)) / 255
@@ -73,6 +72,7 @@ def generate_dataset(dataset,input_channel,input_width,input_height,stage, speci
             print("################################################################"
                   + "\nCreated new file: ./Data/" + specifics['dataset_custom_name'] + ".npy"
                   + "\n################################################################\n")
+    data = data[:specifics['n_Train_Images'] + specifics['n_Val_Images']]
     return data
 
 def generate_testset(input_channel,input_width,input_height,specifics):
@@ -115,7 +115,6 @@ def generate_testset(input_channel,input_width,input_height,specifics):
             print("################################################################"
                   + "\nCreated new file: ./Data/" + specifics['testset_custom_name'] + ".npy"
                   + "\n################################################################\n")
-
     return data
 
 def splitDataset(dset, specifics):
@@ -137,7 +136,7 @@ def splitDataset(dset, specifics):
 
         val_images = dset
         val_images = val_images[-1 * specifics['n_Val_Images']:, 0, :, :]
-    
+
 
     return train_images, val_images
 

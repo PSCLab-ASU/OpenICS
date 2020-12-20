@@ -14,7 +14,7 @@ from skimage.measure import compare_ssim as ssim
 import matplotlib.pyplot as plt
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+os.environ["CUDA_VISIBLE_DEVICES"] = '3'
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def reconstruction_method(reconstruction, specifics):
@@ -40,9 +40,10 @@ class ISTANet_wrapper():
             model = model.to(device)
         self.model = model
 
-    def initialize(self,dataset,sensing):
+    def initialize(self,dataset, TrainingLabels, sensing):
         # do the preparation for the running.
         self.rand_loader = dataset
+        self.trainingLabels = TrainingLabels
 
     def run(self):
         if (self.specifics['stage'] == 'training'):
@@ -85,14 +86,14 @@ class ISTANet_wrapper():
 
             # added functionality
             # if(self.specifics['bmp_folder_images'] == True):
-            #     Training_labels = utils.getTrainingLabelsFolder(self.specifics['stage'], self.specifics)
+            #     Training_labels = utils.getgetTrainingLabelsFolder(self.specifics['stage'], self.specifics)
             #     Phi_input, Qinit = sensing_methods.computInitMxScratch(Training_labels=Training_labels,
             #                                                            specifics=self.specifics)
             # else:
-            input_channel = self.specifics['input_channel']
-            input_width = self.specifics['input_width']
-            input_height = self.specifics['input_width']
-            Training_labels = utils.getTrainingLabels(input_channel,input_width,input_height,self.specifics['stage'], self.specifics)
+            # input_channel = self.specifics['input_channel']
+            # input_width = self.specifics['input_width']
+            # input_height = self.specifics['input_width']
+            Training_labels = self.trainingLabels
             Phi_input, Qinit = sensing_methods.computInitMx(Training_labels=Training_labels,
                                                             specifics=self.specifics)
 
@@ -138,6 +139,8 @@ class ISTANet_wrapper():
                     loss_constraint)
                     print(output_data)
 
+                if (not (os.path.exists("./" + log_dir))):
+                    os.mkdir("./" + log_dir)
                 output_file = open(log_file_name, 'a')
                 output_file.write(output_data)
                 output_file.close()
@@ -176,6 +179,10 @@ class ISTANet_wrapper():
                 filepaths = glob.glob(test_dir + '/*.tif')
             elif(self.specifics['testing_data_type'] == 'bmp'):
                 filepaths = glob.glob(test_dir + '/*.bmp')
+            elif (self.specifics['testing_data_type'] == 'png'):
+                filepaths = glob.glob(test_dir + '/*.png')
+            elif (self.specifics['testing_data_type'] == 'jpg'):
+                filepaths = glob.glob(test_dir + '/*.jpg')
             else:
                 raise Exception('testing_data_type of ' + self.specifics['testing_data_type'] + ' is unknown')
 
@@ -185,14 +192,16 @@ class ISTANet_wrapper():
                 os.makedirs(result_dir)
 
             ImgNum = len(filepaths)
+            if(ImgNum > 1000):
+                ImgNum = 1000
+            REC_TIME_All = np.zeros([1, ImgNum], dtype=np.float32)
             PSNR_All = np.zeros([1, ImgNum], dtype=np.float32)
             SSIM_All = np.zeros([1, ImgNum], dtype=np.float32)
 
-            input_channel = self.specifics['input_channel']
-            input_width = self.specifics['input_width']
-            input_height = self.specifics['input_width']
-            Training_labels = utils.getTrainingLabels(input_channel, input_width, input_height, self.specifics['stage'],
-                                                      self.specifics)
+            # input_channel = self.specifics['input_channel']
+            # input_width = self.specifics['input_width']
+            # input_height = self.specifics['input_width']
+            Training_labels = self.trainingLabels
             Phi_input, Qinit = sensing_methods.computInitMx(Training_labels=Training_labels, specifics=self.specifics)
 
             Phi = torch.from_numpy(Phi_input).type(torch.FloatTensor)
@@ -203,74 +212,99 @@ class ISTANet_wrapper():
 
             print('\n')
             print("CS Reconstruction Start")
-
             with torch.no_grad():
                 for img_no in range(ImgNum):
                     imgName = filepaths[img_no]
 
                     Img = cv2.imread(imgName, 1)
 
-                    Img_yuv = cv2.cvtColor(Img, cv2.COLOR_BGR2YCrCb)
+                    #Img_yuv = cv2.cvtColor(Img, cv2.COLOR_BGR2YCrCb)
+                    Img_yuv = Img
                     Img_rec_yuv = Img_yuv.copy()
 
-                    Iorg_y = Img_yuv[:, :, 0]
+                    if (self.specifics['sudo_rgb']):
+                        start = time()
+                        x_output3 = []
+                        Iorg_3 = []
+                        for i in range(3):
+                            Iorg_y = Img_yuv[:, :, i]
+                            [Iorg, row, col, Ipad, row_new, col_new] = utils.imread_CS_py(Iorg_y, self.specifics)
+                            Iorg_3.append(Iorg)
+                            Icol = utils.img2col_py(Ipad, self.specifics['input_width']).transpose() / 255.0
 
-                    [Iorg, row, col, Ipad, row_new, col_new] = utils.imread_CS_py(Iorg_y, self.specifics)
-                    Icol = utils.img2col_py(Ipad, self.specifics['input_width']).transpose() / 255.0
+                            Img_output = Icol
 
-                    Img_output = Icol
+                            batch_x = torch.from_numpy(Img_output)
+                            batch_x = batch_x.type(torch.FloatTensor)
+                            batch_x = batch_x.to(device)
 
-                    start = time()
+                            Phix = torch.mm(batch_x, torch.transpose(Phi, 0, 1))
 
-                    batch_x = torch.from_numpy(Img_output)
-                    batch_x = batch_x.type(torch.FloatTensor)
-                    batch_x = batch_x.to(device)
+                            [x_output, loss_layers_sym] = model(Phix, Phi, Qinit)
+                            x_output3.append(x_output)
 
-                    Phix = torch.mm(batch_x, torch.transpose(Phi, 0, 1))
+                        x_output = x_output3
+                        Iorg = np.array(Iorg_3)
+                        end = time()
+                        Pred_t = []
+                        for i in range(3):
+                            Pred_t.append(x_output[i].cpu().data.numpy().transpose())
+                    else:
+                        Iorg_y = Img_yuv[:, :, 0]
+                        [Iorg, row, col, Ipad, row_new, col_new] = utils.imread_CS_py(Iorg_y, self.specifics)
+                        Icol = utils.img2col_py(Ipad, self.specifics['input_width']).transpose() / 255.0
 
-                    [x_output, loss_layers_sym] = model(Phix, Phi, Qinit)
+                        Img_output = Icol
 
-                    end = time()
+                        start = time()
+                        batch_x = torch.from_numpy(Img_output)
+                        batch_x = batch_x.type(torch.FloatTensor)
+                        batch_x = batch_x.to(device)
+                        Phix = torch.mm(batch_x, torch.transpose(Phi, 0, 1))
 
-                    Prediction_value = x_output.cpu().data.numpy()
+                        [x_output, loss_layers_sym] = model(Phix, Phi, Qinit)
+                        end = time()
+                        Prediction_value = x_output.cpu().data.numpy()
+                        Pred_t = Prediction_value.transpose()
 
-                    # loss_sym = torch.mean(torch.pow(loss_layers_sym[0], 2))
-                    # for k in range(layer_num - 1):
-                    #     loss_sym += torch.mean(torch.pow(loss_layers_sym[k + 1], 2))
-                    #
-                    # loss_sym = loss_sym.cpu().data.numpy()
-
-                    X_rec = np.clip(utils.col2im_CS_py(Prediction_value.transpose(), row, col, row_new, col_new, self.specifics), 0, 1)
+                    X_rec = np.clip(utils.col2im_CS_py(Pred_t, row, col, row_new, col_new, self.specifics), 0, 1)
 
                     rec_PSNR = utils.psnr(X_rec * 255, Iorg.astype(np.float64))
-                    rec_SSIM = ssim(X_rec * 255, Iorg.astype(np.float64), data_range=255)
+                    if(self.specifics['sudo_rgb']):
+                        rec_SSIM = ssim(X_rec.transpose() * 255, Iorg.astype(np.float64).transpose(), data_range=255, multichannel=True)
+                    else:
+                        rec_SSIM = ssim(X_rec * 255, Iorg.astype(np.float64), data_range=255)
 
                     # plt.imshow(X_rec, cmap='gray_r')
                     # plt.show()
                     print("[%02d/%02d] Run time for %s is %.4f, PSNR is %.2f, SSIM is %.4f" % (
                     img_no, ImgNum, imgName, (end - start), rec_PSNR, rec_SSIM))
-                    #TODO rewrite this
-                    Img_rec_yuv[:, :, 0] = X_rec * 255
 
-                    im_rec_rgb = cv2.cvtColor(Img_rec_yuv, cv2.COLOR_YCrCb2BGR)
-                    im_rec_rgb = np.clip(im_rec_rgb, 0, 255).astype(np.uint8)
+                    # TODO change: no longer save the images
+                    # Img_rec_yuv[:, :, 0] = X_rec * 255
 
-                    resultName = imgName.replace(data_dir, result_dir)
-                    cv2.imwrite("%s_ISTA_Net_plus_ratio_%d_epoch_%d_PSNR_%.2f_SSIM_%.4f.png" % (
-                    resultName, cs_ratio, epoch_num, rec_PSNR, rec_SSIM), im_rec_rgb)
+                    # im_rec_rgb = cv2.cvtColor(Img_rec_yuv, cv2.COLOR_YCrCb2BGR)
+                    # im_rec_rgb = np.clip(im_rec_rgb, 0, 255).astype(np.uint8)
+
+                    # resultName = imgName.replace(data_dir, result_dir)
+                    # cv2.imwrite("%s_ISTA_Net_plus_ratio_%d_epoch_%d_PSNR_%.2f_SSIM_%.4f.png" % (
+                    # resultName, cs_ratio, epoch_num, rec_PSNR, rec_SSIM), im_rec_rgb)
 
                     del x_output
+                    REC_TIME_All[0, img_no] = (end-start)
                     PSNR_All[0, img_no] = rec_PSNR
                     SSIM_All[0, img_no] = rec_SSIM
 
             print('\n')
-            output_data = "CS ratio is %d, Avg PSNR/SSIM for %s is %.2f/%.4f, Epoch number of model is %d \n" % (
-            cs_ratio, test_name, np.mean(PSNR_All), np.mean(SSIM_All), epoch_num)
+            output_data = "CS ratio is %d, Avg TIME/PSNR/SSIM for %s is %.4f/%.2f/%.4f, Epoch number of model is %d \n" % (
+            cs_ratio, test_name, np.mean(REC_TIME_All), np.mean(PSNR_All), np.mean(SSIM_All), epoch_num)
             print(output_data)
 
             output_file_name = "./%s/PSNR_SSIM_Results_CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f_imgwidth_%d.txt" % (
             log_dir, layer_num, group_num, cs_ratio, learning_rate, self.specifics['input_width'])
 
+            if (not (os.path.exists("./" + log_dir))):
+                os.mkdir("./" + log_dir)
             output_file = open(output_file_name, 'a')
             output_file.write(output_data)
             output_file.close()

@@ -4,12 +4,12 @@ tf.disable_eager_execution()
 # import tensorflow as tf
 import numpy as np
 import time
-from matplotlib import pyplot as plt
+
 import random
 import sensing_methods
 import utils
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]='2'
+os.environ["CUDA_VISIBLE_DEVICES"]='0'
 def reconstruction_method(dset,sensing_method,specifics):
     method = LDAMP_wrapper(sensing_method, specifics)
     return method
@@ -218,6 +218,9 @@ class LDAMP_wrapper():
                 # TODO major change
                 # ## Load and Preprocess Training Data
                 train_images, val_images = utils.splitDataset(self.dset, self.specifics)
+                len_train = len(train_images)
+                len_val = len(val_images)
+
                 x_train = np.transpose(np.reshape(train_images, (-1, channel_img * height_img * width_img)))
                 x_val = np.transpose(np.reshape(val_images, (-1, channel_img * height_img * width_img)))
 
@@ -231,7 +234,13 @@ class LDAMP_wrapper():
 
                     saver_best = tf.train.Saver()  # defaults to saving all variables
                     saver_dict = {}
-                    with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+
+                    config = tf.ConfigProto(allow_soft_placement=True)
+
+                    #TODO This is used to accommodate our RTX graphics card, don't need it otherwise
+                    config.gpu_options.allow_growth = True
+
+                    with tf.Session(config=config) as sess:
                         sess.run(
                             tf.global_variables_initializer())  # Seems to be necessary for the batch normalization layers for some reason.
 
@@ -273,7 +282,7 @@ class LDAMP_wrapper():
                         save_name_chckpt = save_name + ".ckpt"
                         val_values = []
                         print("Initial Weights Validation Value:")
-                        rand_inds = np.random.choice(len(val_images), n_Val_Images, replace=False)
+                        rand_inds = np.random.choice(len_val, n_Val_Images, replace=False)
                         start_time = time.time()
                         for offset in range(0, n_Val_Images - BATCH_SIZE + 1,
                                             BATCH_SIZE):  # Subtract batch size-1 to avoid eerrors when len(train_images) is not a multiple of the batch size
@@ -299,7 +308,7 @@ class LDAMP_wrapper():
                                 break
                             train_values = []
                             print("This Training iteration ...")
-                            rand_inds = np.random.choice(len(train_images), n_Train_Images, replace=False)
+                            rand_inds = np.random.choice(len_train, n_Train_Images, replace=False)
                             start_time = time.time()
                             for offset in range(0, n_Train_Images - BATCH_SIZE + 1,
                                                 BATCH_SIZE):  # Subtract batch size-1 to avoid errors when len(train_images) is not a multiple of the batch size
@@ -317,7 +326,7 @@ class LDAMP_wrapper():
                             print(np.mean(train_values))
                             val_values = []
                             print("EPOCH ", i + 1, " Validation Value:")
-                            rand_inds = np.random.choice(len(val_images), n_Val_Images, replace=False)
+                            rand_inds = np.random.choice(len_val, n_Val_Images, replace=False)
                             start_time = time.time()
                             for offset in range(0, n_Val_Images - BATCH_SIZE + 1,
                                                 BATCH_SIZE):  # Subtract batch size-1 to avoid eerrors when len(train_images) is not a multiple of the batch size
@@ -411,7 +420,13 @@ class LDAMP_wrapper():
                 ## Train the Model
                 saver = tf.train.Saver()  # defaults to saving all variables
                 saver_dict = {}
-                with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+
+                config = tf.ConfigProto(allow_soft_placement=True)
+
+                #TODO This is used to accommodate our RTX graphics card, don't need it otherwise
+                config.gpu_options.allow_growth = True
+
+                with tf.Session(config=config) as sess:
                     # if 255.*sigma_w<10.:
                     #     sigma_w_min=0.
                     #     sigma_w_max=10.
@@ -497,6 +512,9 @@ class LDAMP_wrapper():
                         [_, _, PSNR] = utils.EvalError_np(x_test, reconstructed_test_images)
                         print(" PSNR: ", PSNR)
                         print(" Average: ", np.average(PSNR))
+            else:
+                raise Exception("Unknown stage " + stage)
+
         else:
             if (stage == 'training'):
                 for n_DAMP_layers in range(start_layer, max_n_DAMP_layers + 1, 1):
@@ -618,6 +636,9 @@ class LDAMP_wrapper():
                     #TODO major change
                     # ## Load and Preprocess Training Data
                     train_images, val_images = utils.splitDataset(self.dset, self.specifics)
+                    len_train = len(train_images)
+                    len_val = len(val_images)
+
                     x_train = np.transpose(np.reshape(train_images, (-1, channel_img * height_img * width_img)))
                     x_val = np.transpose(np.reshape(val_images, (-1, channel_img * height_img * width_img)))
 
@@ -636,7 +657,7 @@ class LDAMP_wrapper():
 
                         config = tf.ConfigProto(allow_soft_placement=True)
 
-                        # This is used to accommodate our RTX graphics card, don't need it otherwise
+                        #TODO This is used to accommodate our RTX graphics card, don't need it otherwise
                         config.gpu_options.allow_growth = True
 
                         with tf.Session(config=config) as sess:
@@ -788,7 +809,7 @@ class LDAMP_wrapper():
                             save_name_chckpt = save_name + ".ckpt"
                             val_values = []
                             print("Initial Weights Validation Value:")
-                            rand_inds = np.random.choice(len(val_images), n_Val_Images, replace=False)
+                            rand_inds = np.random.choice(len_val, n_Val_Images, replace=False)
                             start_time = time.time()
                             for offset in range(0, n_Val_Images - BATCH_SIZE + 1,
                                                 BATCH_SIZE):  # Subtract batch size-1 to avoid eerrors when len(train_images) is not a multiple of the batch size
@@ -818,7 +839,7 @@ class LDAMP_wrapper():
                                     break
                                 train_values = []
                                 print("This Training iteration ...")
-                                rand_inds = np.random.choice(len(train_images), n_Train_Images, replace=False)
+                                rand_inds = np.random.choice(len_train, n_Train_Images, replace=False)
                                 start_time = time.time()
                                 for offset in range(0, n_Train_Images - BATCH_SIZE + 1,
                                                     BATCH_SIZE):  # Subtract batch size-1 to avoid errors when len(train_images) is not a multiple of the batch size
@@ -837,7 +858,7 @@ class LDAMP_wrapper():
                                 print(np.mean(train_values))
                                 val_values = []
                                 print("EPOCH ", i + 1, " Validation Value:")
-                                rand_inds = np.random.choice(len(val_images), n_Val_Images, replace=False)
+                                rand_inds = np.random.choice(len_val, n_Val_Images, replace=False)
                                 start_time = time.time()
                                 for offset in range(0, n_Val_Images - BATCH_SIZE + 1,
                                                     BATCH_SIZE):  # Subtract batch size-1 to avoid eerrors when len(train_images) is not a multiple of the batch size
@@ -981,7 +1002,7 @@ class LDAMP_wrapper():
                 saver = tf.train.Saver()  # defaults to saving all variables
                 saver_dict = {}
 
-                # This is used to accommodate our RTX graphics card, don't need it otherwise
+                #TODO This is used to accommodate our RTX graphics card, don't need it otherwise
                 config = tf.ConfigProto()
                 config.gpu_options.allow_growth = True
 
@@ -1111,6 +1132,8 @@ class LDAMP_wrapper():
                         plt.plot(range(n_DAMP_layers + 1), np.mean(batch_PSNR_hist, axis=1))
                         plt.title("PSNR over " + str(alg) + " layers")
                         plt.show()
+            else:
+                raise Exception("Unknown stage " + stage)
 
 __author__ = 'cmetzler&alimousavi'
 

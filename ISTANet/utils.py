@@ -14,9 +14,6 @@ import os
 
 def generate_dataset(input_channel,input_width,input_height, stage, specifics):
     # a function to generate the corresponding dataset with given parameters. return an instance of the dataset class.
-    if(stage == 'testing'):
-        return 1
-
 
     Training_labels = getTrainingLabels(input_channel,input_width,input_height, stage, specifics)
 
@@ -28,7 +25,7 @@ def generate_dataset(input_channel,input_width,input_height, stage, specifics):
     else:
         rand_loader = DataLoader(dataset=RandomDataset(Training_labels, nrtrain), batch_size=batch_size, num_workers=4,
                                  shuffle=True)
-    return rand_loader
+    return rand_loader, Training_labels
 
 
 def rgb2ycbcr(rgb):
@@ -90,14 +87,29 @@ def img2col_py(Ipad, block_size):
 
 def col2im_CS_py(X_col, row, col, row_new, col_new, specifics):
     block_size = specifics['input_width']
-    X0_rec = np.zeros([row_new, col_new])
-    count = 0
-    for x in range(0, row_new - block_size + 1, block_size):
-        for y in range(0, col_new - block_size + 1, block_size):
-            X0_rec[x:x + block_size, y:y + block_size] = X_col[:, count].reshape([block_size, block_size])
-            # X0_rec[x:x+block_size, y:y+block_size] = X_col[:, count].reshape([block_size, block_size]).transpose()
-            count = count + 1
-    X_rec = X0_rec[:row, :col]
+    if(specifics['sudo_rgb'] == True): # X_col is a list of tensors
+        X_rec3 = []
+        for i in range(3):
+            X0_rec = np.zeros([row_new, col_new])
+
+            count = 0
+            for x in range(0, row_new - block_size + 1, block_size):
+                for y in range(0, col_new - block_size + 1, block_size):
+                    X0_rec[x:x + block_size, y:y + block_size] = X_col[i][:, count].reshape([block_size, block_size])
+                    # X0_rec[x:x+block_size, y:y+block_size] = X_col[:, count].reshape([block_size, block_size]).transpose()
+                    count = count + 1
+            X_rec = X0_rec[:row, :col]
+            X_rec3.append(X_rec)
+        X_rec = np.array(X_rec3)
+    else: # X_col is a tensor
+        X0_rec = np.zeros([row_new, col_new])
+        count = 0
+        for x in range(0, row_new - block_size + 1, block_size):
+            for y in range(0, col_new - block_size + 1, block_size):
+                X0_rec[x:x + block_size, y:y + block_size] = X_col[:, count].reshape([block_size, block_size])
+                # X0_rec[x:x+block_size, y:y+block_size] = X_col[:, count].reshape([block_size, block_size]).transpose()
+                count = count + 1
+        X_rec = X0_rec[:row, :col]
     return X_rec
 
 
@@ -124,8 +136,8 @@ def getTrainingLabels(input_channel,input_width,input_height, stage, specifics):
                                            ]))
             Training_data = Training_data.data.numpy()
             Training_data = Training_data.reshape((-1, input_channel*input_width*input_height)) / 255
-        elif specifics['training_data_fileName'] == 'cifar10/testDatasetDownload':
-            Training_data = datasets.CIFAR10(root='./data', train=True, download=True,
+        elif specifics['training_data_fileName'] == 'cifar10':
+            Training_data = datasets.CIFAR10(root='./data/testDatasetDownload', train=True, download=True,
                                              transform=transforms.Compose([
                                                  transforms.Resize(input_width),
                                                  transforms.CenterCrop(input_width),
@@ -133,8 +145,8 @@ def getTrainingLabels(input_channel,input_width,input_height, stage, specifics):
                                              ]))
             Training_data = Training_data.data.numpy()
             Training_data = Training_data.reshape((-1, input_channel*input_width*input_height)) / 255
-        elif specifics['training_data_fileName'] == 'celeba/testDatasetDownload':
-            Training_data = datasets.CelebA(root='./data', split="train", download=True,
+        elif specifics['training_data_fileName'] == 'celeba':
+            Training_data = datasets.CelebA(root='./data/testDatasetDownload', split="train", download=True,
                                             transform=transforms.Compose([
                                                 transforms.Resize(input_width),
                                                 transforms.CenterCrop(input_width),
@@ -142,6 +154,13 @@ def getTrainingLabels(input_channel,input_width,input_height, stage, specifics):
                                             ]))
             Training_data = Training_data.data.numpy()
             Training_data = Training_data.reshape((-1, input_channel*input_width*input_height)) / 255
+        # elif specifics['training_data_fileName'] == '/storage-t1/database/cs-framework-database/mnist/train':
+        #     Training_data = CustomDataset(specifics['training_data_fileName'], specifics,
+        #                                   transform=transforms.Compose([
+        #                                        transforms.Resize(input_width),
+        #                                        transforms.CenterCrop(input_width),
+        #                                        transforms.ToTensor()
+        #                                    ]))
         elif(specifics['training_data_type'] == 'mat'):
             Training_data = sio.loadmat('./%s/%s.mat' % (specifics['data_dir'], Training_data))
             Training_data = Training_data['labels']
@@ -149,6 +168,9 @@ def getTrainingLabels(input_channel,input_width,input_height, stage, specifics):
             Training_data = np.load('./%s/%s.npy' % (specifics['data_dir'], Training_data))
         else:
             raise Exception('training_data_type of ' + specifics['training_data_type'] + ' is unsupported')
+    Training_data = Training_data[:specifics['nrtrain']]
+    np.random.shuffle(Training_data)
+
     return Training_data
 
 def createTrainingLabels(stage, specifics):
@@ -161,20 +183,28 @@ def createTrainingLabels(stage, specifics):
         images = glob.glob(specifics['custom_training_data_location'] + '/*.bmp')
     elif(specifics['custom_type_of_image'] == 'tif'):
         images = glob.glob(specifics['custom_training_data_location'] + '/*.tif')
+    elif (specifics['custom_type_of_image'] == 'png'):
+        images = glob.glob(specifics['custom_training_data_location'] + '/*.png')
+    elif (specifics['custom_type_of_image'] == 'jpg'):
+        images = glob.glob(specifics['custom_training_data_location'] + '/*.jpg')
     else:
         raise Exception('custom_type_of_image of ' + specifics['custom_type_of_image'] + ' is unsupported')
-
-    for image in images:
+    for i, image in enumerate(images):
         with open(image, 'rb') as file:
             img = Image.open(file)
             img = np.array(img)
-            # convert to grayscale if in RGB
-            # if (len(img.shape) == 3):
-            #     img = np.mean(img, 2)
-            # scale to 1-dimensional vector between 0 and 1
-            img = img.reshape((-1)) / 255
-            Training_labels.append(img)
+            if (specifics['sudo_rgb']):
+                # scale to between 0 and 1
+                Training_labels.append(img[:, :, 0].reshape((1, specifics['input_width'], specifics['input_width'])))
+                Training_labels.append(img[:, :, 1].reshape((1, specifics['input_width'], specifics['input_width'])))
+                Training_labels.append(img[:, :, 2].reshape((1, specifics['input_width'], specifics['input_width'])))
+            else:
+                # scale to between 0 and 1
+                img = img.reshape((specifics['input_channel'], specifics['input_width'], specifics['input_width'])) / 255
+                Training_labels.append(img)
+
     Training_labels = np.array(Training_labels)
+    Training_labels = np.reshape(Training_labels, (-1, specifics['input_width'] * specifics['input_width']))
 
     if (not (os.path.exists(specifics['data_dir']))):
         os.mkdir(specifics['data_dir'])
@@ -182,7 +212,6 @@ def createTrainingLabels(stage, specifics):
     print("################################################################\nCreated new file: "
           + './%s/%s.npy' % (specifics['data_dir'], specifics['custom_dataset_name'])
           + "\n################################################################\n")
-
     return Training_labels
 
 class RandomDataset(Dataset):
@@ -195,3 +224,31 @@ class RandomDataset(Dataset):
 
     def __len__(self):
         return self.len
+
+class CustomDataset(Dataset):
+    def __init__(self, root: str, specifics, transform=transforms.ToTensor()):
+        samples = []
+        srcdir = os.listdir(root)
+        for i in range(len(srcdir)):
+            filename = str(srcdir[i])
+            samples.append(filename)
+
+
+        if len(samples) == 0:
+            msg = "Found 0 files in subfolders of: {}\n".format(self.root)
+            raise RuntimeError(msg)
+
+        self.specifics = specifics
+        self.root = root
+        self.samples = samples
+
+    def __getitem__(self, index: int):
+        path = self.root + '/' + self.samples[index]
+        sample = Image.open(path)
+        sample = self.transform(sample)
+        torch.reshape(sample, (-1, self.specifics['input_width']*self.specifics['input_width']))
+        torch.div(sample, 255)
+        return sample
+
+    def __len__(self) -> int:
+        return len(self.samples)
