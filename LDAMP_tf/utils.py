@@ -57,9 +57,9 @@ def generate_dataset(dataset,input_channel,input_width,input_height,stage, speci
                     img = np.array(img)
                     if(specifics['sudo_rgb']):
                         # scale to between 0 and 1
-                        data.append(img[:, :, 0].reshape((1, input_width, input_height)))
-                        data.append(img[:, :, 1].reshape((1, input_width, input_height)))
-                        data.append(img[:, :, 2].reshape((1, input_width, input_height)))
+                        data.append(img[:, :, 0].reshape((1, input_width, input_height)) / 255)
+                        data.append(img[:, :, 1].reshape((1, input_width, input_height)) / 255)
+                        data.append(img[:, :, 2].reshape((1, input_width, input_height)) / 255)
                     else:
                         # scale to between 0 and 1
                         img = img.reshape((input_channel, input_width, input_height)) / 255

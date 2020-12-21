@@ -6,7 +6,7 @@ import scipy.io as sio
 import platform
 import copy
 import math
-
+import matplotlib.pyplot as plt
 import glob
 from PIL import Image
 import os
@@ -189,19 +189,24 @@ def createTrainingLabels(stage, specifics):
         images = glob.glob(specifics['custom_training_data_location'] + '/*.jpg')
     else:
         raise Exception('custom_type_of_image of ' + specifics['custom_type_of_image'] + ' is unsupported')
+
     for i, image in enumerate(images):
         with open(image, 'rb') as file:
             img = Image.open(file)
             img = np.array(img)
             if (specifics['sudo_rgb']):
                 # scale to between 0 and 1
-                Training_labels.append(img[:, :, 0].reshape((1, specifics['input_width'], specifics['input_width'])))
-                Training_labels.append(img[:, :, 1].reshape((1, specifics['input_width'], specifics['input_width'])))
-                Training_labels.append(img[:, :, 2].reshape((1, specifics['input_width'], specifics['input_width'])))
+                Training_labels.append(img[:, :, 0].reshape((1, specifics['input_width'], specifics['input_width'])) / 255)
+                Training_labels.append(img[:, :, 1].reshape((1, specifics['input_width'], specifics['input_width'])) / 255)
+                Training_labels.append(img[:, :, 2].reshape((1, specifics['input_width'], specifics['input_width'])) / 255)
             else:
                 # scale to between 0 and 1
                 img = img.reshape((specifics['input_channel'], specifics['input_width'], specifics['input_width'])) / 255
                 Training_labels.append(img)
+
+                # fig3 = plt.figure()
+                # plt.imshow(Training_labels[i][0])
+                # plt.show()
 
     Training_labels = np.array(Training_labels)
     Training_labels = np.reshape(Training_labels, (-1, specifics['input_width'] * specifics['input_width']))
