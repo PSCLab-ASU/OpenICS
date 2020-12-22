@@ -4,12 +4,12 @@ tf.disable_eager_execution()
 # import tensorflow as tf
 import numpy as np
 import time
-
+import matplotlib.pyplot as plt
 import random
 import sensing_methods
 import utils
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]='0'
+os.environ["CUDA_VISIBLE_DEVICES"]='3'
 def reconstruction_method(dset,sensing_method,specifics):
     method = LDAMP_wrapper(sensing_method, specifics)
     return method
@@ -1062,6 +1062,7 @@ class LDAMP_wrapper():
                     start_time = time.time()
 
                     Final_PSNRs = []
+                    Final_MSEs = []
                     for offset in range(0, n_Test_Images - BATCH_SIZE + 1,
                                         BATCH_SIZE):  # Subtract batch size-1 to avoid eerrors when len(train_images) is not a multiple of the batch size
                         end = offset + BATCH_SIZE
@@ -1077,8 +1078,16 @@ class LDAMP_wrapper():
                             [x_hat, MSE_history, NMSE_history, PSNR_history],
                             feed_dict={x_true: batch_x_test, A_val_tf: A_val})
                         Final_PSNRs.append(batch_PSNR_hist[-1][0])
+                        Final_MSEs.append(batch_MSE_hist[-1][0])
+
+                    for i in range(len(Final_PSNRs)):
+                        if(Final_PSNRs[i] >= 48.0):
+                            Final_PSNRs[i] = 48.0
                     print(Final_PSNRs)
                     print(np.mean(Final_PSNRs))
+                    print(Final_MSEs)
+                    print(np.mean(Final_MSEs))
+
                     fig1 = plt.figure()
                     plt.imshow(np.transpose(np.reshape(x_test[:, n_Test_Images - 1], (height_img, width_img))),
                                interpolation='nearest', cmap='gray')

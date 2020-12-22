@@ -117,9 +117,12 @@ def psnr(img1, img2):
     img1.astype(np.float32)
     img2.astype(np.float32)
     mse = np.mean((img1 - img2) ** 2)
-    if mse == 0:
-        return 100
+    if mse <= 1:
+        return 48
     PIXEL_MAX = 255.0
+
+    # 20 * log(MaxPixel) - 10 * log(MSE)
+
     return 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
 
 def getTrainingLabels(input_channel,input_width,input_height, stage, specifics):
@@ -195,6 +198,8 @@ def createTrainingLabels(stage, specifics):
             img = Image.open(file)
             img = np.array(img)
             if (specifics['sudo_rgb']):
+                if (i == (specifics['nrtrain']/3)):
+                    break
                 # scale to between 0 and 1
                 Training_labels.append(img[:, :, 0].reshape((1, specifics['input_width'], specifics['input_width'])) / 255)
                 Training_labels.append(img[:, :, 1].reshape((1, specifics['input_width'], specifics['input_width'])) / 255)

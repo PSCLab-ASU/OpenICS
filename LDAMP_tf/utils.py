@@ -4,10 +4,11 @@ tf.disable_eager_execution()
 # import tensorflow as tf
 
 import numpy as np
+import math
 import os
 import glob
 from PIL import Image
-os.environ["CUDA_VISIBLE_DEVICES"]='0'
+os.environ["CUDA_VISIBLE_DEVICES"]='3'
 
 def SetNetworkParams(new_height_img, new_width_img,new_channel_img, new_filter_height,new_filter_width,\
                      new_num_filters,new_n_DnCNN_layers,new_n_DAMP_layers, new_sampling_rate,\
@@ -99,10 +100,9 @@ def generate_testset(input_channel,input_width,input_height,specifics):
                     img = np.array(img)
                     if (specifics['sudo_rgb']):
                         # scale to between 0 and 1
-                        img = img.reshape((3, input_width, input_height)) / 255
-                        data.append(img[0].reshape((1, input_width, input_height)))
-                        data.append(img[1].reshape((1, input_width, input_height)))
-                        data.append(img[2].reshape((1, input_width, input_height)))
+                        data.append(img[:, :, 0].reshape((1, input_width, input_height)) / 255)
+                        data.append(img[:, :, 1].reshape((1, input_width, input_height)) / 255)
+                        data.append(img[:, :, 2].reshape((1, input_width, input_height)) / 255)
                     else:
                         # scale to between 0 and 1
                         img = img.reshape((input_channel, input_width, input_height)) / 255
@@ -143,11 +143,11 @@ def splitDataset(dset, specifics):
 
 ## Evaluate Intermediate Error
 def EvalError(x_hat,x_true):
-    mse=tf.reduce_mean(tf.square(x_hat-x_true),axis=0)
+    mse=tf.reduce_mean(tf.square((x_hat-x_true) * 255.),axis=0)
     xnorm2=tf.reduce_mean(tf.square( x_true),axis=0)
     mse_thisiter=mse
     nmse_thisiter=mse/xnorm2
-    psnr_thisiter=10.*tf.log(1./mse)/tf.log(10.)
+    psnr_thisiter = 20. * tf.log(255. / mse) / tf.log(10.)
     return mse_thisiter, nmse_thisiter, psnr_thisiter
 
 ## Evaluate Intermediate Error
