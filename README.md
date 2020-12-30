@@ -1,6 +1,6 @@
 
 # Section 0: Table of Benchmarks
-<table id="ISTANET TABLE">
+<table>
 <thead>
   <tr>
     <th>Method</th>
@@ -16,58 +16,58 @@
     <td rowspan="30">ISTANETPlus</td>
     <td rowspan="5">MNIST</td>
     <td>2</td>
-    <td>EX1</td>
-    <td>EX2</td>
-    <td>EX3</td>
+    <td>47.99</td>
+    <td>0.9999</td>
+    <td>0.0107</td>
   </tr>
   <tr>
     <td>4</td>
-    <td>EX4</td>
-    <td>EX5</td>
-    <td>EX6</td>
+    <td>44.18</td>
+    <td>0.9987</td>
+    <td>0.0181</td>
   </tr>
   <tr>
     <td>8</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>34.96</td>
+    <td>0.9903</td>
+    <td>0.0132</td>
   </tr>
   <tr>
     <td>16</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>27.32</td>
+    <td>0.9536</td>
+    <td>0.0132</td>
   </tr>
   <tr>
     <td>32</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>19.29</td>
+    <td>0.7411</td>
+    <td>0.0121</td>
   </tr>
   <tr>
     <td rowspan="5">CelebA</td>
     <td>2</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>37.43</td>
+    <td>0.9798</td>
+    <td>0.0839</td>
   </tr>
   <tr>
     <td>4</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>31.14</td>
+    <td>0.9297</td>
+    <td>0.0699</td>
   </tr>
   <tr>
     <td>8</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>27.07</td>
+    <td>0.8499</td>
+    <td>0.2076</td>
   </tr>
   <tr>
     <td>16</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>23.77</td>
+    <td>0.7406</td>
+    <td>0.1361</td>
   </tr>
   <tr>
     <td>32</td>
@@ -78,126 +78,126 @@
   <tr>
     <td rowspan="5">CIFAR10</td>
     <td>2</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>34.12</td>
+    <td>0.9703</td>
+    <td>0.0332</td>
   </tr>
   <tr>
     <td>4</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>27.66</td>
+    <td>0.8932</td>
+    <td>0.0301</td>
   </tr>
   <tr>
     <td>8</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>23.41</td>
+    <td>0.7632</td>
+    <td>0.0318</td>
   </tr>
   <tr>
     <td>16</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>20.25</td>
+    <td>0.5979</td>
+    <td>0.0386</td>
   </tr>
   <tr>
     <td>32</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>17.95</td>
+    <td>0.435</td>
+    <td>0.0379</td>
   </tr>
   <tr>
     <td rowspan="5">CIFAR10 Gray</td>
     <td>2</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>33.63</td>
+    <td>0.9679</td>
+    <td>0.0072</td>
   </tr>
   <tr>
     <td>4</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>27.46</td>
+    <td>0.8886</td>
+    <td>0.0147</td>
   </tr>
   <tr>
     <td>8</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>23.15</td>
+    <td>0.7501</td>
+    <td>0.0133</td>
   </tr>
   <tr>
     <td>16</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>20.25</td>
+    <td>0.5911</td>
+    <td>0.0123</td>
   </tr>
   <tr>
     <td>32</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>18.13</td>
+    <td>0.4406</td>
+    <td>0.0116</td>
   </tr>
   <tr>
     <td rowspan="5">Bigset</td>
     <td>2</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>37.28</td>
+    <td>0.9393</td>
+    <td>0.0631</td>
   </tr>
   <tr>
     <td>4</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>33</td>
+    <td>0.8686</td>
+    <td>0.0512</td>
   </tr>
   <tr>
     <td>8</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>29.88</td>
+    <td>0.7823</td>
+    <td>0.0453</td>
   </tr>
   <tr>
     <td>16</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>24.73</td>
+    <td>0.584</td>
+    <td>0.0390</td>
   </tr>
   <tr>
     <td>32</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>24.67</td>
+    <td>0.5864</td>
+    <td>0.0336</td>
   </tr>
   <tr>
     <td rowspan="5">Bigset Gray</td>
     <td>2</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>38.49</td>
+    <td>0.95</td>
+    <td>0.0173</td>
   </tr>
   <tr>
     <td>4</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>34.06</td>
+    <td>0.8874</td>
+    <td>0.0130</td>
   </tr>
   <tr>
     <td>8</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>30.69</td>
+    <td>0.8007</td>
+    <td>0.0121</td>
   </tr>
   <tr>
     <td>16</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>27.66</td>
+    <td>0.7035</td>
+    <td>0.0135</td>
   </tr>
   <tr>
     <td>32</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>25.16</td>
+    <td>0.6074</td>
+    <td>0.0153</td>
   </tr>
   <tr>
     <td colspan="6">THIS IS EXAMPLE TEXT, PUT THE TOTAL SCORE CALCULATION HERE</td>
