@@ -1,6 +1,209 @@
 
-# Section 0:
-	TABLE OF BENCHMARKS
+# Section 0: Table of Benchmarks
+<table id="ISTANET TABLE">
+<thead>
+  <tr>
+    <th>Method</th>
+    <th>Dataset</th>
+    <th>Compression Ratio</th>
+    <th>PSNR</th>
+    <th>SSIM</th>
+    <th>Reconstruction Speed</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td rowspan="30">ISTANETPlus</td>
+    <td rowspan="5">MNIST</td>
+    <td>2</td>
+    <td>EX1</td>
+    <td>EX2</td>
+    <td>EX3</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>EX4</td>
+    <td>EX5</td>
+    <td>EX6</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td rowspan="5">CelebA</td>
+    <td>2</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td rowspan="5">CIFAR10</td>
+    <td>2</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td rowspan="5">CIFAR10 Gray</td>
+    <td>2</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td rowspan="5">Bigset</td>
+    <td>2</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td rowspan="5">Bigset Gray</td>
+    <td>2</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="6">THIS IS EXAMPLE TEXT, PUT THE TOTAL SCORE CALCULATION HERE</td>
+  </tr>
+</tbody>
+</table>
 
 
 # Section 1: Setting up environment
