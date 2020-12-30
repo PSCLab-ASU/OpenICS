@@ -71,9 +71,9 @@
   </tr>
   <tr>
     <td>32</td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>21.13</td>
+    <td>0.6295</td>
+    <td>0.057</td>
   </tr>
   <tr>
     <td rowspan="5">CIFAR10</td>
