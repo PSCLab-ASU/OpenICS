@@ -8,7 +8,7 @@ import math
 import os
 import glob
 from PIL import Image
-os.environ["CUDA_VISIBLE_DEVICES"]='3'
+os.environ["CUDA_VISIBLE_DEVICES"]='0'
 
 def SetNetworkParams(new_height_img, new_width_img,new_channel_img, new_filter_height,new_filter_width,\
                      new_num_filters,new_n_DnCNN_layers,new_n_DAMP_layers, new_sampling_rate,\
@@ -52,16 +52,20 @@ def generate_dataset(dataset,input_channel,input_width,input_height,stage, speci
                 images = glob.glob(specifics['new_data'] + "/*.jpg")
             if (specifics['custom_type_of_image'] == "png"):
                 images = glob.glob(specifics['new_data'] + "/*.png")
-            for image in images:
+            for i, image in enumerate(images):
                 with open(image, 'rb') as file:
                     img = Image.open(file)
                     img = np.array(img)
                     if(specifics['sudo_rgb']):
+                        if (i == ((specifics['n_Val_Images']+specifics['n_Train_Images']) / 3)):
+                            break
                         # scale to between 0 and 1
                         data.append(img[:, :, 0].reshape((1, input_width, input_height)) / 255)
                         data.append(img[:, :, 1].reshape((1, input_width, input_height)) / 255)
                         data.append(img[:, :, 2].reshape((1, input_width, input_height)) / 255)
                     else:
+                        if (i == (specifics['n_Val_Images']+specifics['n_Train_Images'])):
+                            break
                         # scale to between 0 and 1
                         img = img.reshape((input_channel, input_width, input_height)) / 255
                         data.append(img)
@@ -100,9 +104,10 @@ def generate_testset(input_channel,input_width,input_height,specifics):
                     img = np.array(img)
                     if (specifics['sudo_rgb']):
                         # scale to between 0 and 1
-                        data.append(img[:, :, 0].reshape((1, input_width, input_height)) / 255)
-                        data.append(img[:, :, 1].reshape((1, input_width, input_height)) / 255)
-                        data.append(img[:, :, 2].reshape((1, input_width, input_height)) / 255)
+                        if (img.ndim == 3):
+                            data.append(img[:, :, 0].reshape((1, input_width, input_height)) / 255)
+                            data.append(img[:, :, 1].reshape((1, input_width, input_height)) / 255)
+                            data.append(img[:, :, 2].reshape((1, input_width, input_height)) / 255)
                     else:
                         # scale to between 0 and 1
                         img = img.reshape((input_channel, input_width, input_height)) / 255
@@ -141,13 +146,28 @@ def splitDataset(dset, specifics):
     return train_images, val_images
 
 
+def psnr(img1, img2):
+    img1.astype(np.float32)
+    img2.astype(np.float32)
+    mse = np.mean((img1 - img2) ** 2)
+    if mse <= 1:
+        return 48
+    PIXEL_MAX = 255.0
+
+    # 20 * log(MaxPixel) - 10 * log(MSE)
+
+    return 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
+
 ## Evaluate Intermediate Error
 def EvalError(x_hat,x_true):
-    mse=tf.reduce_mean(tf.square((x_hat-x_true) * 255.),axis=0)
+    x_hat = tf.clip_by_value(x_hat, clip_value_min=0, clip_value_max=1)
+    mse=tf.reduce_mean(tf.square((x_hat-x_true)),axis=0)
+    # mse=tf.reduce_mean(tf.square((x_hat-x_true) * 255.),axis=0)
     xnorm2=tf.reduce_mean(tf.square( x_true),axis=0)
     mse_thisiter=mse
     nmse_thisiter=mse/xnorm2
-    psnr_thisiter = 20. * tf.log(255. / mse) / tf.log(10.)
+    psnr_thisiter = 10. * tf.log(1. / mse) / tf.log(10.)
+    # psnr_thisiter = 20. * tf.log(255. / mse) / tf.log(10.)
     return mse_thisiter, nmse_thisiter, psnr_thisiter
 
 ## Evaluate Intermediate Error

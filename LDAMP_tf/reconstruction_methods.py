@@ -5,11 +5,12 @@ tf.disable_eager_execution()
 import numpy as np
 import time
 import matplotlib.pyplot as plt
+from skimage.measure import compare_ssim as ssim
 import random
 import sensing_methods
 import utils
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]='3'
+os.environ["CUDA_VISIBLE_DEVICES"]='0'
 def reconstruction_method(dset,sensing_method,specifics):
     method = LDAMP_wrapper(sensing_method, specifics)
     return method
@@ -1062,7 +1063,9 @@ class LDAMP_wrapper():
                     start_time = time.time()
 
                     Final_PSNRs = []
-                    Final_MSEs = []
+                    Final_SSIMs = []
+                    Final_TIMEs = []
+                    Final_RECs = []
                     for offset in range(0, n_Test_Images - BATCH_SIZE + 1,
                                         BATCH_SIZE):  # Subtract batch size-1 to avoid eerrors when len(train_images) is not a multiple of the batch size
                         end = offset + BATCH_SIZE
@@ -1072,44 +1075,57 @@ class LDAMP_wrapper():
                         A_val = sensing_methods.GenerateMeasurementMatrix(measurement_mode)
 
                         batch_x_test = x_test[:, offset:end]
-
+                        start = time.time()
                         # Run optimization. This will both generate compressive measurements and then recontruct from them.
                         batch_x_recon, batch_MSE_hist, batch_NMSE_hist, batch_PSNR_hist = sess.run(
                             [x_hat, MSE_history, NMSE_history, PSNR_history],
                             feed_dict={x_true: batch_x_test, A_val_tf: A_val})
+                        end = time.time()
                         Final_PSNRs.append(batch_PSNR_hist[-1][0])
-                        Final_MSEs.append(batch_MSE_hist[-1][0])
+                        # Final_PSNRs.append(utils.psnr(batch_x_recon*255, batch_x_test*255))
+                        rec_SSIM = ssim(np.reshape(batch_x_recon, (BATCH_SIZE, height_img, width_img)), np.reshape(batch_x_test, (BATCH_SIZE, height_img, width_img)), data_range=1)
+                        Final_SSIMs.append(rec_SSIM)
+                        Final_TIMEs.append(end - start)
+                        for i in range(BATCH_SIZE):
+                            Final_RECs.append(batch_x_recon[:,i])
 
                     for i in range(len(Final_PSNRs)):
                         if(Final_PSNRs[i] >= 48.0):
                             Final_PSNRs[i] = 48.0
-                    print(Final_PSNRs)
-                    print(np.mean(Final_PSNRs))
-                    print(Final_MSEs)
-                    print(np.mean(Final_MSEs))
+                    print("PSNR/SSIM/TIME = %.4f/%.4f/%.4f" % (np.mean(Final_PSNRs), np.mean(Final_SSIMs), np.mean(Final_TIMEs)))
 
-                    fig1 = plt.figure()
-                    plt.imshow(np.transpose(np.reshape(x_test[:, n_Test_Images - 1], (height_img, width_img))),
-                               interpolation='nearest', cmap='gray')
-                    plt.show()
-                    fig2 = plt.figure()
-                    plt.imshow(np.transpose(np.reshape(batch_x_recon[:, 0], (height_img, width_img))),
-                               interpolation='nearest', cmap='gray')
-                    plt.show()
-                    fig3 = plt.figure()
-                    plt.plot(range(n_DAMP_layers + 1), np.mean(batch_PSNR_hist, axis=1))
-                    plt.title("PSNR over " + str(alg) + " layers")
-                    plt.show()
+                    # fig1 = plt.figure()
+                    # plt.imshow(np.transpose(np.reshape(x_test[:, n_Test_Images - 1], (height_img, width_img))),
+                    #            interpolation='nearest', cmap='gray')
+                    # plt.show()
+                    # fig2 = plt.figure()
+                    # plt.imshow(np.transpose(np.reshape(batch_x_recon[:, 0], (height_img, width_img))),
+                    #            interpolation='nearest', cmap='gray')
+                    # plt.show()
+                    # fig3 = plt.figure()
+                    # plt.plot(range(n_DAMP_layers + 1), np.mean(batch_PSNR_hist, axis=1))
+                    # plt.title("PSNR over " + str(alg) + " layers")
+                    # plt.show()
                     if (self.specifics['sudo_rgb']):
                         fig1 = plt.figure()
-                        x_recombined = np.reshape(np.transpose(x_test)[:n_Test_Images - 1],
-                                                  (height_img * width_img * 3))
-                        plt.imshow(np.reshape(x_recombined, (height_img, width_img, 3)))
+                        x_recombined1 = np.transpose(np.reshape(x_test[:, n_Test_Images - 1], (height_img, width_img)))
+                        x_recombined2 = np.transpose(np.reshape(x_test[:, n_Test_Images - 2], (height_img, width_img)))
+                        x_recombined3 = np.transpose(np.reshape(x_test[:, n_Test_Images - 3], (height_img, width_img)))
+                        x_recombined = [x_recombined1,x_recombined2,x_recombined3]
+                        x_recombined = np.array(np.transpose(x_recombined))
+                        plt.imshow(x_recombined)
                         plt.show()
+
                         fig2 = plt.figure()
-                        x_recombined = np.reshape(np.transpose(batch_x_recon)[:3], (height_img * width_img * 3))
-                        plt.imshow(np.reshape(x_recombined, (height_img, width_img, 3)))
+                        # x_recombined = np.reshape(np.transpose(batch_x_recon)[:3], (height_img * width_img * 3))
+                        x_recombined1 = np.transpose(np.reshape(Final_RECs[n_Test_Images - 1], (height_img, width_img)))
+                        x_recombined2 = np.transpose(np.reshape(Final_RECs[n_Test_Images - 2], (height_img, width_img)))
+                        x_recombined3 = np.transpose(np.reshape(Final_RECs[n_Test_Images - 3], (height_img, width_img)))
+                        x_recombined = [x_recombined1, x_recombined2, x_recombined3]
+                        x_recombined = np.array(np.transpose(x_recombined))
+                        plt.imshow(x_recombined)
                         plt.show()
+
                         fig3 = plt.figure()
                         plt.plot(range(n_DAMP_layers + 1), np.mean(batch_PSNR_hist, axis=1))
                         plt.title("PSNR over " + str(alg) + " layers")
@@ -1120,7 +1136,7 @@ class LDAMP_wrapper():
                                    interpolation='nearest')
                         plt.show()
                         fig2 = plt.figure()
-                        plt.imshow(np.transpose(np.reshape(batch_x_recon[:, 0], (height_img, width_img))),
+                        plt.imshow(np.transpose(np.reshape(batch_x_recon[:, BATCH_SIZE - 1], (height_img, width_img))),
                                    interpolation='nearest',
                                    cmap='gray')
                         plt.show()

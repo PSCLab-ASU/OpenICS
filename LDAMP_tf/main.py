@@ -7,7 +7,7 @@ import reconstruction_methods as rms
 import utils
 import sensing_methods as sms
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]='3'
+os.environ["CUDA_VISIBLE_DEVICES"]='0'
 
 # from tensorflow.python.client import device_lib
 # print(device_lib.list_local_devices())
@@ -94,10 +94,10 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
 
 if __name__ == "__main__":
     print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
-    sampling_rate = 1/16
+    sampling_rate = 1/32
     input_channel = 1 # always keep as 1, technically does support 3 but benchmark at 1 and use sudo_rgb
-    input_width = 32 # 40, cifar: 32, celebA: 64, bigset: 64, mnist: 32
-    input_height = 32 # 40
+    input_width = 64 # 40, cifar: 32, celebA: 64, bigset: 64, mnist: 32
+    input_height = 64 # 40
     n = input_channel * input_height * input_width # input_height * input_width #
     m = int(np.round(sampling_rate * input_channel * input_height * input_width))# int(np.round(sampling_rate * input_height * input_width))#
     print("CS ratio: " + str(n/m))
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     main(
         sensingtype, # sensing type
         "DAMP", #put DAMP instead of LDAMP
-        "training", # stage
+        "testing", # stage
         False, # default, switch to false if want to edit parameters below
         '', # dataset is not used
         input_channel, # input channels
@@ -144,17 +144,17 @@ if __name__ == "__main__":
             'EPOCHS': 50,
             'n_Train_Images': 45000, #128 * 1600,  # 128*3000, 55000, cifar 45000, 140000 * 3
             'n_Val_Images': 5000,  # 10000
-            'n_Test_Images': 100, # only for LbL
-            'BATCH_SIZE': 128, # 128 for training, 1 for testing, 3 for testing with sudo_rgb
+            'n_Test_Images': 13*64, # only for LbL
+            'BATCH_SIZE': 64, # 128 for training, 1 for testing
             'InitWeightsMethod': 'smaller_net', #Options are random, denoiser, smaller_net, and layer_by_layer.
             'loss_func': 'MSE',
             'init_mu': 0,
             'init_sigma': 0.1,
             'mode': sensingtype,
-            'save_folder_name': 'benchmark_cifar10_gray_csratio16',
+            'save_folder_name': 't4/benchmark_bigset_gray_csratio32',
 
             'validation_patch': '',
-            'training_patch': './Data/benchmark_cifar10_gray_train.npy',
+            'training_patch': './Data/benchmark_celebA_64x64_train.npy',
             'testing_patch': './Data/benchmark_cifar10_gray_test.npy',
 
             # if True, will use 'validation_patch' to load val data, otherwise cut from training_patch
@@ -162,14 +162,14 @@ if __name__ == "__main__":
 
             # if True, creates new dataset and uses it, False: uses 'training_patch'
             'create_new_dataset': False,
-            'new_data': '/storage-t1/database/cs-framework-database/cifar10_gray/train',
-            'dataset_custom_name': 'benchmark_cifar10_gray_train',
-            'custom_type_of_image': 'png',  # bmp, tif, jpg, png
+            'new_data': '/storage-t1/database/cs-framework-database/bigset/train/data',
+            'dataset_custom_name': 'benchmark_bigset_train',
+            'custom_type_of_image': 'bmp',  # bmp, tif, jpg, png
 
             # if True, creates new dataset and uses it, False: uses 'testing_patch'
-            'create_new_testpatch': False,  # if False, ignore parameters below
-            'new_test_data': '/storage-t1/database/cs-framework-database/celebA_64x64/test',
-            'testset_custom_name': 'benchmark_celebA_64x64_test',
-            'testing_data_type': 'jpg'  # bmp, tif, celebA: jpg, mnist, cifar10: png
+            'create_new_testpatch': True,  # if False, ignore parameters below
+            'new_test_data': '/storage-t1/database/cs-framework-database/bigset_gray/test',
+            'testset_custom_name': 'benchmark_bigset_gray_test',
+            'testing_data_type': 'bmp'  # bmp, tif, celebA: jpg, mnist, cifar10: png
         },
     )
