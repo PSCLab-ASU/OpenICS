@@ -59,7 +59,7 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
 if __name__ == "__main__":
     input_channel = 1
     input_width = 64
-    ratio = 32
+    ratio = 2
     stage = 'training'
 
     m = input_width*input_width
@@ -80,19 +80,19 @@ if __name__ == "__main__":
         n,
         specifics={
             'stage': stage,
-            'sudo_rgb': True,
+            'sudo_rgb': True, # if dataset is rgb, then true else false
             'start_epoch': 0,
             'end_epoch': 50,
             'testing_epoch_num': 50,
             'learning_rate': 1e-4,
             'layer_num': 9,
-            'group_num': 904, # organizational purposes
+            'group_num': 901, # organizational purposes, 900-905
             'cs_ratio': ratio,
             'input_channel': input_channel,
             'input_width': input_width,
             'n': n,
             'm': m,
-            'nrtrain': 60000 * 3, #224000, #88912, 867, 224000, 50000 * 3
+            'nrtrain': 60000, #224000, #88912, 867, 224000, 50000 * 3
             'batch_size': 128, # 64 for train
 
             # customize your directory names
@@ -108,20 +108,20 @@ if __name__ == "__main__":
 
             # (Training only) if not creating new dataset, input file name and type.
             # Will then train on this dataset
-            'training_data_fileName': 'benchmark_mnist_train',
+            'training_data_fileName': 'benchmark_celebA_64x64_train', # benchmark_bigset_gray_train
             # 'Training_Data', 'bigset_train_data', special cases: 'mnist','cifar10','celeba'
             'training_data_type': 'npy',  # mat, npy
 
             # (Training only) set to True and define custom name, location, and type.
             # Will then create and train on this new dataset
             'create_custom_dataset': True,
-            'custom_dataset_name': "benchmark_bigset_train",
-            'custom_training_data_location': '/storage-t1/database/cs-framework-database/bigset/train/data',
+            'custom_dataset_name': "benchmark_celebA_64x64_train", # what you want to call it
+            'custom_training_data_location': '/storage-t1/database/cs-framework-database/celebA_64x64/train', # bigset
             'custom_type_of_image': 'bmp', # bmp, tif, celebA: jpg, mnist, cifar10: png
 
             # (Testing only) if testing, use these parameters to define where and what type of images testing on
             'Testing_data_location': '/storage-t1/database/cs-framework-database/celebA_64x64/test',# 'Set11'
             'testing_data_isFolderImages': True,
-            'testing_data_type': 'jpg',  # bigset: bmp, tif, celebA: jpg, mnist, cifar10: png
+            'testing_data_type': 'jpg',  # bigset: bmp, celebA: jpg, mnist, cifar10: png
         }
     )

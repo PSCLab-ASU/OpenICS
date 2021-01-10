@@ -106,7 +106,7 @@ if __name__ == "__main__":
     main(
         sensingtype, # sensing type
         "DAMP", #put DAMP instead of LDAMP
-        "testing", # stage
+        "training", # stage
         False, # default, switch to false if want to edit parameters below
         '', # dataset is not used
         input_channel, # input channels
@@ -116,7 +116,7 @@ if __name__ == "__main__":
         n, # n
         {
             'channel_img': input_channel,
-            'sudo_rgb': False,
+            'sudo_rgb': True,
             'width_img': input_width,
             'height_img': input_height,
             'n': n,
@@ -133,7 +133,7 @@ if __name__ == "__main__":
 
             ## Training Parameters
             'start_layer': 1, # used to define where to start when resuming
-            'max_Epoch_Fails': 3,  # How many training epochs to run without improvement in the validation error
+            'max_Epoch_Fails': 50,  # How many training epochs to run without improvement in the validation error
             'ResumeTraining': False,  # Load weights from a network you've already trained a little
             'LayerbyLayer': True,
             'DenoiserbyDenoiser': False,  # if this is true, overrides other two
@@ -144,32 +144,32 @@ if __name__ == "__main__":
             'EPOCHS': 50,
             'n_Train_Images': 45000, #128 * 1600,  # 128*3000, 55000, cifar 45000, 140000 * 3
             'n_Val_Images': 5000,  # 10000
-            'n_Test_Images': 13*64, # only for LbL
+            'n_Test_Images': 37*64, # only for LbL
             'BATCH_SIZE': 64, # 128 for training, 1 for testing
             'InitWeightsMethod': 'smaller_net', #Options are random, denoiser, smaller_net, and layer_by_layer.
             'loss_func': 'MSE',
             'init_mu': 0,
             'init_sigma': 0.1,
             'mode': sensingtype,
-            'save_folder_name': 't4/benchmark_bigset_gray_csratio32',
+            'save_folder_name': 'benchmark_bigset_csratio32',
 
             'validation_patch': '',
-            'training_patch': './Data/benchmark_celebA_64x64_train.npy',
-            'testing_patch': './Data/benchmark_cifar10_gray_test.npy',
+            'training_patch': './Data/benchmark_bigset_train.npy',
+            'testing_patch': './Data/benchmark_bigset_test.npy',
 
             # if True, will use 'validation_patch' to load val data, otherwise cut from training_patch
             'use_separate_val_patch': False, # TODO LOOK AT NOTES
 
             # if True, creates new dataset and uses it, False: uses 'training_patch'
             'create_new_dataset': False,
-            'new_data': '/storage-t1/database/cs-framework-database/bigset/train/data',
-            'dataset_custom_name': 'benchmark_bigset_train',
-            'custom_type_of_image': 'bmp',  # bmp, tif, jpg, png
+            'new_data': '/storage-t1/database/cs-framework-database/celebA_64x64/train',
+            'dataset_custom_name': 'benchmark_celebA_64x64_train',
+            'custom_type_of_image': 'jpg',  # bmp, tif, jpg, png
 
             # if True, creates new dataset and uses it, False: uses 'testing_patch'
-            'create_new_testpatch': True,  # if False, ignore parameters below
-            'new_test_data': '/storage-t1/database/cs-framework-database/bigset_gray/test',
-            'testset_custom_name': 'benchmark_bigset_gray_test',
-            'testing_data_type': 'bmp'  # bmp, tif, celebA: jpg, mnist, cifar10: png
+            'create_new_testpatch': False,  # if False, ignore parameters below
+            'new_test_data': '/storage-t1/database/cs-framework-database/celebA_64x64/test',
+            'testset_custom_name': 'benchmark_celebA_64x64_test',
+            'testing_data_type': 'jpg'  # bmp, tif, celebA: jpg, mnist, cifar10: png
         },
     )
