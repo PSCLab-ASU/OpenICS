@@ -51,4 +51,5 @@ def dcgan_gen(z, hparams):
     restore_dict = {var.op.name: var for var in tf.global_variables() if var.op.name in restore_vars}
     restore_path = tf.train.latest_checkpoint(hparams.pretrained_model_dir)
 
+
     return x_hat_batch, restore_dict, restore_path

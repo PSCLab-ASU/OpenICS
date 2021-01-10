@@ -32,7 +32,7 @@ if __name__ == "__main__":
     specifics = {
             'num_training_iterations': 1000000,
             'learned_sensing_parameters': False, #Whether or not to add the sensing parameters (of a random sensing matrix or a Discriminator network) to the list of parameters of the optimizer
-            'batch_size': 64,
+            'batch_size': 1,
             'num_latents': 100,
             'summary_every_step': 100, # The interval at which to log debug ops.
             'save_every_step': 1000, # The interval at which to save model dicts
@@ -47,7 +47,7 @@ if __name__ == "__main__":
             'generator': "DCGAN", #should be either MLP (originally used for MNIST) or DCGAN (originally used for CelebA)
 
             'copy_dataset_source_folder': "/storage-t1/database/cs-framework-database/mnist",
-            'dataset': './data/mnist',  #train/val/test sets will be loaded from here by default. If the folder does not exist, the program will attempt to create the dataset from the copy_dataset_source_folder, where it assumes a test and train subfolder is present
+            'dataset': './data/celebAmini',  #train/val/test sets will be loaded from here by default. If the folder does not exist, the program will attempt to create the dataset from the copy_dataset_source_folder, where it assumes a test and train subfolder is present
             'n_Val_Images': 10000 #number of validation images for the dataset split
         }
     main(
@@ -56,10 +56,10 @@ if __name__ == "__main__":
         stage = "training",
         default = "False",
         dataset = "mnist",
-        input_channel = 1,
-        input_width = 32,
-        input_height = 32,
-        n = 32*32*1,
+        input_channel = 3,
+        input_width = 64,
+        input_height = 64,
+        n = 64*64*3,
         m = 10,
         specifics = specifics
     )

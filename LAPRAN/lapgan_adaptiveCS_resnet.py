@@ -106,6 +106,7 @@ class LAPGAN_Discriminator_level1(nn.Module):
         if isinstance(input.data, torch.cuda.FloatTensor) and self.ngpu > 1:
             output = nn.parallel.data_parallel(self.main, input, range(self.ngpu))
         else:
+            #print(input.shape)
             output = self.main(input)
 
         return output.view(-1, 1).squeeze(1)

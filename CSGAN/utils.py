@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from typing import Any, Callable, cast, Dict, List, Optional, Tuple
 def generate_dataset(dataset,input_channel,input_width,input_height,stage,specifics):
+    global channels
+    channels = input_channel
     trans = PreprocessTransform()
     if not os.path.exists(specifics['dataset']):
         print("Dataset folder given in specifics does not exist. Attempting to create dataset from source folder...")
@@ -23,7 +25,7 @@ def generate_dataset(dataset,input_channel,input_width,input_height,stage,specif
             print("Test set could not be found. Please make sure the test set is in the test subfolder.")
             exit()
         test_dataset = CustomDataset(specifics["dataset"]+"/test",transform=transforms.Compose([
-                                        transforms.Grayscale(),
+                                        #transforms.Grayscale(),
                                         transforms.Resize(input_width),
                                         transforms.CenterCrop(input_width),
                                         transforms.ToTensor(),
@@ -38,14 +40,14 @@ def generate_dataset(dataset,input_channel,input_width,input_height,stage,specif
             print("Train set could not be found. Please make sure the train set is in the train subfolder.")
             exit()
         train_dataset = CustomDataset(specifics["dataset"]+"/train",transform=transforms.Compose([
-                                        transforms.Grayscale(),
+                                      #  transforms.Grayscale(),
                                         transforms.Resize(input_width),
                                         transforms.CenterCrop(input_width),
                                         transforms.ToTensor(),
                                         transforms.Lambda(trans)                                            
                                     ]))
         val_dataset = CustomDataset(specifics["dataset"]+"/val",transform=transforms.Compose([
-                                        transforms.Grayscale(),
+                                      #  transforms.Grayscale(),
                                         transforms.Resize(input_width),
                                         transforms.CenterCrop(input_width),
                                         transforms.ToTensor(),
@@ -116,46 +118,6 @@ def make_prior(num_latents):
 
     return torch.distributions.normal.Normal(prior_mean,prior_scale)
 
-class CustomMnistDataset(Dataset):
-    def __init__(self, root_dir, datasetType, transform=None):
-        """
-        Args:
-            type(string): type of the dataset. Can be train, test, or val.
-            root_dir (string): Root directory of the dataset
-            transform (callable, optional): Optional transform to be applied
-                on a sample.
-        """
-        self.root_dir = root_dir
-        self.transform = transform
-        self.datasetType = datasetType
-
-    def __len__(self):
-        if self.datasetType == "train":
-            return 60000
-        elif self.datasetType =="val":
-            return 0
-        elif self.datasetType == "test":
-            return 10000
-        else:
-            return 0
-
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-
-        img_name = os.path.join(self.root_dir,self.datasetType,
-                                str(idx)+".png")
-       # print("img_name:", img_name)
-        image = io.imread(img_name)
-       # landmarks = self.landmarks_frame.iloc[idx, 1:]
-        #landmarks = np.array([landmarks])
-        #landmarks = landmarks.astype('float').reshape(-1, 2)
-       # sample = {'image': image}
-
-        if self.transform:
-            image = self.transform(image)
-
-        return image, 0
 IMG_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.ppm', '.bmp', '.pgm', '.tif', '.tiff', '.webp')
 def has_file_allowed_extension(filename: str, extensions: Tuple[str, ...]) -> bool:
     """Checks if a file is an allowed extension.
@@ -204,7 +166,10 @@ def pil_loader(path: str) -> Image.Image:
     # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
     with open(path, 'rb') as f:
         img = Image.open(f)
-        return img.convert('RGB')
+        if (channels == 3):
+            return img.convert('RGB')
+        else:
+            return img.copy()
 def default_loader(path: str) -> Any:
     from torchvision import get_image_backend
     if get_image_backend() == 'accimage':

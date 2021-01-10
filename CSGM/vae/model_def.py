@@ -3,8 +3,7 @@
 
 
 import tensorflow as tf
-import vae.utils as utils
-
+import mnist_vae.src.utils as utils
 
 class Hparams(object):
     def __init__(self):
@@ -12,7 +11,7 @@ class Hparams(object):
         self.n_hidden_recog_2 = 500  # 2nd layer encoder neurons
         self.n_hidden_gener_1 = 500  # 1st layer decoder neurons
         self.n_hidden_gener_2 = 500  # 2nd layer decoder neurons
-        self.n_input = 784           # MNIST data input (img shape: 28*28)
+        self.n_input = 32*32           # MNIST data input (img shape: 28*28)
         self.n_z = 20                # dimensionality of latent space
         self.transfer_fct = tf.nn.softplus
 

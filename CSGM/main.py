@@ -28,7 +28,7 @@ def main(reconstruction,sensing,stage,default,dataset,input_channel,input_width,
         
 
 if __name__ == "__main__":
-    specifics = presets.dcganCustom
+    specifics = presets.dcganWithRegCustom
     #print(specifics)
     main(
         reconstruction= "csgm",
@@ -40,6 +40,6 @@ if __name__ == "__main__":
         input_width = 32,
         input_height = 32,
         n = 32*32*1,
-        m = 100, # 10 25 50 100 200 300 400 500 750
+        m = 512, # 10 25 50 100 200 300 400 500 750
         specifics = specifics
     )

@@ -6,7 +6,8 @@ import utils
 import tensorflow.compat.v1 as tf
 import dcgan.dcgan_utils as dcgan_utils
 from glob import glob
-
+import time
+import scipy.misc
 def reconstruction_method(reconstruction,input_channel, input_width, input_height, m, n,sensing,datasetname, sensingname, specifics):
     # a function to return the reconstruction method with given parameters. It's a class with two methods: initialize and run.
     if (reconstruction == 'csgm' or reconstruction == 'CSGM'):
@@ -35,9 +36,9 @@ class csgm():
             if len(self.data) == 0:
                 raise Exception("[!] No data found in '" + data_path + "'")
             np.random.shuffle(self.data)
-            imreadImg = dcgan_utils.imread(self.data[0])
+            imreadImg = scipy.misc.imread(self.data[0]).astype(np.float)
             if len(imreadImg.shape) >= 3: #check if image is a non-grayscale image by checking channel number
-                self.c_dim = dcgan_utils.imread(self.data[0]).shape[-1]    
+                self.c_dim = scipy.misc.imread(self.data[0]).astype(np.float).shape[-1]    
             else:
                 self.c_dim = 1
             self.grayscale = (self.c_dim == 1)
@@ -121,6 +122,13 @@ class csgm():
             estimators = utils.get_estimators(hparams)
             utils.setup_checkpointing(hparams)
             measurement_losses, l2_losses = utils.load_checkpoints(hparams)
+            PSNRs = {}
+            SSIMs = {}
+            reconst_times = []
+            for model_type in hparams.model_types:
+                PSNRs[model_type] = {}
+                SSIMs[model_type] = {}
+            recons_times = []
 
             x_hats_dict = {model_type : {} for model_type in hparams.model_types}
             x_batch_dict = {}
@@ -154,8 +162,11 @@ class csgm():
 
                 for model_type in hparams.model_types:
                     estimator = estimators[model_type]
+                    benchmarkStartTime = time.time()
                     x_hat_batch = estimator(A, y_batch, hparams)
-
+                    benchmarkEndTime = time.time()
+                    reconst_time = (benchmarkEndTime-benchmarkStartTime)/hparams.batch_size
+                    reconst_times.append(reconst_time)
                     for i, key in enumerate(x_batch_dict.keys()):
                         x = xs_dict[key]
                         y = y_batch[i]
@@ -167,6 +178,12 @@ class csgm():
                         # Compute and store measurement and l2 loss
                         measurement_losses[model_type][key] = utils.get_measurement_loss(x_hat, A, y)
                         l2_losses[model_type][key] = utils.get_l2_loss(x_hat, x)
+                        if (hparams.dataset=="mnist"):
+                            PSNRs[model_type][key] = utils.compute_average_psnr(x.reshape(1,hparams.input_channels,hparams.input_size,hparams.input_size)*2-1,x_hat.reshape(1,hparams.input_channels,hparams.input_size,hparams.input_size)*2-1)
+                            SSIMs[model_type][key] = utils.compute_average_SSIM(x.reshape(1,hparams.input_size,hparams.input_size,hparams.input_channels)*2-1,x_hat.reshape(1,hparams.input_size,hparams.input_size,hparams.input_channels)*2-1)
+                        else:
+                            PSNRs[model_type][key] = utils.compute_average_psnr(x.reshape(1,hparams.input_channels,hparams.input_size,hparams.input_size),x_hat.reshape(1,hparams.input_channels,hparams.input_size,hparams.input_size))
+                            SSIMs[model_type][key] = utils.compute_average_SSIM(x.reshape(1,hparams.input_size,hparams.input_size,hparams.input_channels),x_hat.reshape(1,hparams.input_size,hparams.input_size,hparams.input_channels))
 
                 print(("Processed upto image {0} / {1}".format(key+1, len(xs_dict))))
 
@@ -175,7 +192,6 @@ class csgm():
                     utils.checkpoint(x_hats_dict, measurement_losses, l2_losses, save_image, hparams)
                     x_hats_dict = {model_type : {} for model_type in hparams.model_types}
                     print('\nProcessed and saved first ', key+1, 'images\n')
-
                 x_batch_dict = {}
 
             # Final checkpoint
@@ -189,8 +205,15 @@ class csgm():
                     print(model_type)
                     mean_m_loss = np.mean(list(measurement_losses[model_type].values()))
                     mean_l2_loss = np.mean(list(l2_losses[model_type].values()))
+                    mean_PSNR = np.mean(list(PSNRs[model_type].values()))
+                    mean_SSIM = np.mean(list(SSIMs[model_type].values()))
+                    print('number of measurements = ' + str(self.m))
                     print('mean measurement loss = {0}'.format(mean_m_loss))
                     print('mean l2 loss = {0}'.format(mean_l2_loss))
+                    print('mean PSNR = {0}'.format(mean_PSNR))
+                    print('mean SSIM = {0}'.format(mean_SSIM))
+                    print('mean reconstruction time = {0}'.format(sum(reconst_times)/len(reconst_times)))
+                    
 
             if hparams.image_matrix > 0:
                 utils.image_matrix(xs_dict, x_hats_dict, view_image, hparams)
@@ -211,9 +234,11 @@ class csgm():
                 HPARAMS.training_epochs = self.specifics["training-epochs"]
                 HPARAMS.summary_epoch = self.specifics["summary-epochs"]
                 HPARAMS.ckpt_epoch = self.specifics["ckpt_epoch"]
-
+                HPARAMS.train_data = self.specifics["train_data"]
+                HPARAMS.input_size=self.specifics["input-size"]
                 HPARAMS.ckpt_dir = './models/mnist-vae/'
                 HPARAMS.sample_dir = './samples/mnist-vae/'
+                HPARAMS.n_input = HPARAMS.input_size*HPARAMS.input_size
                 vae.main(HPARAMS)
             if (self.datasetname =="celebA"):
                 import dcgan.DCGANtensorflow.main as dcgan

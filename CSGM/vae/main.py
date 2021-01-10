@@ -4,9 +4,9 @@
 import os
 import numpy as np
 import tensorflow as tf
-import vae.utils as utils
-import vae.model_def as model_def
-import vae.data_input as data_input
+import mnist_vae.src.utils as utils
+import mnist_vae.src.model_def as model_def
+import mnist_vae.src.data_input as data_input
 
 
 def main(hparams):
@@ -38,8 +38,8 @@ def main(hparams):
 
     # Sanity checks
     for var in tf.global_variables():
-        print var.op.name
-    print ''
+        print((var.op.name))
+    print('')
 
     # Get a new session
     sess = tf.Session()
@@ -54,14 +54,14 @@ def main(hparams):
     start_epoch = utils.try_restore(hparams, sess, model_saver)
 
     # Get data iterator
-    iterator = data_input.mnist_data_iteratior()
+    #iterator = data_input.mnist_data_iteratior()
 
     # Training
     for epoch in range(start_epoch+1, hparams.training_epochs):
         avg_loss = 0.0
         num_batches = hparams.num_samples // hparams.batch_size
         batch_num = 0
-        for (x_batch_val, _) in iterator(hparams, num_batches):
+        for x_batch_val in data_input.mnist_data(hparams,num_batches):
             batch_num += 1
             feed_dict = {x_ph: x_batch_val}
             _, loss_val = sess.run([update_op, total_loss], feed_dict=feed_dict)
@@ -73,19 +73,19 @@ def main(hparams):
                 z_val = np.random.randn(hparams.batch_size, hparams.n_z)
                 x_sample_val = sess.run(x_sample, feed_dict={z_ph: z_val})
 
-                utils.save_images(np.reshape(x_reconstr_mean_val, [-1, 28, 28]),
+                utils.save_images(np.reshape(x_reconstr_mean_val, [-1, hparams.input_size, hparams.input_size]),
                                   [10, 10],
                                   '{}/reconstr_{:02d}_{:04d}.png'.format(hparams.sample_dir, epoch, batch_num))
-                utils.save_images(np.reshape(x_batch_val, [-1, 28, 28]),
+                utils.save_images(np.reshape(x_batch_val, [-1, hparams.input_size, hparams.input_size]),
                                   [10, 10],
                                   '{}/orig_{:02d}_{:04d}.png'.format(hparams.sample_dir, epoch, batch_num))
-                utils.save_images(np.reshape(x_sample_val, [-1, 28, 28]),
+                utils.save_images(np.reshape(x_sample_val, [-1, hparams.input_size, hparams.input_size]),
                                   [10, 10],
                                   '{}/sampled_{:02d}_{:04d}.png'.format(hparams.sample_dir, epoch, batch_num))
 
 
         if epoch % hparams.summary_epoch == 0:
-            print "Epoch:", '%04d' % (epoch), 'Avg loss = {:.9f}'.format(avg_loss)
+            print(("Epoch:", '%04d' % (epoch), 'Avg loss = {:.9f}'.format(avg_loss)))
 
         if epoch % hparams.ckpt_epoch == 0:
             save_path = os.path.join(hparams.ckpt_dir, 'mnist_vae_model')
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     HPARAMS.training_epochs = 100
     HPARAMS.summary_epoch = 1
     HPARAMS.ckpt_epoch = 5
-
+    HPARAMS.n_input = hparams.input_width*hparams.input_width
     HPARAMS.ckpt_dir = './models/mnist-vae/'
     HPARAMS.sample_dir = './samples/mnist-vae/'
 

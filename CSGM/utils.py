@@ -5,14 +5,21 @@ import tensorflow.compat.v1 as tf
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-
 import mnist.mnist_estimators as mnist_estimators
 import celebA.celebA_estimators as celebA_estimators
 
 from sklearn.linear_model import Lasso
 from l1regls import l1regls
 from cvxopt import matrix
+import skimage.measure as skim
+def compute_average_psnr(img,img_hat):
+    sz=img.shape[0]
+    return sum([skim.compare_psnr(img[i,:,:,:]/2.0+0.5,img_hat[i,:,:,:]/2.0+0.5,data_range=1.0) for i in range(sz)])/sz
 
+def compute_average_SSIM(img,img_hat):
+    sz=img.shape[0]
+
+    return sum([skim.compare_ssim(img[i,:,:,:]/2.0+0.5,img_hat[i,:,:,:]/2.0+0.5,data_range=1.0,multichannel=True) for i in range(sz)])/sz
 
 def generate_dataset(dataset,input_channel,input_width,input_height,stage):
     if dataset == 'mnist':

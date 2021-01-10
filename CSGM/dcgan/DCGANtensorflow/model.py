@@ -7,7 +7,7 @@ from glob import glob
 import tensorflow as tf
 import numpy as np
 from six.moves import xrange
-
+import scipy.misc
 from dcgan.DCGANtensorflow.ops import *
 from dcgan.DCGANtensorflow.utils import *
 
@@ -90,9 +90,9 @@ class DCGAN(object):
       if len(self.data) == 0:
         raise Exception("[!] No data found in '" + data_path + "'")
       np.random.shuffle(self.data)
-      imreadImg = imread(self.data[0])
+      imreadImg = scipy.misc.imread(self.data[0]).astype(np.float)
       if len(imreadImg.shape) >= 3: #check if image is a non-grayscale image by checking channel number
-        self.c_dim = imread(self.data[0]).shape[-1]
+        self.c_dim = scipy.misc.imread(self.data[0]).astype(np.float).shape[-1] 
       else:
         self.c_dim = 1
 
@@ -207,8 +207,11 @@ class DCGAN(object):
       print(" [*] Load SUCCESS")
     else:
       print(" [!] Load failed...")
-
+    best_avg_gloss = math.inf
+    best_gloss_iter = -1
     for epoch in xrange(config.epoch):
+      g_losses = []
+      d_losses = []
       if config.dataset == 'mnist':
         batch_idxs = min(len(self.data_X), config.train_size) // config.batch_size
       else:      
@@ -293,7 +296,8 @@ class DCGAN(object):
           errD_fake = self.d_loss_fake.eval({ self.z: batch_z })
           errD_real = self.d_loss_real.eval({ self.inputs: batch_images })
           errG = self.g_loss.eval({self.z: batch_z})
-
+          g_losses.append(errG)
+          d_losses.append(errD_fake+errD_real)
         print("[%8d Epoch:[%2d/%2d] [%4d/%4d] time: %4.4f, d_loss: %.8f, g_loss: %.8f" \
           % (counter, epoch, config.epoch, idx, batch_idxs,
             time.time() - start_time, errD_fake+errD_real, errG))
@@ -311,6 +315,7 @@ class DCGAN(object):
             save_images(samples, image_manifold_size(samples.shape[0]),
                   './{}/train_{:08d}.png'.format(config.sample_dir, counter))
             print("[Sample] d_loss: %.8f, g_loss: %.8f" % (d_loss, g_loss)) 
+            
           else:
             try:
               samples, d_loss, g_loss = self.sess.run(
@@ -326,10 +331,38 @@ class DCGAN(object):
             except:
               print("one pic error!...")
 
-        if np.mod(counter, config.ckpt_freq) == 0:
-          self.save(config.checkpoint_dir, counter)
+       # if np.mod(counter, config.ckpt_freq) == 0:
+        #  self.save(config.checkpoint_dir, counter,'model_iter'+str(epoch))
         
         counter += 1
+      self.save(config.checkpoint_dir, counter,'model_iter'+str(epoch))
+      avg_gloss= sum(g_losses)/len(g_losses)
+      avg_dloss= sum(d_losses)/len(d_losses)
+      logFile = open(self.checkpoint_dir+"/log.txt","a")
+      
+      logOutput= ("\n\nAverage g_loss at iteration "+str(epoch) +": " + str(avg_gloss))
+      logOutput+= ("\nAverage d_loss at iteration "+str(epoch) +": " + str(avg_dloss))
+      logOutput += ("\nBest g_loss before this iteration was at iteration "+str(best_gloss_iter) +": " + str(best_avg_gloss))
+      if (avg_gloss < best_avg_gloss):
+        logOutput += ("\nCurrent iteration is the best iteration so far")
+        best_avg_gloss = avg_gloss
+        best_gloss_iter = epoch
+        logFile.write(logOutput)
+        logFile.close()
+        print(logOutput)
+      elif(avg_gloss > 5*best_avg_gloss):
+        logOutput += ("\nLast generator loss worsened significantly. Exiting training....")
+        logFile.write(logOutput)
+        logFile.close()
+        print(logOutput)
+        exit()
+      else:
+        logOutput += ("\nNo improvement...")
+        logFile.write(logOutput)
+        logFile.close()
+        print(logOutput)
+
+
         
   def discriminator(self, image, y=None, reuse=False):
     with tf.variable_scope("discriminator") as scope:
@@ -522,18 +555,18 @@ class DCGAN(object):
     # checkpoint_dir = os.path.join(checkpoint_dir, self.model_dir)
 
     filename += '.b' + str(self.batch_size)
-    if not os.path.exists(checkpoint_dir):
-      os.makedirs(checkpoint_dir)
+    if not os.path.exists(checkpoint_dir+"/"+filename):
+      os.makedirs(checkpoint_dir+"/"+filename)
 
     if ckpt:
       self.saver.save(self.sess,
-              os.path.join(checkpoint_dir, filename),
+              os.path.join(checkpoint_dir+"/"+filename, filename),
               global_step=step)
 
     if frozen:
       tf.train.write_graph(
               tf.graph_util.convert_variables_to_constants(self.sess, self.sess.graph_def, ["generator_1/Tanh"]),
-              checkpoint_dir,
+              checkpoint_dir+"/"+filename,
               '{}-{:06d}_frz.pb'.format(filename, step),
               as_text=False)
 

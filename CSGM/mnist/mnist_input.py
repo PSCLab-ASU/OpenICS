@@ -2,6 +2,8 @@
 
 import math
 import numpy as np
+import glob
+import dcgan.dcgan_utils as dcgan_utils
 import mnist.mnist_model_def as mnist_model_def
 import tensorflow.compat.v1 as tf
 from tensorflow.examples.tutorials.mnist import input_data
@@ -57,7 +59,13 @@ def model_input(hparams):
     mnist = input_data.read_data_sets('./data/mnist', one_hot=True)
 
     if hparams.input_type == 'full-input':
-        images = {i: image for (i, image) in enumerate(mnist.test.images[:hparams.num_input_images])}
+        image_paths = glob.glob(hparams.input_path_pattern)
+        image_paths= image_paths[:hparams.num_input_images]
+        image_paths.sort() 
+
+        images = [dcgan_utils.get_image(image_path,hparams.input_size,True,hparams.input_size,True) for image_path in image_paths]#images = [dcgan_utils.get_image(image_path, image_size) for image_path in image_paths]
+        images = {i: image.reshape([hparams.input_size*hparams.input_size*1])/2+0.5 for (i, image) in enumerate(images)}
+
     elif hparams.input_type == 'random-test':
         images = get_random_test_subset(mnist, hparams.num_input_images)
     elif hparams.input_type == 'gen-span':
