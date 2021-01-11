@@ -13,6 +13,213 @@
 </thead>
 <tbody>
   <tr>
+    <td rowspan="30">LDAMP<br>Layer-by-Layer</td>
+    <td rowspan="5">MNIST</td>
+    <td>2</td>
+    <td>48</td>
+    <td>0.9999</td>
+    <td>0.2493</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>47.2738</td>
+    <td>0.9997</td>
+    <td>0.2468</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>30.4165</td>
+    <td>0.9704</td>
+    <td>0.2455</td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td>24.7801</td>
+    <td>0.9287</td>
+    <td>0.1686</td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td>14.0546</td>
+    <td>0.5527</td>
+    <td>0.053</td>
+  </tr>
+  <tr>
+    <td rowspan="5">CelebA</td>
+    <td>2</td>
+    <td>40.5767</td>
+    <td>0.9986</td>
+    <td>0.9729</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>32.1129</td>
+    <td>0.9911</td>
+    <td>0.9403</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>27.5632</td>
+    <td>0.9759</td>
+    <td>0.9421</td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td>23.7575</td>
+    <td>0.9409</td>
+    <td>0.9446</td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td>17.6439</td>
+    <td>0.7866</td>
+    <td>0.1988</td>
+  </tr>
+  <tr>
+    <td rowspan="5">CIFAR10</td>
+    <td>2</td>
+    <td>35.1305</td>
+    <td>0.995</td>
+    <td>0.2303</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>28.6455</td>
+    <td>0.9793</td>
+    <td>0.2411</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>22.7897</td>
+    <td>0.9323</td>
+    <td>0.2393</td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td>18.395</td>
+    <td>0.823</td>
+    <td>0.1454</td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td>13.7681</td>
+    <td>0.4758</td>
+    <td>0.0194</td>
+  </tr>
+  <tr>
+    <td rowspan="5">CIFAR10 Gray</td>
+    <td>2</td>
+    <td>34.5538</td>
+    <td>0.9945</td>
+    <td>0.245</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>28.1537</td>
+    <td>0.9775</td>
+    <td>0.2466</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>23.3344</td>
+    <td>0.938</td>
+    <td>0.2582</td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td>17.2754</td>
+    <td>0.7614</td>
+    <td>0.069</td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td>13.7009</td>
+    <td>0.4419</td>
+    <td>0.0369</td>
+  </tr>
+  <tr>
+    <td rowspan="5">Bigset</td>
+    <td>2</td>
+    <td>37.2695</td>
+    <td>0.9951</td>
+    <td>1.0422</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>33.8795</td>
+    <td>0.9879</td>
+    <td>0.9857</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>31.0234</td>
+    <td>0.9742</td>
+    <td>0.9805</td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td>28.01</td>
+    <td>0.9524</td>
+    <td>0.9892</td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td>17.51</td>
+    <td>0.7634</td>
+    <td>0.2282</td>
+  </tr>
+  <tr>
+    <td rowspan="5">Bigset Gray</td>
+    <td>2</td>
+    <td>40.4972</td>
+    <td>0.9954</td>
+    <td>1.1842</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>37.3146</td>
+    <td>0.9881</td>
+    <td>1.1625</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>34.1416</td>
+    <td>0.975</td>
+    <td>1.1563</td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td>32.9576</td>
+    <td>0.9651</td>
+    <td>1.574</td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td>13.5395</td>
+    <td>0.5392</td>
+    <td>0.2627</td>
+  </tr>
+  <tr>
+    <td colspan="6">THIS IS EXAMPLE TEXT, PUT THE TOTAL SCORE CALCULATION HERE</td>
+  </tr>
+</tbody>
+</table>
+
+<br>
+
+<table>
+<thead>
+  <tr>
+    <th>Method</th>
+    <th>Dataset</th>
+    <th>Compression Ratio</th>
+    <th>PSNR</th>
+    <th>SSIM</th>
+    <th>Reconstruction Speed</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
     <td rowspan="30">ISTANETPlus</td>
     <td rowspan="5">MNIST</td>
     <td>2</td>
@@ -1111,20 +1318,20 @@ L1</br>
 
 
 ### Datadriven:
+LDAMP </br>
+(Reference: https://papers.nips.cc/paper/2017/file/8597a6cfa74defcbde3047c891d78f90-Paper.pdf)</br>
+(Repository: https://github.com/ricedsp/D-AMP_Toolbox/tree/master/LDAMP_TensorFlow)</br>
+* list main (we choose specific dataset and specific cs ratio) benchmark results
+* compare to one in original paper
+* only supports layer-by-layer training
+* supports gaussian, complex-gaussian, and coded-diffraction sensing for Layer-by-Layer (not Fast-JL)
+
 ISTANET </br>
 (Reference: https://openaccess.thecvf.com/content_cvpr_2018/papers_backup/Zhang_ISTA-Net_Interpretable_Optimization-Inspired_CVPR_2018_paper.pdf)</br>
 (Repository: https://github.com/jianzhangcs/ISTA-Net)</br>
 * list main (we choose specific dataset and specific cs ratio) benchmark results
 * compare to one in original paper
 * merged ISTANet and ISTANetPlus, parameter used to control which one to train/test
-
-LDAMP</br>
-(Reference: https://papers.nips.cc/paper/2017/file/8597a6cfa74defcbde3047c891d78f90-Paper.pdf)</br>
-(Repository: https://github.com/ricedsp/D-AMP_Toolbox/tree/master/LDAMP_TensorFlow)</br>
-* list main (we choose specific dataset and specific cs ratio) benchmark results
-* compare to one in original paper
-* only supports layer-by-layer and denoiser-by-denoiser training (not end-to-end)
-* supports gaussian, complex-gaussian, and coded-diffraction sensing for Layer-by-Layer (not Fast-JL)
 
 ReconNet</br>
 (Reference: https://openaccess.thecvf.com/content_cvpr_2016/papers/Kulkarni_ReconNet_Non-Iterative_Reconstruction_CVPR_2016_paper.pdf)</br>
