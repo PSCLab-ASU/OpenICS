@@ -32,6 +32,7 @@ specifics: (used to store variables conveniently and define new ones)<br />
 &nbsp;&nbsp;&nbsp;&nbsp;matrix_dir: local directory where the sampling matrices go<br />
 &nbsp;&nbsp;&nbsp;&nbsp;training_data_fileName: the name of the training data file<br />
 &nbsp;&nbsp;&nbsp;&nbsp;training_data_type: the type of the training data file<br />
+&nbsp;&nbsp;&nbsp;&nbsp;use_universal_matrix: true if you want to create the sensing matrix from scratch<br />
 &nbsp;&nbsp;&nbsp;&nbsp;create_custom_dataset: true if you want to create a new dataset<br />
 &nbsp;&nbsp;&nbsp;&nbsp;custom_dataset_name: name of the custom dataset to be created<br />
 &nbsp;&nbsp;&nbsp;&nbsp;custom_training_data_location: location of the custom dataset<br />
