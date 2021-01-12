@@ -1,4 +1,8 @@
-# Variables:
+# ISTANETPlus and ISTANET
+### Description:
+This implementation of ISTANet and ISTANet-Plus is based off of https://github.com/jianzhangcs/ISTA-Net. ISTANet and ISTANet-Plus were merged into the same framework and are both accessible with the provided code. All variables are set through the main.py function.
+
+### Variables:
 sensing: unused<br />
 reconstruction: type of reconstruction (IstaNetPlus)<br />
 stage: either "training" or "testing"<br />
@@ -11,6 +15,7 @@ m: unused<br />
 n: unused<br />
 specifics: (used to store variables conveniently and define new ones)<br />
 &nbsp;&nbsp;&nbsp;&nbsp;stage: taken from original input<br />
+&nbsp;&nbsp;&nbsp;&nbsp;sudo_rgb: instead of setting the channel to 3, set sudo_rgb to True<br />
 &nbsp;&nbsp;&nbsp;&nbsp;start_epoch: set to non-zero when loading a specific network for training<br />
 &nbsp;&nbsp;&nbsp;&nbsp;end_epoch: total number of epochs used in training<br />
 &nbsp;&nbsp;&nbsp;&nbsp;testing_epoch_num: used when loading a specific network for testing<br />
@@ -25,20 +30,12 @@ specifics: (used to store variables conveniently and define new ones)<br />
 &nbsp;&nbsp;&nbsp;&nbsp;data_dir: local directory where the training and testing data will be stored <br />
 &nbsp;&nbsp;&nbsp;&nbsp;result_dir: local directory where the reconstructed images go<br />
 &nbsp;&nbsp;&nbsp;&nbsp;matrix_dir: local directory where the sampling matrices go<br />
-&nbsp;&nbsp;&nbsp;&nbsp;Training_data_Name: taken from original input, used in utils to retrieve training labels<br />
-&nbsp;&nbsp;&nbsp;&nbsp;test_name: directory where the test images reside<br />
-
-# Commands to set up in conda:
-
-conda create -n pytCUDA python=3.7.0<br />
-conda install pytorch==1.6.0 torchvision cudatoolkit=10.2 -c pytorch<br />
-conda install scipy==1.5.2<br />
-conda install opencv==3.4.2<br />
-conda install scikit-image==0.17.2<br />
-
-# Data:
-
-use Set11 for testing<br />
-use Training_Data.mat for training<br />
-
-
+&nbsp;&nbsp;&nbsp;&nbsp;training_data_fileName: the name of the training data file<br />
+&nbsp;&nbsp;&nbsp;&nbsp;training_data_type: the type of the training data file<br />
+&nbsp;&nbsp;&nbsp;&nbsp;create_custom_dataset: true if you want to create a new dataset<br />
+&nbsp;&nbsp;&nbsp;&nbsp;custom_dataset_name: name of the custom dataset to be created<br />
+&nbsp;&nbsp;&nbsp;&nbsp;custom_training_data_location: location of the custom dataset<br />
+&nbsp;&nbsp;&nbsp;&nbsp;custom_type_of_image: type of image to be parsed in the training data location<br />
+&nbsp;&nbsp;&nbsp;&nbsp;Testing_data_location: location of the testing data<br />
+&nbsp;&nbsp;&nbsp;&nbsp;testing_data_isFolderImages: true if the location contains raw images<br />
+&nbsp;&nbsp;&nbsp;&nbsp;testing_data_type:  type of image to be parsed in the testing data location<br />
