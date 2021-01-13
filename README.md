@@ -2,6 +2,53 @@
 
 
 # Section 0: Table of Benchmarks
+<table>
+<thead>
+  <tr>
+    <th>Method</th>
+    <th>Score</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Learned DAMP</td>
+    <td>20.72298384</td>
+  </tr>
+  <tr>
+    <td>ISTANet-Plus</td>
+    <td>16.68532509</td>
+  </tr>
+  <tr>
+    <td>CSGAN</td>
+    <td>26.75406106</td>
+  </tr>
+  <tr>
+    <td>LAPRAN</td>
+    <td>19.73516194</td>
+  </tr>
+  <tr>
+    <td>CSGM</td>
+    <td>13.42710173</td>
+  </tr>
+  <tr>
+    <td>TVAL3</td>
+    <td>12.2197737</td>
+  </tr>
+  <tr>
+    <td>TV</td>
+    <td>7.859866999</td>
+  </tr>
+  <tr>
+    <td>D-AMP</td>
+    <td>7.160057161</td>
+  </tr>
+  <tr>
+    <td>NLR-CS</td>
+    <td>6.601654874</td>
+  </tr>
+</tbody>
+</table>
+
 
 # Section 1: Setting up environment
 
