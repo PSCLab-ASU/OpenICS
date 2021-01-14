@@ -35,9 +35,6 @@ class random_sensing(nn.Module):
     def forward(self,x):
         if self.channel==1:
             r = self.s1(x)
-            print(r.shape)
-            print(r)
-            exit()
         else:
             r1=self.s1(x[:,0,:])
             r2=self.s2(x[:,1,:])

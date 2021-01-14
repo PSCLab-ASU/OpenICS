@@ -151,7 +151,6 @@ def pil_loader(path: str) -> Image.Image:
     with open(path, 'rb') as f:
         img = Image.open(f)
         if (channels == 3):
-            print('aaaaa')
             return img.convert('RGB')
         else:
             return img.copy()
