@@ -15,7 +15,7 @@
     <td>20.72298384</td>
   </tr>
   <tr>
-    <td>ISTANet-Plus</td>
+    <td>ISTA-Net Plus</td>
     <td>16.68532509</td>
   </tr>
   <tr>
@@ -142,7 +142,7 @@ LDAMP </br>
 * only supports layer-by-layer training
 * supports gaussian, complex-gaussian, and coded-diffraction sensing for Layer-by-Layer (not Fast-JL)
 
-ISTANET </br>
+ISTA-Net Plus </br>
 (Reference: https://openaccess.thecvf.com/content_cvpr_2018/papers_backup/Zhang_ISTA-Net_Interpretable_Optimization-Inspired_CVPR_2018_paper.pdf)</br>
 (Repository: https://github.com/jianzhangcs/ISTA-Net)</br>
 * list main (we choose specific dataset and specific cs ratio) benchmark results
@@ -402,7 +402,7 @@ CSGAN</br>
 </thead>
 <tbody>
   <tr>
-    <td rowspan="30">ISTANETPlus</td>
+    <td rowspan="30">ISTA-Net Plus</td>
     <td rowspan="5">MNIST</td>
     <td>2</td>
     <td>47.99</td>
