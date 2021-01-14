@@ -1,7 +1,7 @@
 #TODO tensorflow version 2.X migration code changed the import tensorflow as tf line to two lines as seen below
-import tensorflow.compat.v1 as tf
-tf.disable_eager_execution()
-# import tensorflow as tf
+# import tensorflow.compat.v1 as tf
+# tf.disable_eager_execution()
+import tensorflow as tf
 import numpy as np
 import time
 import matplotlib.pyplot as plt
@@ -62,7 +62,7 @@ def CountParameters():
         shape = variable.get_shape()
         variable_parameters = 1
         for dim in shape:
-            variable_parameters *= dim #TODO # originaly dim.value instead of dim, migration to tensorflow 2.X
+            variable_parameters *= dim.value #TODO # originaly dim.value instead of dim, migration to tensorflow 2.X
         total_parameters += variable_parameters
     print('Total number of parameters: ')
     print(total_parameters)

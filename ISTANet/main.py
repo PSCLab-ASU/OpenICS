@@ -114,10 +114,10 @@ if __name__ == "__main__":
 
             # (Training only) set to True and define custom name, location, and type.
             # Will then create and train on this new dataset
-            'create_custom_dataset': True,
+            'create_custom_dataset': False,
             'custom_dataset_name': "benchmark_celebA_64x64_train", # what you want to call it
             'custom_training_data_location': '/storage-t1/database/cs-framework-database/celebA_64x64/train', # bigset
-            'custom_type_of_image': 'bmp', # bmp, tif, celebA: jpg, mnist, cifar10: png
+            'custom_type_of_image': 'jpg', # bmp, tif, celebA: jpg, mnist, cifar10: png
 
             # (Testing only) if testing, use these parameters to define where and what type of images testing on
             'Testing_data_location': '/storage-t1/database/cs-framework-database/celebA_64x64/test',# 'Set11'

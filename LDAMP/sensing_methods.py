@@ -1,7 +1,7 @@
 #TODO tensorflow version 2.X migration code changed the import tensorflow as tf line to two lines as seen below
-import tensorflow.compat.v1 as tf
-tf.disable_eager_execution()
-# import tensorflow as tf
+# import tensorflow.compat.v1 as tf
+# tf.disable_eager_execution()
+import tensorflow as tf
 import numpy as np
 import os
 os.environ["CUDA_VISIBLE_DEVICES"]='0'
