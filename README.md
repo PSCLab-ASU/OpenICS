@@ -59,7 +59,7 @@
 `conda install pytorch==1.6.0 torchvision cudatoolkit=10.1 -c pytorch`</br>
 `conda install opencv==3.4.2`</br>
 `conda install scikit-image==0.17.2`</br>
-`conda install pandas</br>
+`conda install pandas`</br>
  
  ### Datadriven using conda (Tensorflow):
 `conda create -n CS_methods_environement python=3.7.9` </br>
