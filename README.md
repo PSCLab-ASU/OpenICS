@@ -59,6 +59,7 @@
 `conda install pytorch==1.6.0 torchvision cudatoolkit=10.1 -c pytorch`</br>
 `conda install opencv==3.4.2`</br>
 `conda install scikit-image==0.17.2`</br>
+`conda install pandas</br>
  
  ### Datadriven using conda (Tensorflow):
 `conda create -n CS_methods_environement python=3.7.9` </br>
@@ -67,6 +68,13 @@
 `conda install tensorflow-gpu=1.15 cudatoolkit=10.0`</br>
 `conda install opencv==3.4.2`</br>
 `conda install scikit-image==0.17.2`</br>
+`pip install pypng`</br>
+`pip install PyWavelets`</br>
+`pip install scipy==1.1.0`</br>
+`pip install matplotlib`</br>
+`pip install scikit-learn`</br>
+`pip install cvxopt`</br>
+`pip install Pillow`</br>
 
 ### Matlab:
 `cd \<path to CS_Framework directory\>`<br>
