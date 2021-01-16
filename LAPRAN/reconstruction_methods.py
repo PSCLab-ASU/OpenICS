@@ -391,6 +391,8 @@ class lapran():
             with torch.no_grad():
                 for idx, (data, _) in enumerate(self.testloader, 0):
                     data_array = data.numpy()
+                    if (data_array.shape[0] < self.batch_size):
+                        continue
                     for i in range(self.batch_size):
                         target_temp = data_array[i]  # 1x64x64
                         if (self.input_width == 64):
@@ -440,7 +442,7 @@ class lapran():
         print('Test: average errG_mse: %.4f,' % (sum(errD_fake_mses)/(len(errD_fake_mses))))
         print('Test: average PSNR: %.4f,' % (sum(PSNRs)/len(PSNRs)))
         print('Test: average SSIM: %.4f,' % (sum(SSIMs)/len(SSIMs)))
-        print('Test: average reconstruction time: %.4f,' % (sum(reconst_times)/len(reconst_times)))
+        print('Test: average reconstruction time: %.12f,' % (sum(reconst_times)/len(reconst_times)))
 
     def val(self, epoch, stage, channels, valloader, sensing_matrix1, sensing_matrix2, sensing_matrix3, sensing_matrix4,
         target, g1_input, lapnet1_gen, lapnet2_gen, lapnet3_gen, lapnet4_gen, criterion_mse, y2, y3, y4, specifics):
