@@ -102,16 +102,12 @@ class random_sensing(nn.Module):
         self.width=width
         self.height=height
         self.s = nn.Linear(width * height, self.m, bias=False)
+            
     def forward(self,x):
-        if self.channel==3:
-            m0 = self.s(x[:, 0, :, :].view(-1, self.width*self.height))
-            m1 = self.s(x[:, 1, :, :].view(-1, self.width*self.height))
-            m2 = self.s(x[:, 2, :, :].view(-1, self.width*self.height))
-            m = torch.cat((m0, m1, m2), dim=1)
-        else:
-            m0 = self.s(x[:, 0, :, :].view(-1, self.width*self.height))
-            m=m0
-        x=m.view(-1,self.channel,self.m)
+        ms = []
+        for i in range(self.channel):
+            ms.append(self.s(x[:, i, :, :].view(-1, self.width * self.height)))
+        x=torch.cat(ms,dim=1).view(-1,self.channel,self.m)
         return x
 
 def compute_ssim(img,img_hat):

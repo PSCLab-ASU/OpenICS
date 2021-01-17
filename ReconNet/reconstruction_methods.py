@@ -48,10 +48,13 @@ class ReconNetWrapper():
         if stage == 'testing':
             self.load_model()
             self.load_sensing()
-        elif stage == 'training' and 'resume-training' in self.specifics and (self.specifics['resume-training'] == 'True' or self.specifics['resume-training'] is True):
-            self.load_model()
-            self.load_sensing()
-        elif stage == 'training' and not 'resume-training':
+        elif stage == 'training':
+            resume_training = self.specifics['resume-training'] if 'resume-training' in self.specifics else False
+        
+            if str(resume_training) == 'True':
+                self.load_model()
+                self.load_sensing()
+            
             self.check_dirs()
         
         # Save sensing matrix
@@ -60,7 +63,7 @@ class ReconNetWrapper():
         # Handle other components, i.e. data loading, optimizer, and loss
         self.dataset = dset
         
-        self.batch_size = self.specifics['batch-size'] if 'batch-size' in self.specifics else len(dset)
+        self.batch_size = self.specifics['batch-size'] if 'batch-size' in self.specifics else len(self.dataset)
         self.workers = self.specifics['workers'] if 'workers' in self.specifics else 0
         
         if stage == 'testing':
@@ -74,9 +77,13 @@ class ReconNetWrapper():
             # If user defined validation images, then create validation set
             if 'validation-images' in self.specifics:
                 self.validation_images = self.specifics['validation-images']
+                
+                if isinstance(self.validation_images, float) and self.validation_images < 1:
+                    self.validation_images = int(self.validation_images * len(self.dataset))
+                
                 self.trainset, self.valset = torch.utils.data.random_split(
-                    dset,
-                    [len(dset) - self.validation_images, self.validation_images],
+                    self.dataset,
+                    [len(self.dataset) - self.validation_images, self.validation_images],
                     generator=torch.Generator().manual_seed(self.specifics['validation-split-seed'] if 'validation-split-seed' in self.specifics else 2147483647)
                 )
                 self.valdataloader = torch.utils.data.DataLoader(
@@ -88,7 +95,7 @@ class ReconNetWrapper():
             # Otherwise, train on entire dataset (no validation images)
             else:
                 self.validation_images = 0
-                self.trainset = dset
+                self.trainset = self.dataset
             
             self.traindataloader = torch.utils.data.DataLoader(
                 self.trainset,
@@ -151,7 +158,7 @@ class ReconNetWrapper():
     def check_dirs(self):
         if os.path.exists(self.model_root) and len([name for name in os.listdir(self.model_root) if name.endswith(model_ext)]) > 0:
             while True:
-                ans = input("WARNING: Training this session will likely overwrite a previous model. Would you like to continue? (Y/N)").lower().strip()
+                ans = input("WARNING: Training this session will likely overwrite a previous model. Would you like to continue? (Y/N)\n").lower().strip()
                 
                 if ans == 'y' or ans == 'yes':
                     return

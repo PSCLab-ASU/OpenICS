@@ -9,24 +9,24 @@ custom_specifics = {
     'logs-root': './logs',
     
     'epochs': 100,
-    'batch-size': 128,
-    'lr': 2e-5,
+    'lr': 1e-4,
     'betas': (0.5, 0.999),
+    'batch-size': 1,
     
-    'specific-model-path': './models/reconnet/mnist/cr2/best_model0.rnet',
-    'sensing-path': './models/reconnet/mnist/cr2/rand.rnet.sensing',
-    'resume-training': False,
+    #'specific-model-path': './models/reconnet/mnist/cr2/best_model.rnet',
+    #'sensing-path': './models/reconnet/mnist/cr2/rand.rnet.sensing',
+    #'resume-training': False,
     
     'save-interval': 5,
-    #'max-images': 1000000000,
-    'validation-images': 10000,
+    #'max-images': 16,
+    'validation-images': 1 / 5,
     'validation-split-seed': 2147483647,
     'workers': 2,
-    'device': 'cuda:2'
+    'device': 'cuda:0'
 }
 
 def main(sensing, reconstruction, stage, default, dataset, input_channel, input_width, input_height, m, n, specifics):
-    if default == 'True' or default is True:
+    if str(default) == 'True':
         # set all the parameters with the default values.
         sensing = 'random'
         reconstruction = 'reconnet'
@@ -71,7 +71,7 @@ if __name__ == "__main__":
         sensing='random',
         reconstruction='ReconNet',
         stage=stage,
-        default="False",
+        default='False',
         dataset=dataset,
         input_channel=input_channel,
         input_width=input_width,
