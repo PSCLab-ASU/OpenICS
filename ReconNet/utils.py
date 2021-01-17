@@ -132,8 +132,8 @@ def compute_psnr(img,img_hat):
 def random_name(N):
     return ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=N))
 
-def create_dirs(model_root,logs_root,rname,stage,dataset,id,ratio):
-    model_root = os.path.join(model_root, rname, dataset, 'cr' + str(ratio), id)
+def create_dirs(model_root,logs_root,rname,stage,dataset,ratio):
+    model_root = os.path.join(model_root, rname, dataset, 'cr' + str(ratio))
     logs_root = os.path.join(logs_root, rname, stage, dataset, 'cr' + str(ratio))
     
     if not os.path.exists(model_root):
@@ -145,16 +145,16 @@ def create_dirs(model_root,logs_root,rname,stage,dataset,id,ratio):
     return model_root, logs_root
 
 def save_imgs(img,img_hat,path):
-    rows = math.floor(math.sqrt(img.shape[0]))
+    rows = math.floor(math.sqrt(len(img)))
     cols = rows * 2
     
     fig,axs = plt.subplots(rows, cols)
     
     for i in range(rows):
         for j in range(rows):
-            ax = axs[i,j]
+            ax = axs[i,rows + j]
             ax.set_axis_off()
-            ax_hat = axs[i,rows + j]
+            ax_hat = axs[i,j]
             ax_hat.set_axis_off()
             cur_img = img[i * rows + j]
             cur_img_hat = img_hat[i * rows + j]

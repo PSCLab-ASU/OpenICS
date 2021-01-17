@@ -35,7 +35,6 @@ class ReconNetWrapper():
             self.rname,
             stage,
             dset.name,
-            self.id,
             self.dims[0] * self.dims[1] // self.m
         )
         self.log_file = open(os.path.join(self.logs_root, self.id + '.txt'), 'w')
@@ -52,6 +51,8 @@ class ReconNetWrapper():
         elif stage == 'training' and 'resume-training' in self.specifics and (self.specifics['resume-training'] == 'True' or self.specifics['resume-training'] is True):
             self.load_model()
             self.load_sensing()
+        elif stage == 'training' and not 'resume-training':
+            self.check_dirs()
         
         # Save sensing matrix
         torch.save(self.sensing.state_dict(), os.path.join(self.model_root, sensing_name))
@@ -145,6 +146,18 @@ class ReconNetWrapper():
         self.sensing.load_state_dict(torch.load(sensing_path))
         print("Loaded sensing model from %s"%sensing_path)
         self.log_file.write("Loaded sensing model from %s\n"%sensing_path)
+    
+    # Check if starting training will overwrite 
+    def check_dirs(self):
+        if os.path.exists(self.model_root) and len([name for name in os.listdir(self.model_root) if name.endswith(model_ext)]) > 0:
+            while True:
+                ans = input("WARNING: Training this session will likely overwrite a previous model. Would you like to continue? (Y/N)").lower().strip()
+                
+                if ans == 'y' or ans == 'yes':
+                    return
+                elif ans == 'n' or ans == 'no':
+                    self.log_file.write("Manually exited")
+                    exit()
     
     # Run the model
     def run(self,stage):
@@ -299,6 +312,8 @@ class ReconNetWrapper():
                 saved_items = 1
             
             start = time.time()
+            saved_img = []
+            saved_img_hat = []
             
             for img in iter(self.testdataloader):
                 # Feed imgs through network
@@ -320,9 +335,9 @@ class ReconNetWrapper():
                 val_ssims += batch_ssims
                 
                 # Save images from first batch
-                if total_items == 0:
-                    saved_img = img[:saved_items]
-                    saved_img_hat = img_hat[:saved_items]
+                if len(saved_img) < saved_items:
+                    saved_img.extend(img[:saved_items - len(saved_img)])
+                    saved_img_hat.extend(img_hat[:saved_items - len(saved_img_hat)])
                 
                 total_items += img.shape[0]
                 print("[%d / %d] PSNR: %f SSIM: %f"%(total_items, len(self.dataset), batch_psnr, batch_ssim))
