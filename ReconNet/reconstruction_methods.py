@@ -28,19 +28,20 @@ class ReconNetWrapper():
     # Sets up directories, the model, sensing, and data loading
     def initialize(self,dset,sensing_method,stage):
         # Create directories and log file
+        self.id = u.random_name(16)
         self.model_root, self.logs_root = u.create_dirs(
             self.specifics['model-root'],
             self.specifics['logs-root'],
             self.rname,
             stage,
             dset.name,
+            self.id,
             self.dims[0] * self.dims[1] // self.m
         )
-        self.id = u.random_name(16)
         self.log_file = open(os.path.join(self.logs_root, self.id + '.txt'), 'w')
         
         # Create model and sensing
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(self.specifics['device']) if 'device' in self.specifics else torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.net = u.ReconNet(self.m, self.dims[0], self.dims[1], self.dims[2]).to(self.device)
         self.sensing = sensing_method.to(self.device)
         

@@ -115,16 +115,25 @@ class random_sensing(nn.Module):
         return x
 
 def compute_ssim(img,img_hat):
-    return [skimetrics.structural_similarity(img[i,:,:,:].numpy().T/2.0+0.5,img_hat[i,:,:,:].numpy().T/2.0+0.5, multichannel=True) for i in range(img.shape[0])]
+    return [skimetrics.structural_similarity(
+        np.clip(img[i,:,:,:].numpy().T/2.0+0.5, 0.0, 1.0),
+        np.clip(img_hat[i,:,:,:].numpy().T/2.0+0.5, 0.0, 1.0),
+        multichannel=True,
+        data_range=1.0
+    ) for i in range(img.shape[0])]
 
 def compute_psnr(img,img_hat):
-    return [skimetrics.peak_signal_noise_ratio(img[i,:,:,:].numpy()/2.0+0.5,img_hat[i,:,:,:].numpy()/2.0+0.5,data_range=1.0) for i in range(img.shape[0])]
+    return [min(skimetrics.peak_signal_noise_ratio(
+        np.clip(img[i,:,:,:].numpy().T/2.0+0.5, 0.0, 1.0),
+        np.clip(img_hat[i,:,:,:].numpy().T/2.0+0.5, 0.0, 1.0),
+        data_range=1.0
+    ), 48.0) for i in range(img.shape[0])]
 
 def random_name(N):
     return ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=N))
 
-def create_dirs(model_root,logs_root,rname,stage,dataset,ratio):
-    model_root = os.path.join(model_root, rname, dataset, 'cr' + str(ratio))
+def create_dirs(model_root,logs_root,rname,stage,dataset,id,ratio):
+    model_root = os.path.join(model_root, rname, dataset, 'cr' + str(ratio), id)
     logs_root = os.path.join(logs_root, rname, stage, dataset, 'cr' + str(ratio))
     
     if not os.path.exists(model_root):

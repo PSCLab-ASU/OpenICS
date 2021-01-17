@@ -10,18 +10,19 @@ custom_specifics = {
     
     'epochs': 100,
     'batch-size': 128,
-    'lr': 1e-4,
+    'lr': 2e-5,
     'betas': (0.5, 0.999),
     
-    #'specific-model-path': './models/reconnet/mnist/cr8/checkpoint_best.rnet',
-    #'sensing-path': './models/reconnet/mnist/cr8/rand.rnet.sensing',
+    'specific-model-path': './models/reconnet/mnist/cr2/best_model0.rnet',
+    'sensing-path': './models/reconnet/mnist/cr2/rand.rnet.sensing',
     'resume-training': False,
     
     'save-interval': 5,
     #'max-images': 1000000000,
     'validation-images': 10000,
     'validation-split-seed': 2147483647,
-    'workers': 2
+    'workers': 2,
+    'device': 'cuda:2'
 }
 
 def main(sensing, reconstruction, stage, default, dataset, input_channel, input_width, input_height, m, n, specifics):
@@ -59,8 +60,8 @@ def main(sensing, reconstruction, stage, default, dataset, input_channel, input_
 
 if __name__ == "__main__":
     input_channel, input_width, input_height = 1, 32, 32
-    ratio = 8
-    stage = 'training'
+    ratio = 2
+    stage = 'testing'
     dataset = 'mnist'
     
     # NOTE: m is per-channel, so for input size of w,h,c and compression ratio r, m = w * h // r
