@@ -20,15 +20,15 @@
   </tr>
   <tr>
     <td>CSGAN</td>
-    <td>26.75406106</td>
+    <td>19.77839493</td>
   </tr>
   <tr>
     <td>LAPRAN</td>
-    <td>19.73516194</td>
+    <td>19.17125057</td>
   </tr>
   <tr>
     <td>CSGM</td>
-    <td>13.42710173</td>
+    <td>5.935114887</td>
   </tr>
   <tr>
     <td>TVAL3</td>
