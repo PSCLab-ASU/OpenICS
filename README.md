@@ -24,7 +24,7 @@
   </tr>
   <tr>
     <td>LAPRAN</td>
-    <td>19.17125057</td>
+    <td>25.51094228</td>
   </tr>
   <tr>
     <td>CSGM</td>
