@@ -249,15 +249,9 @@ def GenLDAMPFilename(alg,tie_weights,LayerbyLayer,n_DAMP_layer_override=None,sam
         sampling_rate_save=sampling_rate_override
     else:
         sampling_rate_save=sampling_rate
-    filename = "./saved_models/"
-    if (not (os.path.exists(filename))):
-        os.mkdir(filename)
-    filename = "./saved_models/" + specifics['save_folder_name']
-    if (not (os.path.exists(filename))):
-        os.mkdir(filename)
-    filename = "./saved_models/" + specifics['save_folder_name'] + "/LDAMP"
-    if (not (os.path.exists(filename))):
-        os.mkdir(filename)
+    filename = specifics['save_folder_name']
+    if not os.path.exists(filename):
+        os.makedirs(filename)
 
     if loss_func=='SURE':
         filename = filename + "/SURE_"+alg+"_" + str(n_DnCNN_layers) + "DnCNNL_" + str(int(n_DAMP_layers_save)) + "DAMPL_Tie"+str(tie_weights)+"_LbyL"+str(LayerbyLayer)+"_SR" +str(int(sampling_rate_save*100))
@@ -269,15 +263,9 @@ def GenLDAMPFilename(alg,tie_weights,LayerbyLayer,n_DAMP_layer_override=None,sam
 
 ##Create a string that generates filenames. Ensures consitency between functions
 def GenDnCNNFilename(sigma_w_min,sigma_w_max,useSURE=False, specifics=None):
-    filename = "./saved_models/"
-    if (not (os.path.exists(filename))):
-        os.mkdir(filename)
-    filename = "./saved_models/" + specifics['save_folder_name']
-    if (not (os.path.exists(filename))):
-        os.mkdir(filename)
-    filename = "./saved_models/" + specifics['save_folder_name'] + "/DnCNN"
-    if (not (os.path.exists(filename))):
-        os.mkdir(filename)
+    filename = specifics['save_folder_name']
+    if not os.path.exists(filename):
+        os.makedirs(filename)
 
     if useSURE:
         filename = filename + "/SURE_DnCNN_" + str(n_DnCNN_layers) + "L_sigmaMin" + str(

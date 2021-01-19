@@ -71,10 +71,10 @@ class ISTANet_wrapper():
 
             optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-            model_dir = "./%s/CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f_imgwidth_%d" % (
+            model_dir = "%s/CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f_imgwidth_%d" % (
             model_dir, layer_num, group_num, cs_ratio, learning_rate, self.specifics['input_width'])
 
-            log_file_name = "./%s/Log_CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f_imgwidth_%d.txt" % (
+            log_file_name = "%s/Log_CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f_imgwidth_%d.txt" % (
             log_dir, layer_num, group_num, cs_ratio, learning_rate, self.specifics['input_width'])
 
             if not os.path.exists(model_dir):
@@ -82,7 +82,7 @@ class ISTANet_wrapper():
 
             if start_epoch > 0:
                 pre_model_dir = model_dir
-                model.load_state_dict(torch.load('./%s/net_params_%d.pkl' % (pre_model_dir, start_epoch)))
+                model.load_state_dict(torch.load('%s/net_params_%d.pkl' % (pre_model_dir, start_epoch)))
 
             # added functionality
             # if(self.specifics['bmp_folder_images'] == True):
@@ -139,15 +139,15 @@ class ISTANet_wrapper():
                     loss_constraint)
                     print(output_data)
 
-                if (not (os.path.exists("./" + log_dir))):
-                    os.mkdir("./" + log_dir)
+                if (not (os.path.exists("" + log_dir))):
+                    os.mkdir("" + log_dir)
                 output_file = open(log_file_name, 'a')
                 output_file.write(output_data)
                 output_file.close()
 
                 if epoch_i % 5 == 0:
                     torch.save(model.state_dict(),
-                               "./%s/net_params_%d.pkl" % (model_dir, epoch_i))  # save only the parameters
+                               "%s/net_params_%d.pkl" % (model_dir, epoch_i))  # save only the parameters
         elif (self.specifics['stage'] == 'testing'):
             model = self.model
 
@@ -164,11 +164,11 @@ class ISTANet_wrapper():
 
             optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-            model_dir = "./%s/CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f_imgwidth_%d" % (
+            model_dir = "%s/CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f_imgwidth_%d" % (
             model_dir, layer_num, group_num, cs_ratio, learning_rate, self.specifics['input_width'])
 
             # Load pre-trained model with epoch number
-            model.load_state_dict(torch.load('./%s/net_params_%d.pkl' % (model_dir, epoch_num)))
+            model.load_state_dict(torch.load('%s/net_params_%d.pkl' % (model_dir, epoch_num)))
 
 
             if(self.specifics['testing_data_isFolderImages'] == False):
@@ -300,11 +300,11 @@ class ISTANet_wrapper():
             cs_ratio, test_name, np.mean(REC_TIME_All), np.mean(PSNR_All), np.mean(SSIM_All), epoch_num)
             print(output_data)
 
-            output_file_name = "./%s/PSNR_SSIM_Results_CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f_imgwidth_%d.txt" % (
+            output_file_name = "%s/PSNR_SSIM_Results_CS_ISTA_Net_plus_layer_%d_group_%d_ratio_%d_lr_%.4f_imgwidth_%d.txt" % (
             log_dir, layer_num, group_num, cs_ratio, learning_rate, self.specifics['input_width'])
 
-            if (not (os.path.exists("./" + log_dir))):
-                os.mkdir("./" + log_dir)
+            if (not (os.path.exists("" + log_dir))):
+                os.mkdir("" + log_dir)
             output_file = open(output_file_name, 'a')
             output_file.write(output_data)
             output_file.close()
