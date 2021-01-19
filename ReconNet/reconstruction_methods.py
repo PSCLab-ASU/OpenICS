@@ -38,6 +38,7 @@ class ReconNetWrapper():
             self.dims[0] * self.dims[1] // self.m
         )
         self.log_file = open(os.path.join(self.logs_root, self.id + '.txt'), 'w')
+        self.log_file.write("Params: " + str(self.specifics) + '\n')
         
         # Create model and sensing
         self.device = torch.device(self.specifics['device']) if 'device' in self.specifics else torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -163,7 +164,7 @@ class ReconNetWrapper():
                 if ans == 'y' or ans == 'yes':
                     return
                 elif ans == 'n' or ans == 'no':
-                    self.log_file.write("Manually exited")
+                    self.log_file.write("Manually exited\n")
                     exit()
     
     # Run the model
@@ -177,7 +178,7 @@ class ReconNetWrapper():
         else:
             raise NotImplementedError
             
-        self.log_file.write("\nEnded %s"%time.asctime())
+        self.log_file.write("\nEnded %s\n"%time.asctime())
         self.log_file.close()
     
     # Start training loop
@@ -355,7 +356,7 @@ class ReconNetWrapper():
             val_ssim = sum(val_ssims) / len(val_ssims)
             
             print("Avg. PSNR: %f SSIM: %f Reconstruction Speed: %f"%(val_psnr, val_ssim, (end - start) / len(self.dataset)))
-            self.log_file.write("\nAvg. PSNR: %f SSIM: %f Reconstruction Speed: %f"%(val_psnr, val_ssim, (end - start) / len(self.dataset)))
+            self.log_file.write("\nAvg. PSNR: %f SSIM: %f Reconstruction Speed: %f\n"%(val_psnr, val_ssim, (end - start) / len(self.dataset)))
             
             u.save_imgs(saved_img, saved_img_hat, os.path.join(self.logs_root, self.id + '.png'))
 
