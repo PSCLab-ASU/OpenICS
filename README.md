@@ -82,12 +82,14 @@
 
 ### Using the framework:
 #### Data-driven using Python
-To run the methods in Python, you may either modify the `main.py` file in each method's folder and run `python main.py`, or call it from another file and pass in custom arguments. Details about the parameters may be found in each method's folder, and will require modification to properly work with different file structures. Note that the correct conda environment must be active for it to function properly.
+To run the methods in Python, you may either modify the `main.py` file in each method's folder and run `python main.py`, or call it from another file and pass in custom arguments. Details about the specifics parameter may be found in each method's folder, and will require modification to properly work with different file structures. Note that the correct conda environment must be active for it to function properly.
 
 Pre-trained models for each data-driven method may be downloaded from [this link](https://google.com). <!--ADD IN GOOGLE DRIVE LINK-->
 
 #### Model-based using Matlab
-To run the methods in Matlab, you may either modify the `demo.m` file in the framework root directory and run it in Matlab, or call the `main.m` function from another file and pass in custom arguments. Details about the parameters may be found in each method's folder. Note that `set_up.m` must be ran in each new session for it to function properly.
+To run the methods in Matlab, you may either modify the `demo.m` file in the framework root directory and run it in Matlab, or call the `main.m` function from another file and pass in custom arguments. Details about the specifics parameter may be found in each method's folder. Note that `set_up.m` must be ran in each new session for it to function properly.
+
+
 
 # Section 2: Parameters
 
@@ -102,12 +104,6 @@ input_height: Height of training/testing images</br>
 m: # of measurements/outputs of sensing matrix</br>
 n: # of inputs to sensing matrix</br>
 specifics: Specific parameter settings of chosen reconstruction method</br>
-
-### Matlab:
-To quickly modify parameters, make changes to demo.m. Refer to the README.md
-located in the directory of each Matlab reconstruction method for more details
-on method-specific parameters.
-
 
 
 
