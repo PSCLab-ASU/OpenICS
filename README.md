@@ -52,7 +52,7 @@
 
 # Section 1: Setting up environment
 
-### Datadriven using conda (PyTorch):
+### Data-driven using conda (PyTorch):
 `conda create -n CS_methods_environement python=3.7.9` </br>
 `conda activate CS_methods_environement`</br>
 </br>
@@ -61,7 +61,7 @@
 `conda install scikit-image==0.17.2`</br>
 `conda install pandas`</br>
  
- ### Datadriven using conda (Tensorflow):
+ ### Data-driven using conda (Tensorflow):
 `conda create -n CS_methods_environement python=3.7.9` </br>
 `conda activate CS_methods_environement`</br>
 </br>
@@ -76,13 +76,18 @@
 `pip install cvxopt`</br>
 `pip install Pillow`</br>
 
-### Matlab:
-`cd \<path to CS_Framework directory\>`<br>
+### Model-based using Matlab:
+`cd \<path to CS-Framework directory\>`<br>
 `run set_up.m`<br>
 
+### Using the framework:
+#### Data-driven using Python
+To run the methods in Python, you may either modify the `main.py` file in each method's folder and run `python main.py`, or call it from another file and pass in custom arguments. Details about the parameters may be found in each method's folder, and will require modification to properly work with different file structures. Note that the correct conda environment must be active for it to function properly.
 
+Pre-trained models for each data-driven method may be downloaded from [this link](https://google.com). <!--ADD IN GOOGLE DRIVE LINK-->
 
-
+#### Model-based using Matlab
+To run the methods in Matlab, you may either modify the `demo.m` file in the framework root directory and run it in Matlab, or call the `main.m` function from another file and pass in custom arguments. Details about the parameters may be found in each method's folder. Note that `set_up.m` must be ran in each new session for it to function properly.
 
 # Section 2: Parameters
 
