@@ -18,7 +18,7 @@ The method may be directly ran by modifying and calling `main.py`, which contain
 * specifics: The specific parameters for the method. Parameters are detailed below.
   * test-root: The path to the folder containing the testing images
   * train-root: The path to the folder containing the training images
-  * model-root: The path to the folder in which to save all models. The file structure will be as follows: {model-root} > reconnet > {dataset} > cr{n // m} > model/sensing files, where // denotes floor division
+  * model-root: The path to the folder in which to save all models. The file structure will be as follows: {model-root} > reconnet > {dataset} > cr{n // m where // denotes floor division} > model/sensing files
   * logs-root: The path to the folder in which to save all logs. The file structure will be as follows: {logs-root} > reconnet > {stage} > {dataset} > cr{n // m} > log files
   * epochs: The number of epochs for which to train the model
   * lr: The learning rate for the Adam optimizer
