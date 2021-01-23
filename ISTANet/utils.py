@@ -165,10 +165,10 @@ def getTrainingLabels(input_channel,input_width,input_height, stage, specifics):
         #                                        transforms.ToTensor()
         #                                    ]))
         elif(specifics['training_data_type'] == 'mat'):
-            Training_data = sio.loadmat('./%s/%s.mat' % (specifics['data_dir'], Training_data))
+            Training_data = sio.loadmat('%s/%s.mat' % (specifics['data_dir'], Training_data))
             Training_data = Training_data['labels']
         elif(specifics['training_data_type'] == 'npy'):
-            Training_data = np.load('./%s/%s.npy' % (specifics['data_dir'], Training_data))
+            Training_data = np.load('%s/%s.npy' % (specifics['data_dir'], Training_data))
         else:
             raise Exception('training_data_type of ' + specifics['training_data_type'] + ' is unsupported')
     Training_data = Training_data[:specifics['nrtrain']]
@@ -177,7 +177,7 @@ def getTrainingLabels(input_channel,input_width,input_height, stage, specifics):
     return Training_data
 
 def createTrainingLabels(stage, specifics):
-    custom_dataset = './%s/%s.npy' % (specifics['data_dir'], specifics['custom_dataset_name'])
+    custom_dataset = '%s/%s.npy' % (specifics['data_dir'], specifics['custom_dataset_name'])
     if(os.path.exists(custom_dataset)):
         return np.load(custom_dataset)
 
@@ -218,9 +218,9 @@ def createTrainingLabels(stage, specifics):
 
     if (not (os.path.exists(specifics['data_dir']))):
         os.mkdir(specifics['data_dir'])
-    np.save(os.path.join('./%s/%s.npy' % (specifics['data_dir'], specifics['custom_dataset_name'])), Training_labels)
+    np.save(os.path.join('%s/%s.npy' % (specifics['data_dir'], specifics['custom_dataset_name'])), Training_labels)
     print("################################################################\nCreated new file: "
-          + './%s/%s.npy' % (specifics['data_dir'], specifics['custom_dataset_name'])
+          + '%s/%s.npy' % (specifics['data_dir'], specifics['custom_dataset_name'])
           + "\n################################################################\n")
     return Training_labels
 
