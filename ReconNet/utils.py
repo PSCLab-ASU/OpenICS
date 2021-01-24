@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 
 def generate_dataset(dataset,input_channel,input_width,input_height,stage,specifics):
     print("Creating dataset...")
+    validate_data = specifics['validate-data'] if 'validate-data' in specifics else False
     
     if stage == 'testing':
         root = specifics['test-root']
@@ -34,7 +35,8 @@ def generate_dataset(dataset,input_channel,input_width,input_height,stage,specif
             ]
         ),
         max_imgs=specifics['max-images'] if 'max-images' in specifics else None,
-        name=dataset
+        name=dataset,
+        validate_data=validate_data
     )
     
     print("Finished creating dataset")
@@ -43,10 +45,26 @@ def generate_dataset(dataset,input_channel,input_width,input_height,stage,specif
     return dset
 
 class CustomDataset(Dataset):
-    def __init__(self, root, transform, name, max_imgs):
+    def __init__(self, root, transform, name, max_imgs, validate_data):
         self.root = root
         self.transform = transform
-        self.all_imgs = os.listdir(root)[:max_imgs]
+        if str(validate_data) == 'False':
+            self.all_imgs = os.listdir(root)[:max_imgs]
+        else:
+            self.all_imgs = []
+            
+            # Will check all files are able to be properly transformed before adding them to the dataset.
+            # SLOW, recommended to turn off whenever possible
+            for file in os.listdir(root):
+                if max_imgs is None or len(self.all_imgs) < max_imgs:
+                    try:
+                        self.transform(Image.open(os.path.join(self.root, file)))
+                        self.all_imgs.append(file)
+                    except:
+                        continue
+                else:
+                    break
+            
         self.name = name
 
     def __len__(self):
@@ -152,8 +170,8 @@ def save_imgs(img,img_hat,path):
             ax.set_axis_off()
             ax_hat = axs[i,j]
             ax_hat.set_axis_off()
-            cur_img = img[i * rows + j]
-            cur_img_hat = img_hat[i * rows + j]
+            cur_img = np.clip(img[i * rows + j], 0.0, 1.0)
+            cur_img_hat = np.clip(img_hat[i * rows + j], 0.0, 1.0)
             
             if cur_img.shape[0] == 1:
                 cur_img = cur_img.squeeze()
