@@ -33,3 +33,4 @@ The method may be directly ran by modifying and calling `main.py`, which contain
   * validation-split-seed: The seed to use for randomly splitting the train set into validation/training. Recommended to set or leave as default in order to ensure consistency between training sessions
   * workers: The number of workers to use for loading the dataset. Recommended between 0 to 2
   * device: The pytorch device on which to train/test on. To run on CPU, set it to 'cpu'. To run on gpu, set it to 'cuda:N' where N is the index of the GPU to use, starting from 0
+  * validate-data: Whether to check if data can be properly transformed before adding it to the dataset. This process is slow, so it is recommended to clean the data beforehand and keep this option off
