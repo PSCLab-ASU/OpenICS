@@ -128,7 +128,7 @@ class ReconNetWrapper():
             else:
                 raise Exception("No models found in %s"%self.model_root)
         
-        self.net.load_state_dict(torch.load(model_path))
+        self.net.load_state_dict(torch.load(model_path, map_location=self.device))
         print("Loaded model from %s"%model_path)
         self.log_file.write("Loaded model from %s\n"%model_path)
     
@@ -151,7 +151,7 @@ class ReconNetWrapper():
             else:
                 raise Exception("No sensing models found in %s"%self.model_root)
         
-        self.sensing.load_state_dict(torch.load(sensing_path))
+        self.sensing.load_state_dict(torch.load(sensing_path, map_location=self.device))
         print("Loaded sensing model from %s"%sensing_path)
         self.log_file.write("Loaded sensing model from %s\n"%sensing_path)
     
