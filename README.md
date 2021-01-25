@@ -31,6 +31,10 @@
     <td>5.935114887</td>
   </tr>
   <tr>
+    <td>ReconNet</td>
+    <td>19.06523133</td>
+  </tr>
+  <tr>
     <td>TVAL3</td>
     <td>12.2197737</td>
   </tr>
@@ -1216,6 +1220,216 @@ CSGAN</br>
   </tr>
 </tbody>
 </table>
+
+<br>
+
+<table>
+<thead>
+  <tr>
+    <th>Method</th>
+    <th>Dataset</th>
+    <th>Compression Ratio</th>
+    <th>PSNR</th>
+    <th>SSIM</th>
+    <th>Reconstruction Speed</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td rowspan="30">ReconNet</td>
+    <td rowspan="5">MNIST</td>
+    <td>2</td>
+    <td>32.261</td>
+    <td>0.972</td>
+    <td>0.0031</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>29.206</td>
+    <td>0.950</td>
+    <td>0.0030</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>26.096</td>
+    <td>0.935</td>
+    <td>0.0029</td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td>22.985</td>
+    <td>0.858</td>
+    <td>0.0030</td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td>19.731</td>
+    <td>0.760</td>
+    <td>0.0032</td>
+  </tr>
+  <tr>
+    <td rowspan="5">CelebA</td>
+    <td>2</td>
+    <td>31.147</td>
+    <td>0.929</td>
+    <td>0.0051</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>28.221</td>
+    <td>0.879</td>
+    <td>0.0054</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>25.431</td>
+    <td>0.807</td>
+    <td>0.0053</td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td>23.089</td>
+    <td>0.720</td>
+    <td>0.0049</td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td>21.079</td>
+    <td>0.635</td>
+    <td>0.0047</td>
+  </tr>
+  <tr>
+    <td rowspan="5">CIFAR10</td>
+    <td>2</td>
+    <td>28.838</td>
+    <td>0.925</td>
+    <td>0.0041</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>25.025</td>
+    <td>0.835</td>
+    <td>0.0041</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>21.819</td>
+    <td>0.696</td>
+    <td>0.0040</td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td>19.688</td>
+    <td>0.556</td>
+    <td>0.0039</td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td>17.885</td>
+    <td>0.420</td>
+    <td>0.0037</td>
+  </tr>
+  <tr>
+    <td rowspan="5">CIFAR10 Gray</td>
+    <td>2</td>
+    <td>28.977</td>
+    <td>0.926</td>
+    <td>0.0028</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>25.306</td>
+    <td>0.838</td>
+    <td>0.0026</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>22.079</td>
+    <td>0.698</td>
+    <td>0.0026</td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td>19.853</td>
+    <td>0.556</td>
+    <td>0.0026</td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td>18.131</td>
+    <td>0.418</td>
+    <td>0.0029</td>
+  </tr>
+  <tr>
+    <td rowspan="5">Bigset</td>
+    <td>2</td>
+    <td>31.407</td>
+    <td>0.861</td>
+    <td>0.0057</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>28.871</td>
+    <td>0.781</td>
+    <td>0.0047</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>26.970</td>
+    <td>0.703</td>
+    <td>0.0047</td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td>24.779</td>
+    <td>0.615</td>
+    <td>0.0055</td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td>23.041</td>
+    <td>0.538</td>
+    <td>0.0046</td>
+  </tr>
+  <tr>
+    <td rowspan="5">Bigset Gray</td>
+    <td>2</td>
+    <td>32.844</td>
+    <td>0.887</td>
+    <td>0.0038</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>30.513</td>
+    <td>0.823</td>
+    <td>0.0033</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>27.993</td>
+    <td>0.736</td>
+    <td>0.0032</td>
+  </tr>
+  <tr>
+    <td>16</td>
+    <td>26.045</td>
+    <td>0.657</td>
+    <td>0.0034</td>
+  </tr>
+  <tr>
+    <td>32</td>
+    <td>23.929</td>
+    <td>0.566</td>
+    <td>0.0033</td>
+  </tr>
+  <tr>
+    <td colspan="6">THIS IS EXAMPLE TEXT, PUT THE TOTAL SCORE CALCULATION HERE</td>
+  </tr>
+</tbody>
+</table>
+
+<br>
+
 <table>
 <thead>
   <tr>
