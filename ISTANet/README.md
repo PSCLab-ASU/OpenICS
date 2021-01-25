@@ -8,13 +8,17 @@ reconstruction: type of reconstruction (IstaNetPlus)<br />
 stage: either "training" or "testing"<br />
 default: default is training<br />
 dataset: name of dataset to train on<br />
-input_channel: unused<br />
-input_width: unused<br />
-input_height: unused<br />
+input_channel: keep at 1, modify sudo_rgb in specifics instead to process RGB images<br />
+input_width: the width of the image<br />
+input_height: unused, instead the image is assumed to be square (input_width x input_width)<br />
 m: unused<br />
 n: unused<br />
 specifics: (used to store variables conveniently and define new ones)<br />
 &nbsp;&nbsp;&nbsp;&nbsp;stage: taken from original input<br />
+&nbsp;&nbsp;&nbsp;&nbsp;n: taken from original input<br />
+&nbsp;&nbsp;&nbsp;&nbsp;m: taken from original input<br />
+&nbsp;&nbsp;&nbsp;&nbsp;input_width: taken from original input<br />
+&nbsp;&nbsp;&nbsp;&nbsp;input_height: taken from original input<br />
 &nbsp;&nbsp;&nbsp;&nbsp;sudo_rgb: instead of setting the channel to 3, set sudo_rgb to True<br />
 &nbsp;&nbsp;&nbsp;&nbsp;start_epoch: set to non-zero when loading a specific network for training<br />
 &nbsp;&nbsp;&nbsp;&nbsp;end_epoch: total number of epochs used in training<br />
