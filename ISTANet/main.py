@@ -62,9 +62,9 @@ if __name__ == "__main__":
     ratio = 2
     stage = 'training'
 
-    m = input_width*input_width
     # n = int(ratio/100 * m)
-    n = int(1/ratio * m)
+    n = input_width**2
+    m = n // ratio
 
     print("Ratio: " + str(m/n)) # it is multiplied in from the right not the left
     main(
@@ -79,7 +79,6 @@ if __name__ == "__main__":
         m,
         n,
         specifics={
-            'stage': stage,
             'sudo_rgb': True, # if dataset is rgb, then true else false
             'start_epoch': 0,
             'end_epoch': 50,
@@ -88,10 +87,6 @@ if __name__ == "__main__":
             'layer_num': 9,
             'group_num': 901, # organizational purposes, 900-905
             'cs_ratio': ratio,
-            'input_channel': input_channel,
-            'input_width': input_width,
-            'n': n,
-            'm': m,
             'nrtrain': 60000, #224000, #88912, 867, 224000, 50000 * 3
             'batch_size': 128, # 64 for train
 
