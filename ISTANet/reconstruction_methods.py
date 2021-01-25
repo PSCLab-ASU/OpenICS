@@ -192,8 +192,6 @@ class ISTANet_wrapper():
                 os.makedirs(result_dir)
 
             ImgNum = len(filepaths)
-            if(ImgNum > 1000):
-                ImgNum = 1000
             REC_TIME_All = np.zeros([1, ImgNum], dtype=np.float32)
             PSNR_All = np.zeros([1, ImgNum], dtype=np.float32)
             SSIM_All = np.zeros([1, ImgNum], dtype=np.float32)
