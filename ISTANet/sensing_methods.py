@@ -34,7 +34,7 @@ def computInitMx(Training_labels, specifics):
 def computInitMxScratch(Training_labels, specifics):
     # (272, 1089)
     # gaussian sensing, mean = 0, std_dev = 1/input_width
-    Phi_input = np.random.normal(0, 1./specifics['input_width'], size=(specifics['n'], specifics['m']))
+    Phi_input = np.random.normal(0, 1./specifics['input_width'], size=(specifics['m'], specifics['n']))
     mean = np.mean(Phi_input)
     std_dev = np.std(Phi_input)
     # X_data = Training_labels.data.numpy().transpose()
