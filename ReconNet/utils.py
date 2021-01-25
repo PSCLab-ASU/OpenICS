@@ -146,9 +146,9 @@ def compute_psnr(img,img_hat):
 def random_name(N):
     return ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=N))
 
-def create_dirs(model_root,logs_root,rname,stage,dataset,ratio):
-    model_root = os.path.join(model_root, rname, dataset, 'cr' + str(ratio))
-    logs_root = os.path.join(logs_root, rname, stage, dataset, 'cr' + str(ratio))
+def create_dirs(model_root,logs_root,rname,stage,dataset,save_name):
+    model_root = os.path.join(model_root, rname, dataset, save_name)
+    logs_root = os.path.join(logs_root, rname, stage, dataset, save_name)
     
     if not os.path.exists(model_root):
         os.makedirs(model_root)
