@@ -1083,7 +1083,7 @@ class LDAMP_wrapper():
                         end = time.time()
                         Final_PSNRs.append(batch_PSNR_hist[-1][0])
                         # Final_PSNRs.append(utils.psnr(batch_x_recon*255, batch_x_test*255))
-                        rec_SSIM = ssim(np.reshape(batch_x_recon, (BATCH_SIZE, height_img, width_img)), np.reshape(batch_x_test, (BATCH_SIZE, height_img, width_img)), data_range=1)
+                        rec_SSIM = sum([ ssim(np.reshape(batch_x_recon[:,i], (height_img, width_img)), np.reshape(batch_x_test[:,i], (height_img, width_img)), data_range=1.0) for i in range(BATCH_SIZE)])/BATCH_SIZE
                         Final_SSIMs.append(rec_SSIM)
                         Final_TIMEs.append(end - start)
                         for i in range(BATCH_SIZE):
