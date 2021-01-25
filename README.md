@@ -178,7 +178,7 @@ CSGM</br>
 (Reference: http://proceedings.mlr.press/v70/bora17a/bora17a.pdf)</br>
 (Repository: https://github.com/AshishBora/csgm)</br>
 * list main (we choose specific dataset and specific cs ratio) benchmark results
-* IF THERE IS NO DIFFERENCE IN RESULTS, SKIP THESE TWO POINTS
+* To reproduce the results in the original paper, test the network with the same batch size that was used to train the network. Using different batch sizes affects the network's performance during testing because of the batch normalization layers in the generator.
 * compare to one in original paper
 * significant modifications that we made to the code that affect the performance
 
