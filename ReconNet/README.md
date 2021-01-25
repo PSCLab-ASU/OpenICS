@@ -19,8 +19,8 @@ The method may be directly ran by modifying and calling `main.py`, which contain
   * save-name: The custom name, not path, of the folder in which to save the model. Defaults to cr{n // m where // denotes floor division}
   * test-root: The path to the folder containing the testing images
   * train-root: The path to the folder containing the training images
-  * model-root: The path to the folder in which to save all models. The file structure will be as follows: {model-root} > reconnet > {dataset} > {save-name} > model/sensing files
-  * logs-root: The path to the folder in which to save all logs. The file structure will be as follows: {logs-root} > reconnet > {stage} > {dataset} > {save-name} > log files
+  * model-root: The path to the folder in which to save all models. The file structure will be constructed as follows: {model-root} > reconnet > {dataset} > {save-name} > model/sensing files
+  * logs-root: The path to the folder in which to save all logs. The file structure will be constructed as follows: {logs-root} > reconnet > {stage} > {dataset} > {save-name} > log files
   * epochs: The number of epochs for which to train the model
   * lr: The learning rate for the Adam optimizer
   * betas: The beta values for the Adam optimizer
