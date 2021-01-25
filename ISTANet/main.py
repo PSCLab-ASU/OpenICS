@@ -8,10 +8,9 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
         input_channel = 1 # restricted to 1
         input_width = 33 # restricted to 33
         input_height = 33 # restricted to 33
-        m = 1089
-        n = 272 # ratio_dict = {1: 10, 4: 43, 10: 109, 25: 272, 30: 327, 40: 436, 50: 545}
+        m = 272
+        n = 1089 # ratio_dict = {1: 10, 4: 43, 10: 109, 25: 272, 30: 327, 40: 436, 50: 545}
         specifics = {
-            'stage': stage,
             'sudo_rgb': False,
             'start_epoch': 0,
             'end_epoch': 200,
@@ -20,10 +19,6 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
             'layer_num': 9,
             'group_num': 2, # check to make sure group matches folder
             'cs_ratio': 25,
-            'input_channel': input_channel,
-            'input_width': input_width,
-            'n': n,
-            'm': m,
             'nrtrain': 88912,
             'batch_size': 64,
 
@@ -49,7 +44,12 @@ def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,
         # with open('./original_specifics.json', 'r') as fp:
         #     specifics = json.load(fp)
 
-
+    # Transfer parameters to specifics
+    specifics['n'] = n
+    specifics['m'] = m
+    specifics['input_channel'] = input_channel
+    specifics['input_width'] = input_width
+    specifics['stage'] = stage
     dset, Training_Labels = utils.generate_dataset(input_channel,input_width,input_height, stage, specifics)
     # sensing_method=sms.sensing_method(sensing, specifics) # not used
     reconstruction_method=rms.reconstruction_method(reconstruction,specifics)
