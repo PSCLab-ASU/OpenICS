@@ -35,7 +35,7 @@ class ReconNetWrapper():
             self.rname,
             stage,
             dset.name,
-            self.dims[0] * self.dims[1] // self.m
+            self.specifics['save-name'] if 'save-name' in self.specifics else ('cr' + str(self.dims[0] * self.dims[1] // self.m))
         )
         self.log_file = open(os.path.join(self.logs_root, self.id + '.txt'), 'w')
         self.log_file.write("Params: " + str(self.specifics) + '\n')
