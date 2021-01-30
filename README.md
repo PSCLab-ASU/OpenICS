@@ -135,51 +135,51 @@ specifics: Specific parameter settings of chosen reconstruction method</br>
 
 # Section 3: List of Methods
 ### Model-based:
-TVAL3</br>
+#### TVAL3
 (Reference: https://www.caam.rice.edu/~zhang/reports/tr1213.pdf)</br>
 (Repository: https://www.caam.rice.edu/~optimization/L1/TVAL3/)</br>
 
-NLR-CS</br>
+#### NLR-CS
 (Reference: https://see.xidian.edu.cn/faculty/wsdong/Papers/Journal/NLR-CS-TIP.pdf)</br>
 (Repository: http://see.xidian.edu.cn/faculty/wsdong/Code_release/NLR_codes.rar)</br>
 * The definition of the size measurements has been changed to reflect the definition in L1-Magic. This affects the value of m in relation to the compression ratio.
 
-D-AMP</br>
+#### D-AMP
 (Reference: https://arxiv.org/pdf/1406.4175.pdf)</br>
 (Repository: https://github.com/ricedsp/D-AMP_Toolbox)</br>
 * The DNCNN denoiser is unsupported.
 
-L1</br>
+#### L1
 (Reference: https://statweb.stanford.edu/~candes/software/l1magic/)</br>
 (Repository: https://statweb.stanford.edu/~candes/software/l1magic/)</br>
 
 
 ### Data-driven:
-LDAMP </br>
+#### LDAMP
 (Reference: https://papers.nips.cc/paper/2017/file/8597a6cfa74defcbde3047c891d78f90-Paper.pdf)</br>
 (Repository: https://github.com/ricedsp/D-AMP_Toolbox/tree/master/LDAMP_TensorFlow)</br>
 * Only supports layer-by-layer training
 * Supports gaussian, complex-gaussian, and coded-diffraction sensing for Layer-by-Layer (not Fast-JL)
 
-ISTA-Net Plus </br>
+#### ISTA-Net Plus
 (Reference: https://openaccess.thecvf.com/content_cvpr_2018/papers_backup/Zhang_ISTA-Net_Interpretable_Optimization-Inspired_CVPR_2018_paper.pdf)</br>
 (Repository: https://github.com/jianzhangcs/ISTA-Net)</br>
 * Merged ISTANet and ISTANetPlus, now a parameter is used to control which one to train/test
 
-ReconNet</br>
+#### ReconNet
 (Reference: https://openaccess.thecvf.com/content_cvpr_2016/papers/Kulkarni_ReconNet_Non-Iterative_Reconstruction_CVPR_2016_paper.pdf)</br>
 (Repository: https://github.com/KuldeepKulkarni/ReconNet)</br>
 
-LAPRAN</br>
+#### LAPRAN
 (Reference: https://openaccess.thecvf.com/content_ECCV_2018/papers/Kai_Xu_LAPCSRA_Deep_Laplacian_ECCV_2018_paper.pdf)</br>
 (Repository: https://github.com/PSCLab-ASU/LAPRAN-PyTorch)</br>
 
-CSGM</br>
+#### CSGM
 (Reference: http://proceedings.mlr.press/v70/bora17a/bora17a.pdf)</br>
 (Repository: https://github.com/AshishBora/csgm)</br>
 * To reproduce the results in the original paper, test the network with the same batch size that was used to train the network. Using different batch sizes affects the network's performance during testing because of the batch normalization layers in the generator.
 
-CSGAN</br>
+#### CSGAN
 (Reference: http://proceedings.mlr.press/v97/wu19d/wu19d.pdf)</br>
 (Repository: https://github.com/deepmind/deepmind-research/tree/master/cs_gan)</br>
 
