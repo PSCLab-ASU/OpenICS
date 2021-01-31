@@ -177,10 +177,10 @@ specifics: Specific parameter settings of chosen reconstruction method</br>
 #### CSGM
 (Reference: http://proceedings.mlr.press/v70/bora17a/bora17a.pdf)</br>
 (Repository: https://github.com/AshishBora/csgm)</br>
-* To reproduce the results in the original paper, test the network with the same batch size that was used to train the network. Using different batch sizes affects the network's performance during testing because of the batch normalization layers in the generator.
 
 #### CSGAN
 (Reference: http://proceedings.mlr.press/v97/wu19d/wu19d.pdf)</br>
 (Repository: https://github.com/deepmind/deepmind-research/tree/master/cs_gan)</br>
+* To reproduce the results in the original paper, test the network with the same batch size that was used to train the network. Using different batch sizes affects the network's performance during testing because of the batch normalization layers in the generator.
 
 All implementations of each method in this framework can reproduce the results in their original papers.
