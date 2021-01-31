@@ -328,9 +328,6 @@ Reconstruction time is in seconds.
     <td>0.5392</td>
     <td>0.2627</td>
   </tr>
-  <tr>
-    <td colspan="6">THIS IS EXAMPLE TEXT, PUT THE TOTAL SCORE CALCULATION HERE</td>
-  </tr>
 </tbody>
 </table>
 
@@ -535,9 +532,6 @@ Reconstruction time is in seconds.
     <td>0.6074</td>
     <td>0.0153</td>
   </tr>
-  <tr>
-    <td colspan="6">THIS IS EXAMPLE TEXT, PUT THE TOTAL SCORE CALCULATION HERE</td>
-  </tr>
 </tbody>
 </table>
 
@@ -741,9 +735,6 @@ Reconstruction time is in seconds.
     <td>0.5089</td>
     <td>0.0035</td>
   </tr>
-  <tr>
-    <td colspan="6">THIS IS EXAMPLE TEXT, PUT THE TOTAL SCORE CALCULATION HERE</td>
-  </tr>
 </tbody>
 </table>
 <table>
@@ -945,9 +936,6 @@ Reconstruction time is in seconds.
     <td>0.5611</td>
     <td>0.00035</td>
   </tr>
-  <tr>
-    <td colspan="6">THIS IS EXAMPLE TEXT, PUT THE TOTAL SCORE CALCULATION HERE</td>
-  </tr>
 </tbody>
 </table>
 <table>
@@ -1148,9 +1136,6 @@ Reconstruction time is in seconds.
     <td>16.8286</td>
     <td>0.2712</td>
     <td>3.7072</td>
-  </tr>
-  <tr>
-    <td colspan="6">THIS IS EXAMPLE TEXT, PUT THE TOTAL SCORE CALCULATION HERE</td>
   </tr>
 </tbody>
 </table>
@@ -1356,9 +1341,6 @@ Reconstruction time is in seconds.
     <td>0.566</td>
     <td>0.0033</td>
   </tr>
-  <tr>
-    <td colspan="6">THIS IS EXAMPLE TEXT, PUT THE TOTAL SCORE CALCULATION HERE</td>
-  </tr>
 </tbody>
 </table>
 
@@ -1563,9 +1545,6 @@ Reconstruction time is in seconds.
     <td>0.545</td>
     <td>0.244</td>
   </tr>
-  <tr>
-    <td colspan="6">THIS IS EXAMPLE TEXT, PUT THE TOTAL SCORE CALCULATION HERE</td>
-  </tr>
 </tbody>
 </table>
 
@@ -1768,9 +1747,6 @@ Reconstruction time is in seconds.
     <td>24.035</td>
     <td>0.570</td>
     <td>5.986</td>
-  </tr>
-  <tr>
-    <td colspan="6">THIS IS EXAMPLE TEXT, PUT THE TOTAL SCORE CALCULATION HERE</td>
   </tr>
 </tbody>
 </table>
@@ -1976,9 +1952,6 @@ Reconstruction time is in seconds.
     <td>0.435</td>
     <td>8.226</td>
   </tr>
-  <tr>
-    <td colspan="6">THIS IS EXAMPLE TEXT, PUT THE TOTAL SCORE CALCULATION HERE</td>
-  </tr>
 </tbody>
 </table>
 
@@ -2182,9 +2155,6 @@ Reconstruction time is in seconds.
     <td>24.426</td>
     <td>0.592</td>
     <td>13.443</td>
-  </tr>
-  <tr>
-    <td colspan="6">THIS IS EXAMPLE TEXT, PUT THE TOTAL SCORE CALCULATION HERE</td>
   </tr>
 </tbody>
 </table>
