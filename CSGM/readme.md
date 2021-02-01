@@ -1,4 +1,4 @@
-# ReconNet
+# CSGM
 ### Description
 This implementation of CSGM is based off of the original implementation at https://github.com/AshishBora/csgm . The various scripts that were used to run the algorithm with various parameters were  
 
