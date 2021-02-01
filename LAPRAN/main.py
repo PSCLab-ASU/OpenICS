@@ -3,39 +3,39 @@ import utils
 import sensing_methods as sms
 import argparse
 testSpecifics = {
-            "model": 'adaptiveCS_resnet_wy_ifusion_ufirst',
-            "dataset": "mnist",
-            "batch_size": 1,
+            "model": 'adaptiveCS_resnet_wy_ifusion_ufirst', #The model to use. Currently only "adaptiveCS_resnet_wy_ifusion_ufirst" is supported
+            "dataset": "mnist", #The dataset to use
+            "batch_size": 1, #The number of images in a batch
             "test_batch_size": 1000,
             "epochs": 100,
-            "lr": 2e-4,
+            "lr": 2e-4, # Learning rate for the optimizers
             "momentum": 0.5,
-            "cuda":True,
-            "ngpu": 1,
-            "seed": 1,
+            "cuda":True, #Set to true to enable CUDA training
+            "ngpu": 1, #Number of GPUs to use
+            "seed": 1, #Random seet to use
             "log-interval": 100,
             "layers-gan": 3,
-            "gpu": 0,
-            "outf": './results',
-            "w-loss": 0.01,
-            "stage": 1, #stage under training
-            "transfer": False,
+            "gpu": 0, #Preferred GPU to use
+            "outf": './results', #Folder to load model checkpoints
+            "w-loss": 0.01, #Penalty for the MSE and BCE loss
+            "stage": 1, 
+            "transfer": False
             }
 trainSpecifics = {
-            "model": 'adaptiveCS_resnet_wy_ifusion_ufirst',
-            "batch_size": 128,
+            "model": 'adaptiveCS_resnet_wy_ifusion_ufirst', #The model to use. Currently only "adaptiveCS_resnet_wy_ifusion_ufirst" is supported
+            "batch_size": 128,#The number of images in a batch
             "test_batch_size": 1000,
-            "epochs": 100,
-            "lr": 2e-4,
+            "epochs": 100, #Number of training epochs
+            "lr": 2e-4,# Learning rate for the optimizers
             "momentum": 0.5,
-            "cuda":True,
-            "ngpu": 1,
-            "seed": 2,
+            "cuda":True,#Set to true to enable CUDA training
+            "ngpu": 1,#Number of GPUs to use
+            "seed": 2,#Random seet to use
             "log-interval": 100,
             "layers-gan": 3,
             "gpu": 0,
-            "outf": './results',
-            "w-loss": 0.01,
+            "outf": './results',#Folder to save model checkpoints
+            "w-loss": 0.01,#Penalty for the MSE and BCE loss
             "stage": 1, #stage under training
             "transfer": False,
 
@@ -55,7 +55,7 @@ def main(reconstruction, sensing = "random_sensing",stage = "testing",default = 
         input_width = 32
         input_height = 32
         n = 32**2
-        m = n//2
+        m = n//32
         specifics = trainSpecifics
     
     dset=utils.generate_dataset(dataset,input_channel,input_width,input_height,stage, specifics)

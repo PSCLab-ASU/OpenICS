@@ -7,16 +7,16 @@ def main(reconstruction,sensing,stage,default,dataset,input_channel,input_width,
     if default=="True":
         sensing = "gaussian"
         reconstruction = "csgm"
-        stage = stage
-        dataset = dataset # '.\exampleLocation' # location of dataset
+        stage = "training
+        dataset = dataset
         dataset = "mnist"
 
         input_channel = 1 # n_channels
-        input_width = 28 # width
-        input_height = 28 # height
-        n = 28*28*1
-        m = 50 # 10 25 50 100 200 300 400 500 750
-        specifics = presets.dcganTrain
+        input_width = 32 # width
+        input_height = 32 # height
+        n = 32*32*1
+        m = 32
+        specifics = presets.vaeTrain
 
 
     dset=utils.generate_dataset(dataset,input_channel,input_width,input_height,stage=stage)
@@ -28,18 +28,18 @@ def main(reconstruction,sensing,stage,default,dataset,input_channel,input_width,
         
 
 if __name__ == "__main__":
-    specifics = presets.dcganWithRegCustom
+    specifics = presets.dcganWithRegCustom #see more in presets.py
     #print(specifics)
     main(
         reconstruction= "csgm",
-        sensing = "gaussian", #Can be either sensing_matrix or a neural network (NN_mnist or NN_celeba)
+        sensing = "gaussian",
         stage = "testing",
         default = "False",
         dataset = "celebA",
         input_channel = 1,
         input_width = 32,
         input_height = 32,
-        n = 32*32*1,
-        m = 512, # 10 25 50 100 200 300 400 500 750
+        n = 32*32*1, #width*height*channels
+        m = 512,
         specifics = specifics
     )

@@ -346,7 +346,6 @@ dcganTrain = {
     'z_dim': 100,
     'z_dist':'uniform_signed',
     'G_img_sum': False
-
 }
 dcganWithRegCustom = {
             'pretrained-model-dir': './models/celebA_64_64/',
