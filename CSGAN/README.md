@@ -1,6 +1,6 @@
 # CSGAN
 ### Description
-The CSGAN implementation within the framework is based off the original implementation at https://github.com/deepmind/deepmind-research/tree/master/cs_gan.
+The CSGAN implementation within the framework is based off the original implementation at https://github.com/deepmind/deepmind-research/tree/master/cs_gan. To reproduce the pretrained results, make sure to copy the sensing matrix .npy files into the method's directory.
 
 The method may be directly ran by modifying and calling `main.py`. Otherwise, the method may be ran by calling the main function from another file and passing in custom arguments.
 
