@@ -1,4 +1,4 @@
-# Section 0: Benchmarking Scores
+# Section 0: Benchmarking Scores [0-100]
 <table>
 <thead>
   <tr>
