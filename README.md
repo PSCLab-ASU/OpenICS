@@ -1,73 +1,73 @@
-# Section 0: Benchmarking Scores [0-100]
+# Section 0: Benchmarking Scores
 <table>
 <thead>
   <tr>
     <th>Method</th>
-    <th>Reconstruction Accuracy</th>
-    <th>Reconstruction Speed</th>
-    <th>Overall Score</th>
+    <th>Reconstruction Accuracy [0-50]</th>
+    <th>Reconstruction Speed [0-50]</th>
+    <th>Overall Score [0-100]</th>
   </tr>
 </thead>
 <tbody>
   <tr>
     <td>LAPRAN</td>
-    <td>66.24</td>
-    <td>99.94</td>
-    <td>81.22</td>
-  </tr>
-  <tr>
-    <td>Learned DAMP</td>
-    <td>65.21</td>
-    <td>98.24</td>
-    <td>79.89</td>
-  </tr>
-  <tr>
-    <td>CSGAN</td>
-    <td>57.03</td>
-    <td>99.29</td>
-    <td>75.81</td>
+    <td>23.60</td>
+    <td>32.69</td>
+    <td>56.30</td>
   </tr>
   <tr>
     <td>ReconNet</td>
-    <td>56.95</td>
-    <td>99.06</td>
-    <td>75.67</td>
+    <td>18.78</td>
+    <td>35.28</td>
+    <td>54.06</td>
   </tr>
   <tr>
     <td>ISTA-Net Plus</td>
-    <td>60.07</td>
-    <td>91.49</td>
-    <td>74.04</td>
+    <td>20.40</td>
+    <td>30.02</td>
+    <td>50.42</td>
+  </tr>
+  <tr>
+    <td>Learned DAMP</td>
+    <td>24.24</td>
+    <td>19.21</td>
+    <td>43.46</td>
+  </tr>
+  <tr>
+    <td>CSGAN</td>
+    <td>19.03</td>
+    <td>22.29</td>
+    <td>41.32</td>
   </tr>
   <tr>
     <td>TVAL3</td>
-    <td>56.46</td>
-    <td>43.63</td>
-    <td>50.76</td>
-  </tr>
-  <tr>
-    <td>TV</td>
-    <td>58.01</td>
-    <td>1.64</td>
-    <td>32.96</td>
-  </tr>
-  <tr>
-    <td>NLR-CS</td>
-    <td>59.27</td>
-    <td>0.01</td>
-    <td>32.93</td>
+    <td>18.92</td>
+    <td>18.43</td>
+    <td>37.35</td>
   </tr>
   <tr>
     <td>D-AMP</td>
-    <td>58.80</td>
-    <td>0.02</td>
-    <td>32.68</td>
+    <td>21.83</td>
+    <td>2.35</td>
+    <td>24.19</td>
+  </tr>
+  <tr>
+    <td>L1</td>
+    <td>19.69</td>
+    <td>3.78</td>
+    <td>23.46</td>
+  </tr>
+  <tr>
+    <td>NLR-CS</td>
+    <td>20.35</td>
+    <td>1.69</td>
+    <td>22.04</td>
   </tr>
   <tr>
     <td>CSGM</td>
-    <td>41.23</td>
-    <td>2.28</td>
-    <td>23.92</td>
+    <td>13.27</td>
+    <td>0.11</td>
+    <td>13.38</td>
   </tr>
 </tbody>
 </table>
