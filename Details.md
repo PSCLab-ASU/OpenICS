@@ -736,6 +736,9 @@ Reconstruction time is in images per second.
   </tr>
 </tbody>
 </table>
+
+<br>
+
 <table>
 <thead>
   <tr>
@@ -747,11 +750,6 @@ Reconstruction time is in images per second.
     <th>Reconstruction Time</th>
   </tr>
 </thead>
-</table>
-
-<br>
-
-<table>
 <tbody>
   <tr>
     <td rowspan="30">LAPRAN</td>
