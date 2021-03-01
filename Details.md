@@ -117,9 +117,9 @@ This is because the runtime is one of the most important indicators of the pract
 <br>
 
 On the main README, the reconstruction accuracy score is the sum of the PSNR and SSIM performance metric scores over all the datasets and compression ratios.
-A score of 50 indicates a perfect reconstruction PSNR of 48 and SSIM of 1 over all images while a score of 0 indicates a PSNR and SSIM of 0.
+A score of 50 indicates a perfect reconstruction PSNR of 48 and SSIM of 1 over all images while a score of 0 indicates a PSNR and SSIM of 0.<br>
 The reconstruction speed score is the sum of the reconstruction time performance metric scores over all the datasets and compression ratios.
-A score of 50 indicates that infinite images may be reconstructed per second while a score of 0 indicates 0 images may be reconstructed per second.
+The higher the score, the more images may be reconstructed per second.<br>
 The overall score is calculated as the sum of all three performance metrics.
 
 <br>
@@ -1567,7 +1567,7 @@ Reconstruction time is in images per second.
 </thead>
 <tbody>
   <tr>
-    <td rowspan="30">TV</td>
+    <td rowspan="30">L1</td>
     <td rowspan="5">MNIST</td>
     <td>2</td>
     <td>47.911</td>
@@ -2165,3 +2165,16 @@ Reconstruction time is in images per second.
 </table>
 
 <br>
+
+# Section 2: Benchmarking Specifics
+## L1
+Only the TV (Total Variation) methods from the L1 methods were used for benchmarking.
+
+## ISTA-Net
+ISTA-Net Plus was used for benchmarking.
+
+## CSGAN
+For the MNIST dataset, MLP was used in place of DCGAN.
+
+## CSGM
+For the MNIST dataset, VAE was used in place of DCGAN.
