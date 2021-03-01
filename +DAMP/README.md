@@ -1,8 +1,7 @@
 # D-AMP
-The D-AMP implementation within the framework utilizes the [D-AMP_toolbox source code](https://github.com/ricedsp/D-AMP_Toolbox) from Rice University.
+The D-AMP implementation within the framework utilizes the [D-AMP_toolbox source code](https://github.com/ricedsp/D-AMP_Toolbox) from Rice University. Unused files such as demos and the util folder have been removed from the source code.<br>
 Note that the 'sensing_guassian_random_columnwise' sensing method also comes from the same source code.
 The 'sensing_guassian_random_columnwise' sensing method works significantly better for D-AMP than the 'sensing_guassian_random' sensing method.
-Unused files such as demos and the util folder have been removed from the source code.
 
 The original D-AMP implementation already supports colored reconstruction, so it will only use the vectorized colored reconstruction mode.
 
