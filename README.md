@@ -1,3 +1,4 @@
+Technical report of this project: https://arxiv.org/abs/2103.00652
 # Section 0: Benchmarking Scores
 <table>
 <thead>
