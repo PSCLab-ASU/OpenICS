@@ -319,15 +319,18 @@ class ReconNetWrapper():
             elif len(self.dataset) >= 1:
                 saved_items = 1
             
-            start = time.time()
             saved_img = []
             saved_img_hat = []
+            times = 0
             
             for img in iter(self.testdataloader):
                 # Feed imgs through network
                 img = img.to(self.device)
                 measurement = self.sensing(img)
+                start = time.time()
                 img_hat = self.net(measurement)
+                end = time.time()
+                times += end - start
                 
                 # Move imgs to CPU for future usage
                 img = img.cpu()
@@ -351,12 +354,12 @@ class ReconNetWrapper():
                 print("[%d / %d] PSNR: %f SSIM: %f"%(total_items, len(self.dataset), batch_psnr, batch_ssim))
                 self.log_file.write("[%d / %d] PSNR: %f SSIM: %f\n"%(total_items, len(self.dataset), batch_psnr, batch_ssim))
             
-            end = time.time()
             val_psnr = sum(val_psnrs) / len(val_psnrs)
             val_ssim = sum(val_ssims) / len(val_ssims)
+            avg_time = times / total_items
             
-            print("Avg. PSNR: %f SSIM: %f Reconstruction Speed: %f"%(val_psnr, val_ssim, (end - start) / len(self.dataset)))
-            self.log_file.write("\nAvg. PSNR: %f SSIM: %f Reconstruction Speed: %f\n"%(val_psnr, val_ssim, (end - start) / len(self.dataset)))
+            print("Avg. PSNR: %f SSIM: %f Reconstruction Speed: %f"%(val_psnr, val_ssim, avg_time))
+            self.log_file.write("\nAvg. PSNR: %f SSIM: %f Reconstruction Speed: %f\n"%(val_psnr, val_ssim, avg_time))
             
             u.save_imgs(saved_img, saved_img_hat, os.path.join(self.logs_root, self.id + '.png'))
 
