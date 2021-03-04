@@ -125,7 +125,7 @@ The overall score is calculated as the sum of all three performance metrics.
 <br>
 
 # Section 1: Benchmarking Results
-Reconstruction speed is in images per second.
+Reconstruction time is in images per second.
 
 <table>
 <thead>
@@ -135,7 +135,7 @@ Reconstruction speed is in images per second.
     <th>Compression Ratio</th>
     <th>PSNR</th>
     <th>SSIM</th>
-    <th>Reconstruction Speed</th>
+    <th>Reconstruction Time</th>
   </tr>
 </thead>
 <tbody>
@@ -339,7 +339,7 @@ Reconstruction speed is in images per second.
     <th>Compression Ratio</th>
     <th>PSNR</th>
     <th>SSIM</th>
-    <th>Reconstruction Speed</th>
+    <th>Reconstruction Time</th>
   </tr>
 </thead>
 <tbody>
@@ -543,7 +543,7 @@ Reconstruction speed is in images per second.
     <th>Compression Ratio</th>
     <th>PSNR</th>
     <th>SSIM</th>
-    <th>Reconstruction Speed</th>
+    <th>Reconstruction Time</th>
   </tr>
 </thead>
 <tbody>
@@ -747,7 +747,7 @@ Reconstruction speed is in images per second.
     <th>Compression Ratio</th>
     <th>PSNR</th>
     <th>SSIM</th>
-    <th>Reconstruction Speed</th>
+    <th>Reconstruction Time</th>
   </tr>
 </thead>
 <tbody>
@@ -951,7 +951,7 @@ Reconstruction speed is in images per second.
     <th>Compression Ratio</th>
     <th>PSNR</th>
     <th>SSIM</th>
-    <th>Reconstruction Speed</th>
+    <th>Reconstruction Time</th>
   </tr>
 </thead>
 <tbody>
@@ -1155,7 +1155,7 @@ Reconstruction speed is in images per second.
     <th>Compression Ratio</th>
     <th>PSNR</th>
     <th>SSIM</th>
-    <th>Reconstruction Speed</th>
+    <th>Reconstruction Time</th>
   </tr>
 </thead>
 <tbody>
@@ -1359,7 +1359,7 @@ Reconstruction speed is in images per second.
     <th>Compression Ratio</th>
     <th>PSNR</th>
     <th>SSIM</th>
-    <th>Reconstruction Speed</th>
+    <th>Reconstruction Time</th>
   </tr>
 </thead>
 <tbody>
@@ -1562,7 +1562,7 @@ Reconstruction speed is in images per second.
     <th>Compression Ratio</th>
     <th>PSNR</th>
     <th>SSIM</th>
-    <th>Reconstruction Speed</th>
+    <th>Reconstruction Time</th>
   </tr>
 </thead>
 <tbody>
@@ -1766,7 +1766,7 @@ Reconstruction speed is in images per second.
     <th>Compression Ratio</th>
     <th>PSNR</th>
     <th>SSIM</th>
-    <th>Reconstruction Speed</th>
+    <th>Reconstruction Time</th>
   </tr>
 </thead>
 <tbody>
@@ -1970,7 +1970,7 @@ Reconstruction speed is in images per second.
     <th>Compression Ratio</th>
     <th>PSNR</th>
     <th>SSIM</th>
-    <th>Reconstruction Speed</th>
+    <th>Reconstruction Time</th>
   </tr>
 </thead>
 <tbody>
