@@ -13,32 +13,32 @@ Technical report of this project: https://arxiv.org/abs/2103.00652
   <tr>
     <td>LAPRAN</td>
     <td>23.60</td>
-    <td>32.69</td>
-    <td>56.30</td>
+    <td>34.69</td>
+    <td>58.30</td>
   </tr>
   <tr>
     <td>ReconNet</td>
     <td>18.78</td>
-    <td>35.28</td>
-    <td>54.06</td>
+    <td>37.00</td>
+    <td>55.78</td>
+  </tr>
+  <tr>
+    <td>Learned DAMP</td>
+    <td>24.24</td>
+    <td>30.25</td>
+    <td>54.50</td>
+  </tr>
+  <tr>
+    <td>CSGAN</td>
+    <td>19.03</td>
+    <td>32.58</td>
+    <td>51.61</td>
   </tr>
   <tr>
     <td>ISTA-Net Plus</td>
     <td>20.40</td>
     <td>30.02</td>
     <td>50.42</td>
-  </tr>
-  <tr>
-    <td>Learned DAMP</td>
-    <td>24.24</td>
-    <td>19.21</td>
-    <td>43.46</td>
-  </tr>
-  <tr>
-    <td>CSGAN</td>
-    <td>19.03</td>
-    <td>22.29</td>
-    <td>41.32</td>
   </tr>
   <tr>
     <td>TVAL3</td>
@@ -67,8 +67,8 @@ Technical report of this project: https://arxiv.org/abs/2103.00652
   <tr>
     <td>CSGM</td>
     <td>13.27</td>
-    <td>0.11</td>
-    <td>13.38</td>
+    <td>4.75</td>
+    <td>18.02</td>
   </tr>
 </tbody>
 </table>
