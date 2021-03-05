@@ -1,6 +1,6 @@
 Technical report of this project: https://arxiv.org/abs/2103.00652
 # Section 0: Benchmarking Scores
-![Benchmark scores](chart.pdf)
+![Benchmark scores](chart.svg)
 <table>
 <thead>
   <tr>
