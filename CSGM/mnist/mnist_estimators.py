@@ -4,9 +4,9 @@
 from sklearn.linear_model import OrthogonalMatchingPursuit
 import numpy as np
 import tensorflow.compat.v1 as tf
-import mnist.mnist_model_def as mnist_model_def
-from mnist.mnist_utils import save_image
-import utils
+import CSGM.mnist.mnist_model_def as mnist_model_def
+from CSGM.mnist.mnist_utils import save_image
+import CSGM.utils
 
 
 def lasso_estimator(hparams):  # pylint: disable = W0613

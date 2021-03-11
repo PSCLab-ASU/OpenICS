@@ -5,12 +5,12 @@ import copy
 import heapq
 import tensorflow.compat.v1 as tf
 import numpy as np
-import utils
+import CSGM.utils
 import scipy.fftpack as fftpack
 import pywt
 
-import celebA.celebA_model_def as celebA_model_def
-from celebA.celebA_utils import save_image
+import CSGM.celebA.celebA_model_def as celebA_model_def
+from CSGM.celebA.celebA_utils import save_image
 
 
 def dct2(image_channel):

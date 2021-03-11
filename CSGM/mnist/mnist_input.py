@@ -3,8 +3,8 @@
 import math
 import numpy as np
 import glob
-import dcgan.dcgan_utils as dcgan_utils
-import mnist.mnist_model_def as mnist_model_def
+import CSGM.dcgan.dcgan_utils as dcgan_utils
+import CSGM.mnist.mnist_model_def as mnist_model_def
 import tensorflow.compat.v1 as tf
 from tensorflow.examples.tutorials.mnist import input_data
 

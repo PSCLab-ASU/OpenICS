@@ -10,7 +10,7 @@ They come with the following license: https://github.com/carpedm20/DCGAN-tensorf
 """
 
 import tensorflow as tf
-import dcgan.ops as ops
+import CSGM.dcgan.ops as ops
 
 
 class Hparams(object):

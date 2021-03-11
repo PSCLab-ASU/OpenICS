@@ -1,9 +1,9 @@
 """Some utils for celebA dataset"""
 
 import png
-import dcgan.dcgan_utils as dcgan_utils 
+import CSGM.dcgan.dcgan_utils as dcgan_utils 
 import numpy as np
-import utils
+import CSGM.utils
 
 
 def display_transform(image):

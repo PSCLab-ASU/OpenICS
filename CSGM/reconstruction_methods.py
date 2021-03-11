@@ -2,9 +2,9 @@ import os
 from argparse import ArgumentParser
 from argparse import Namespace
 import numpy as np
-import utils
+import CSGM.utils
 import tensorflow.compat.v1 as tf
-import dcgan.dcgan_utils as dcgan_utils
+import CSGM.dcgan.dcgan_utils as dcgan_utils
 from glob import glob
 import time
 import scipy.misc
@@ -92,12 +92,12 @@ class csgm():
             )
             if HPARAMS.dataset == 'mnist':
                 HPARAMS.image_shape = (self.input_width, self.input_height, self.channels)
-                from mnist.mnist_utils import view_image, save_image
+                from CSGM.mnist.mnist_utils import view_image, save_image
                 self.view_image = view_image
                 self.save_image = save_image
             elif HPARAMS.dataset == 'celebA':
                 HPARAMS.image_shape = (self.input_width, self.input_height, self.channels)
-                from celebA.celebA_utils import view_image, save_image
+                from CSGM.celebA.celebA_utils import view_image, save_image
                 self.view_image = view_image
                 self.save_image = save_image
             else:
@@ -224,8 +224,8 @@ class csgm():
                 print('Consider rerunning lazily with a smaller batch size.')
         elif(stage =="training"):
             if (self.datasetname =="mnist"):
-                import mnist_vae.src.main as vae
-                import mnist_vae.src.model_def as vae_model_def
+                import CSGM.mnist_vae.src.main as vae
+                import CSGM.mnist_vae.src.model_def as vae_model_def
                 HPARAMS = vae_model_def.Hparams()
 
                 HPARAMS.num_samples = self.specifics["num-samples"]
@@ -241,7 +241,7 @@ class csgm():
                 HPARAMS.n_input = HPARAMS.input_size*HPARAMS.input_size
                 vae.main(HPARAMS)
             if (self.datasetname =="celebA"):
-                import dcgan.DCGANtensorflow.main as dcgan
+                import CSGM.dcgan.DCGANtensorflow.main as dcgan
                 flags = tf.app.flags
                 flags.DEFINE_integer("epoch", self.specifics['epoch'], "Epoch to train [25]")
                 flags.DEFINE_float("learning_rate", self.specifics['learning_rate'], "Learning rate of for adam [0.0002]")

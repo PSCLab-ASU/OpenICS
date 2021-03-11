@@ -3,7 +3,7 @@
 
 
 import tensorflow as tf
-import mnist_vae.src.utils as utils
+import CSGM.mnist_vae.utils as utils
 
 class Hparams(object):
     def __init__(self):

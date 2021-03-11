@@ -4,9 +4,9 @@
 import os
 import numpy as np
 import tensorflow as tf
-import mnist_vae.src.utils as utils
-import mnist_vae.src.model_def as model_def
-import mnist_vae.src.data_input as data_input
+import CSGM.mnist_vae.src.utils as utils
+import CSGM.mnist_vae.src.model_def as model_def
+import CSGM.mnist_vae.src.data_input as data_input
 
 
 def main(hparams):

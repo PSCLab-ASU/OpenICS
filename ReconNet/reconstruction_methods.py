@@ -5,7 +5,7 @@ import os
 import time
 import numpy as np
 
-import utils as u
+import ReconNet.utils as u
 
 model_ext = '.rnet'
 best_model_name = 'best_model' + model_ext

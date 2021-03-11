@@ -1,6 +1,6 @@
 # Get input
 import glob
-import dcgan.dcgan_utils as dcgan_utils
+import CSGM.dcgan.dcgan_utils as dcgan_utils
 from tensorflow.examples.tutorials.mnist import input_data
 import numpy as np
 def mnist_data(hparams, num_batches):

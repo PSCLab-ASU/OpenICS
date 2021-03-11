@@ -1,3 +1,8 @@
-*/.idea/
-*/models/*
-*/data/*
+*.DS_STORE
+.gitignore
+*.mex*
+*.asv
+*test_*
+results
+.vscode
+**/__pycache__

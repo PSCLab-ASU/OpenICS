@@ -1,6 +1,5 @@
-import reconstruction_methods as rms
-import utils
-import json
+import ISTANet.reconstruction_methods as rms
+import ISTANet.utils
 
 def main(sensing,reconstruction,stage,default,dataset,input_channel,input_width,input_height,m,n,specifics):
     if default==True:

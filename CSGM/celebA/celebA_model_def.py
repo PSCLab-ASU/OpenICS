@@ -15,7 +15,7 @@ import tensorflow.compat.v1 as tf
 
 #sys.path.append(os.path.join(os.path.dirname(__file__), '..')) #file has benn moved
 #from celebA_dcgan import model_def as celebA_dcgan_model_def #was moved
-import dcgan.model_def as celebA_dcgan_model_def 
+import CSGM.dcgan.model_def as celebA_dcgan_model_def 
 
 def dcgan_discrim(x_hat_batch, hparams):
 

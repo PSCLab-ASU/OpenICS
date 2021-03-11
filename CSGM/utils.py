@@ -5,11 +5,11 @@ import tensorflow.compat.v1 as tf
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-import mnist.mnist_estimators as mnist_estimators
-import celebA.celebA_estimators as celebA_estimators
+import CSGM.mnist.mnist_estimators as mnist_estimators
+import CSGM.celebA.celebA_estimators as celebA_estimators
 
 from sklearn.linear_model import Lasso
-from l1regls import l1regls
+from CSGM.l1regls import l1regls
 from cvxopt import matrix
 import skimage.measure as skim
 def compute_average_psnr(img,img_hat):
@@ -23,10 +23,10 @@ def compute_average_SSIM(img,img_hat):
 
 def generate_dataset(dataset,input_channel,input_width,input_height,stage):
     if dataset == 'mnist':
-            from mnist.mnist_input import model_input 
+            from CSGM.mnist.mnist_input import model_input 
             model_input = model_input
     elif dataset == 'celebA':
-            from celebA.celebA_input import model_input
+            from CSGM.celebA.celebA_input import model_input
             model_input = model_input
     else:
         raise NotImplementedError
