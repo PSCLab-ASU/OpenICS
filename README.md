@@ -112,12 +112,12 @@ More details about how scores are calculated and the benchmarking results may be
 #### Data-driven using Python
 To run the methods in Python, you may either modify the `main.py` file in each method's folder and run `python main.py`, or call it from another file and pass in custom arguments. Details about the specifics parameter may be found in each method's folder, and will require modification to properly work with different file structures. Note that the correct conda environment must be active for it to function properly.
 
-Pre-trained models for each data-driven method may be downloaded from [this link](https://www.dropbox.com/sh/1xtinomj8s1pn4b/AAB7AtjRnE8o7ceXpben1gT3a?dl=0). <!--ADD IN GOOGLE DRIVE LINK TO PRETRAINED MODELS-->
+Pre-trained models for each data-driven method may be downloaded from [this link](https://drive.google.com/drive/folders/15ibWTYwSrTiQwE0glrz0EBzXuiK7JS5s?usp=sharing). <!--ADD IN GOOGLE DRIVE LINK TO PRETRAINED MODELS-->
 
 #### Model-based using Matlab
 To run the methods in Matlab, you may either modify the `demo.m` file in the framework root directory and run it in Matlab, or call the `main.m` function from another file and pass in custom arguments. Details about the specifics parameter may be found in each method's folder. Note that `set_up.m` must be ran in each new session for it to function properly.
 
-The data used for benchmarking every method may be downloaded from [this link](https://www.dropbox.com/sh/1xtinomj8s1pn4b/AAB7AtjRnE8o7ceXpben1gT3a?dl=0). <!--ADD IN GOOGLE DRIVE LINK TO DATA-->
+The data used for benchmarking every method may be downloaded from [this link](https://drive.google.com/drive/folders/15ibWTYwSrTiQwE0glrz0EBzXuiK7JS5s?usp=sharing). <!--ADD IN GOOGLE DRIVE LINK TO DATA-->
 
 # Section 2: Parameters
 
