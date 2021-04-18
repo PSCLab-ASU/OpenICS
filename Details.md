@@ -1163,187 +1163,187 @@ Reconstruction time is in images per second.
     <td rowspan="30">ReconNet</td>
     <td rowspan="5">MNIST</td>
     <td>2</td>
-    <td>32.261</td>
-    <td>0.972</td>
+    <td>38.471</td>
+    <td>0.985</td>
     <td>723.5890</td>
   </tr>
   <tr>
     <td>4</td>
-    <td>29.206</td>
-    <td>0.950</td>
+    <td>32.228</td>
+    <td>0.984</td>
     <td>874.8906</td>
   </tr>
   <tr>
     <td>8</td>
-    <td>26.096</td>
-    <td>0.935</td>
+    <td>27.558</td>
+    <td>0.933</td>
     <td>848.8964</td>
   </tr>
   <tr>
     <td>16</td>
-    <td>22.985</td>
-    <td>0.858</td>
+    <td>23.860</td>
+    <td>0.914</td>
     <td>688.7052</td>
   </tr>
   <tr>
     <td>32</td>
-    <td>19.731</td>
-    <td>0.760</td>
+    <td>20.259</td>
+    <td>0.821</td>
     <td>712.2507</td>
   </tr>
   <tr>
     <td rowspan="5">CelebA</td>
     <td>2</td>
-    <td>31.147</td>
-    <td>0.929</td>
+    <td>33.390</td>
+    <td>0.954</td>
     <td>604.5949</td>
   </tr>
   <tr>
     <td>4</td>
-    <td>28.221</td>
-    <td>0.879</td>
+    <td>28.623</td>
+    <td>0.889</td>
     <td>621.8905</td>
   </tr>
   <tr>
     <td>8</td>
-    <td>25.431</td>
-    <td>0.807</td>
+    <td>25.595</td>
+    <td>0.812</td>
     <td>611.2469</td>
   </tr>
   <tr>
     <td>16</td>
-    <td>23.089</td>
-    <td>0.720</td>
+    <td>23.115</td>
+    <td>0.722</td>
     <td>791.1392</td>
   </tr>
   <tr>
     <td>32</td>
-    <td>21.079</td>
-    <td>0.635</td>
+    <td>21.065</td>
+    <td>0.634</td>
     <td>623.0530</td>
   </tr>
   <tr>
     <td rowspan="5">CIFAR10</td>
     <td>2</td>
-    <td>28.838</td>
-    <td>0.925</td>
+    <td>30.494</td>
+    <td>0.945</td>
     <td>552.1811</td>
   </tr>
   <tr>
     <td>4</td>
-    <td>25.025</td>
-    <td>0.835</td>
+    <td>25.468</td>
+    <td>0.847</td>
     <td>744.6016</td>
   </tr>
   <tr>
     <td>8</td>
-    <td>21.819</td>
-    <td>0.696</td>
+    <td>22.274</td>
+    <td>0.719</td>
     <td>807.1025</td>
   </tr>
   <tr>
     <td>16</td>
-    <td>19.688</td>
-    <td>0.556</td>
+    <td>19.836</td>
+    <td>0.570</td>
     <td>708.2153</td>
   </tr>
   <tr>
     <td>32</td>
-    <td>17.885</td>
-    <td>0.420</td>
+    <td>17.957</td>
+    <td>0.430</td>
     <td>777.6050</td>
   </tr>
   <tr>
     <td rowspan="5">CIFAR10 Gray</td>
     <td>2</td>
-    <td>28.977</td>
-    <td>0.926</td>
+    <td>30.662</td>
+    <td>0.946</td>
     <td>683.0601</td>
   </tr>
   <tr>
     <td>4</td>
-    <td>25.306</td>
-    <td>0.838</td>
+    <td>25.466</td>
+    <td>0.842</td>
     <td>689.6552</td>
   </tr>
   <tr>
     <td>8</td>
-    <td>22.079</td>
-    <td>0.698</td>
+    <td>22.584</td>
+    <td>0.723</td>
     <td>802.5682</td>
   </tr>
   <tr>
     <td>16</td>
-    <td>19.853</td>
-    <td>0.556</td>
+    <td>20.080</td>
+    <td>0.571</td>
     <td>736.9197</td>
   </tr>
   <tr>
     <td>32</td>
-    <td>18.131</td>
-    <td>0.418</td>
+    <td>18.264</td>
+    <td>0.433</td>
     <td>803.8585</td>
   </tr>
   <tr>
     <td rowspan="5">Bigset</td>
     <td>2</td>
-    <td>31.407</td>
-    <td>0.861</td>
+    <td>32.544</td>
+    <td>0.873</td>
     <td>798.7220</td>
   </tr>
   <tr>
     <td>4</td>
-    <td>28.871</td>
-    <td>0.781</td>
+    <td>28.862</td>
+    <td>0.782</td>
     <td>805.1530</td>
   </tr>
   <tr>
     <td>8</td>
-    <td>26.970</td>
-    <td>0.703</td>
+    <td>26.872</td>
+    <td>0.705</td>
     <td>772.7975</td>
   </tr>
   <tr>
     <td>16</td>
-    <td>24.779</td>
-    <td>0.615</td>
+    <td>24.945</td>
+    <td>0.618</td>
     <td>655.3080</td>
   </tr>
   <tr>
     <td>32</td>
-    <td>23.041</td>
-    <td>0.538</td>
+    <td>23.377</td>
+    <td>0.556</td>
     <td>661.3757</td>
   </tr>
   <tr>
     <td rowspan="5">Bigset Gray</td>
     <td>2</td>
-    <td>32.844</td>
-    <td>0.887</td>
+    <td>34.356</td>
+    <td>0.911</td>
     <td>566.5722</td>
   </tr>
   <tr>
     <td>4</td>
-    <td>30.513</td>
-    <td>0.823</td>
+    <td>31.002</td>
+    <td>0.832</td>
     <td>796.8127</td>
   </tr>
   <tr>
     <td>8</td>
-    <td>27.993</td>
-    <td>0.736</td>
+    <td>28.232</td>
+    <td>0.742</td>
     <td>712.2507</td>
   </tr>
   <tr>
     <td>16</td>
-    <td>26.045</td>
-    <td>0.657</td>
+    <td>26.024</td>
+    <td>0.653</td>
     <td>662.6905</td>
   </tr>
   <tr>
     <td>32</td>
-    <td>23.929</td>
-    <td>0.566</td>
+    <td>24.000</td>
+    <td>0.569</td>
     <td>696.3788</td>
   </tr>
 </tbody>
