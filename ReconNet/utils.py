@@ -122,7 +122,7 @@ class random_sensing(nn.Module):
         self.height=height
         self.s = nn.Linear(width * height, self.m, bias=False)
         # orthogonalized gaussian matrix initialization
-        self.s.weight.data = torch.from_numpy(orth(np.random.normal(size=(self.m, width * height)).astype(np.float32)))
+        self.s.weight.data = torch.from_numpy(orth(np.random.normal(size=(width * height, width * height)).astype(np.float32))[:m])
             
     def forward(self,x):
         ms = []
