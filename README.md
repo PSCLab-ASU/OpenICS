@@ -19,9 +19,9 @@ Technical report of this project: https://arxiv.org/abs/2103.00652
   </tr>
   <tr>
     <td>ReconNet</td>
-    <td>18.78</td>
+    <td>19.15</td>
     <td>37.00</td>
-    <td>55.78</td>
+    <td>56.15</td>
   </tr>
   <tr>
     <td>Learned DAMP</td>
