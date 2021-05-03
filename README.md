@@ -105,11 +105,11 @@ Pytorch methods include: ReconNet, LAPRAN, ISTANet, and CSGAN.
 Tensorflow methods include: LDAMP and CSGM.
 The corresponding environment must be activated for these methods to run.
 
-### Model-based using Matlab:
+### Model-based using MATLAB:
 Launch MATLAB and use the command window to run the following commands:<br>
-`cd \<path to CS-Framework directory\>`<br>
+`cd \<path to OpenICS directory\>`<br>
 `run set_up.m`<br>
-Note that MATLAB is not included in the Docker image due to it being licensed software. You will need to install it separately.
+Note that MATLAB is not included in the Docker image due to it being licensed software. You will need to install it separately and run methods outside of the container.
 
 ### Using the framework:
 #### Data-driven using Python
