@@ -13,8 +13,8 @@ run set_up.m;
 % the +TVAL3 directory, reconstruction_method should be 'TVAL3.reconstruction_tval3'
 % Methods implemented in Python CANNOT be called from here. MATLAB methods
 % have a '+' character appended to the beginning of their directory names.
-reconstruction_method = 'TVAL3.reconstruction_tval3';
-sensing_method = 'TVAL3.sensing_walsh_hadamard';
+reconstruction_method = 'TVAL3_reconstruction_tval3';
+sensing_method = 'TVAL3_sensing_walsh_hadamard';
 
 % Reconstruction parameters
 specifics = struct;
@@ -50,4 +50,4 @@ end
 % Main execution
 [x,x_hat,metrics] = main(sensing_method,reconstruction_method,false,img_path,input_channel,input_width,input_height,m,n,specifics);
 imshow([x, x_hat]); % Display images side by side
-fprintf("Reconstruction PSNR: %.2f, SSIM: %.4f\n", metrics.psnr(end), metrics.ssim(end));
+fprintf('Reconstruction PSNR: %.2f, SSIM: %.4f\n', metrics.psnr(end), metrics.ssim(end));

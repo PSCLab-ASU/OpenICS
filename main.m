@@ -28,8 +28,8 @@
 %
 
 function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_channel,input_width,input_height,m,n,specifics)
-    package_name = split(reconstruction, '.');
+    package_name = strsplit(reconstruction, '_');
     package_name = package_name{1};
-    main_handle = str2func([package_name, '.', 'main']);
+    main_handle = str2func(char([package_name, '_', 'main']));
     [x,x_hat,metrics] = main_handle(sensing,reconstruction,default,img_path,input_channel,input_width,input_height,m,n,specifics);
 end
