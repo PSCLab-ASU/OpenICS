@@ -87,6 +87,7 @@ There are two ways to set up the environment for the framework, one using Docker
 Ensure that Docker is installed. Then, follow these steps:
 1. Run `docker build . -t OpenICS` to build the Docker image
 2. Run `docker run -it --gpus all --name OpenICS OpenICS` to start a Docker container with the previous image. The `--gpus all` tag may be replaced with whichever gpus you would like the container to have access to, or removed entirely to run only on the CPU.
+
 After following the above steps, you should have an interactive prompt where you can execute or edit code.<br>
 To copy data or models to the container, run the following command:<br>
 `docker cp {SOURCE PATH} OpenICS:{DESTINATION PATH}` where `{SOURCE PATH}` is the path to the data or models on your machine, and `{DESTINATION PATH}` is the desired path in the container. This command can also be used to copy data out of the container by reversing the arguments.<br>
