@@ -1,8 +1,8 @@
 import CSGM.reconstruction_methods as rms
-import CSGM.utils
+import CSGM.utils as utils
 import CSGM.sensing_methods as sms
 import numpy as np
-import CSGM.presets
+import CSGM.presets as presets
 def main(reconstruction,sensing,stage,default,dataset,input_channel,input_width,input_height,m,n,specifics):
     if default=="True":
         sensing = "gaussian"

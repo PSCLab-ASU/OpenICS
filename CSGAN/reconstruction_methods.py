@@ -4,7 +4,7 @@ import math
 import numpy
 from torch import nn
 import torch.optim as optim
-import CSGAN.utils
+import CSGAN.utils as utils
 from PIL import Image
 from numpy.random import randn
 import os

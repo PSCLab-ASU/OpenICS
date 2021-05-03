@@ -1,5 +1,5 @@
 import ReconNet.reconstruction_methods as rms
-import ReconNet.utils
+import ReconNet.utils as utils
 import ReconNet.sensing_method as sms
 
 custom_specifics = {

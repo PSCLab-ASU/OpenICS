@@ -7,8 +7,8 @@ import time
 import matplotlib.pyplot as plt
 from skimage.measure import compare_ssim as ssim
 import random
-import LDAMP.sensing_methods
-import LDAMP.utils
+import LDAMP.sensing_methods as sensing_methods
+import LDAMP.utils as utils
 import os
 os.environ["CUDA_VISIBLE_DEVICES"]='0'
 def reconstruction_method(dset,sensing_method,specifics):

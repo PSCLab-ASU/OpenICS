@@ -5,7 +5,7 @@ import copy
 import heapq
 import tensorflow.compat.v1 as tf
 import numpy as np
-import CSGM.utils
+import CSGM.utils as utils
 import scipy.fftpack as fftpack
 import pywt
 

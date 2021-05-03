@@ -1,5 +1,5 @@
-import ISTANet.sensing_methods
-import ISTANet.utils
+import ISTANet.sensing_methods as sensing_methods
+import ISTANet.utils as utils
 
 import torch
 import torch.nn as nn

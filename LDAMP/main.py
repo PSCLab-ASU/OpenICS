@@ -4,7 +4,7 @@
 import tensorflow as tf
 import numpy as np
 import LDAMP.reconstruction_methods as rms
-import LDAMP.utils
+import LDAMP.utils as utils
 import LDAMP.sensing_methods as sms
 import os
 os.environ["CUDA_VISIBLE_DEVICES"]='0'

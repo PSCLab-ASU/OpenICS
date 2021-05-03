@@ -6,7 +6,7 @@ import numpy as np
 import tensorflow.compat.v1 as tf
 import CSGM.mnist.mnist_model_def as mnist_model_def
 from CSGM.mnist.mnist_utils import save_image
-import CSGM.utils
+import CSGM.utils as utils
 
 
 def lasso_estimator(hparams):  # pylint: disable = W0613

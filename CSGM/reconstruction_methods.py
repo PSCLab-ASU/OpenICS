@@ -2,7 +2,7 @@ import os
 from argparse import ArgumentParser
 from argparse import Namespace
 import numpy as np
-import CSGM.utils
+import CSGM.utils as utils
 import tensorflow.compat.v1 as tf
 import CSGM.dcgan.dcgan_utils as dcgan_utils
 from glob import glob

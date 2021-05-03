@@ -10,7 +10,7 @@ import skimage
 from numpy.random import randn
 import torchvision.utils as vutils
 import torch.optim as optim
-import LAPRAN.utils
+import LAPRAN.utils as utils
 import math
 import time
 def reconstruction_method(reconstruction,input_channel, input_width, input_height, m, n, specifics):

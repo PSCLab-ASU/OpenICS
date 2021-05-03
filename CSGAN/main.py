@@ -1,6 +1,6 @@
 import torch
 import CSGAN.reconstruction_methods as rms
-import CSGAN.utils
+import CSGAN.utils as utils
 import CSGAN.sensing_methods as sms
 import numpy as np
 

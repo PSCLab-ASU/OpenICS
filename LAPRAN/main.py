@@ -1,5 +1,5 @@
 import LAPRAN.reconstruction_methods as rms
-import LAPRAN.utils
+import LAPRAN.utils as utils
 import LAPRAN.sensing_methods as sms
 import argparse
 testSpecifics = {
