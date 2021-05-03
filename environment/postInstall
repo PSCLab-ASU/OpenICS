@@ -2,5 +2,5 @@
 set -ex
 
 # create conda envs
-conda env create -f CS_Framework_pytorch.yml
-conda env create -f CS_Framework_tensorflow.yml
+conda env create -f OpenICS_Pytorch.yml
+conda env create -f OpenICS_Tensorflow.yml

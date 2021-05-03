@@ -95,11 +95,11 @@ The `nano` editor comes installed with the container, so files may be modified u
 
 #### Using Local Machine
 Ensure that conda is installed. Then, navigate to the `environment` directory and run the following two commands:<br>
-`conda env create -f CS_Framework_pytorch.yml`<br>
-`conda env create -f CS_Framework_tensorflow.yml`<br>
+`conda env create -f OpenICS_Pytorch.yml`<br>
+`conda env create -f OpenICS_Tensorflow.yml`<br>
 
 #### Further Considerations
-Both these approaches will create conda environments `CS_Framework_Pytorch` for Pytorch methods, and `CS_Framework_Tensorflow` for Tensorflow methods.
+Both these approaches will create conda environments `OpenICS_Pytorch` for Pytorch methods, and `OpenICS_Tensorflow` for Tensorflow methods.
 To active either, run `conda activate {ENV NAME}` where `{ENV NAME}` is the name of the conda environment.
 Pytorch methods include: ReconNet, LAPRAN, ISTANet, and CSGAN.
 Tensorflow methods include: LDAMP and CSGM.

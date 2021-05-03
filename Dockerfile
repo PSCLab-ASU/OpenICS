@@ -4,8 +4,8 @@ RUN mkdir /code
 
 COPY ./ /code/
 
-COPY ./environment/CS_Framework_pytorch.yml /
-COPY ./environment/CS_Framework_tensorflow.yml /
+COPY ./environment/OpenICS_Pytorch.yml /
+COPY ./environment/OpenICS_Tensorflow.yml /
 COPY ./environment/postInstall /
 
 RUN chmod +x /postInstall
