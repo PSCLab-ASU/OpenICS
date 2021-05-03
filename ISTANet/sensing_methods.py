@@ -8,8 +8,18 @@ def sensing_method(method_name,specifics):
 
 def computInitMx(Training_labels, specifics):
     if(specifics['use_universal_matrix'] == True):
-        Phi_input, Qinit = computInitMxScratch(Training_labels, specifics)
-        return Phi_input, Qinit
+        save_path = f"{specifics['qinit_dir']}/{specifics['custom_dataset_name']}_{specifics['cs_ratio']}/"
+        phi_path = os.path.join(save_path, 'Phi_input.npy')
+        qinit_path = os.path.join(save_path, 'Qinit.npy')
+        scratch = specifics['load_qinit_from_dir'] if 'load_qinit_from_dir' in specifics else False
+        if not scratch and os.path.exists(save_path) and os.path.exists(phi_path) and os.path.exists(qinit_path):
+            return np.load(phi_path), np.load(qinit_path)
+        else:
+            os.makedirs(save_path)
+            Phi_input, Qinit = computInitMxScratch(Training_labels, specifics)
+            np.save(phi_path, Phi_input)
+            np.save(qinit_path, Qinit)
+            return Phi_input, Qinit
 
     Phi_data_Name = './%s/phi_0_%d_1089.mat' % (specifics['matrix_dir'], specifics['cs_ratio'])
     Phi_data = sio.loadmat(Phi_data_Name)

@@ -201,6 +201,8 @@ class ISTANet_wrapper():
             # input_height = self.specifics['input_width']
             Training_labels = self.trainingLabels
             Phi_input, Qinit = sensing_methods.computInitMx(Training_labels=Training_labels, specifics=self.specifics)
+            print('computed fdot')
+            return
 
             Phi = torch.from_numpy(Phi_input).type(torch.FloatTensor)
             Phi = Phi.to(device)

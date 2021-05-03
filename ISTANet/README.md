@@ -33,8 +33,10 @@ specifics: (used to store variables conveniently and define new ones)<br />
 &nbsp;&nbsp;&nbsp;&nbsp;log_dir: local directory where the logs will be stored<br />
 &nbsp;&nbsp;&nbsp;&nbsp;data_dir: local directory where the training and testing data will be stored <br />
 &nbsp;&nbsp;&nbsp;&nbsp;result_dir: local directory where the reconstructed images go<br />
-&nbsp;&nbsp;&nbsp;&nbsp;matrix_dir: local directory where the sampling matrices go<br />
-&nbsp;&nbsp;&nbsp;&nbsp;use_universal_matrix: true if you want to create the sensing matrix from scratch<br />
+&nbsp;&nbsp;&nbsp;&nbsp;matrix_dir: local directory where the original paper's sampling matrices go<br />
+&nbsp;&nbsp;&nbsp;&nbsp;qinit_dir: local directory where the generated Qinit + Phi_input matrices go<br />
+&nbsp;&nbsp;&nbsp;&nbsp;use_universal_matrix: true if you want to create a sensing matrix rather than use the original paper's sensing matrices<br />
+&nbsp;&nbsp;&nbsp;&nbsp;load_qinit_from_dir: true if you want to load Phi / Qinit from the qinit_dir instead of generate completely from scratch<br />
 &nbsp;&nbsp;&nbsp;&nbsp;training_data_fileName: the name of the training data file<br />
 &nbsp;&nbsp;&nbsp;&nbsp;training_data_type: the type of the training data file<br />
 &nbsp;&nbsp;&nbsp;&nbsp;create_custom_dataset: true if you want to create a new dataset<br />
