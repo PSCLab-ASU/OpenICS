@@ -2,8 +2,8 @@
 
 import glob
 import numpy as np
-import dcgan.dcgan_utils as dcgan_utils
-import celebA.celebA_model_def as celebA_model_def
+import CSGM.dcgan.dcgan_utils as dcgan_utils
+import CSGM.celebA.celebA_model_def as celebA_model_def
 import tensorflow.compat.v1 as tf
 
 

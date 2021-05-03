@@ -3,7 +3,7 @@
 
 import png
 import numpy as np
-import utils
+import CSGM.utils
 
 
 def display_transform(image):

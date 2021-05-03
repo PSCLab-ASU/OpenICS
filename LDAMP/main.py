@@ -3,9 +3,9 @@
 # tf.disable_eager_execution()
 import tensorflow as tf
 import numpy as np
-import reconstruction_methods as rms
-import utils
-import sensing_methods as sms
+import LDAMP.reconstruction_methods as rms
+import LDAMP.utils
+import LDAMP.sensing_methods as sms
 import os
 os.environ["CUDA_VISIBLE_DEVICES"]='0'
 

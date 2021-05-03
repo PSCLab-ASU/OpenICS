@@ -1,6 +1,5 @@
-import torch
-import torchvision
-import utils as u
+import ReconNet.utils as u
+
 def sensing_method(method_name, n, m, input_width, input_height, input_channel):
     # a function which returns a sensing method with given parameters. a sensing method is a subclass of nn.Module
     if method_name.lower() == 'random':

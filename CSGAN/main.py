@@ -1,7 +1,7 @@
 import torch
-import reconstruction_methods as rms
-import utils
-import sensing_methods as sms
+import CSGAN.reconstruction_methods as rms
+import CSGAN.utils
+import CSGAN.sensing_methods as sms
 import numpy as np
 
 def main(reconstruction,sensing,stage,default,dataset,input_channel,input_width,input_height,m,n,specifics):

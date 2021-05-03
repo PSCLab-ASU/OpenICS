@@ -1,73 +1,75 @@
+Technical report of this project: https://arxiv.org/abs/2103.00652
 # Section 0: Benchmarking Scores
+![Benchmark scores](chart.svg)
 <table>
 <thead>
   <tr>
     <th>Method</th>
-    <th>Reconstruction Accuracy</th>
-    <th>Reconstruction Speed</th>
-    <th>Overall Score</th>
+    <th>Reconstruction Accuracy [0-50]</th>
+    <th>Reconstruction Speed [0-50]</th>
+    <th>Overall Score [0-100]</th>
   </tr>
 </thead>
 <tbody>
   <tr>
     <td>LAPRAN</td>
-    <td>66.24</td>
-    <td>99.94</td>
-    <td>81.22</td>
-  </tr>
-  <tr>
-    <td>Learned DAMP</td>
-    <td>65.21</td>
-    <td>98.24</td>
-    <td>79.89</td>
-  </tr>
-  <tr>
-    <td>CSGAN</td>
-    <td>57.03</td>
-    <td>99.29</td>
-    <td>75.81</td>
+    <td>23.60</td>
+    <td>34.69</td>
+    <td>58.30</td>
   </tr>
   <tr>
     <td>ReconNet</td>
-    <td>56.95</td>
-    <td>99.06</td>
-    <td>75.67</td>
+    <td>19.15</td>
+    <td>37.00</td>
+    <td>56.15</td>
+  </tr>
+  <tr>
+    <td>Learned DAMP</td>
+    <td>24.24</td>
+    <td>30.25</td>
+    <td>54.50</td>
+  </tr>
+  <tr>
+    <td>CSGAN</td>
+    <td>19.03</td>
+    <td>32.58</td>
+    <td>51.61</td>
   </tr>
   <tr>
     <td>ISTA-Net Plus</td>
-    <td>60.07</td>
-    <td>91.49</td>
-    <td>74.04</td>
+    <td>20.40</td>
+    <td>30.02</td>
+    <td>50.42</td>
   </tr>
   <tr>
     <td>TVAL3</td>
-    <td>56.46</td>
-    <td>43.63</td>
-    <td>50.76</td>
-  </tr>
-  <tr>
-    <td>TV</td>
-    <td>58.01</td>
-    <td>1.64</td>
-    <td>32.96</td>
-  </tr>
-  <tr>
-    <td>NLR-CS</td>
-    <td>59.27</td>
-    <td>0.01</td>
-    <td>32.93</td>
+    <td>18.92</td>
+    <td>18.43</td>
+    <td>37.35</td>
   </tr>
   <tr>
     <td>D-AMP</td>
-    <td>58.80</td>
-    <td>0.02</td>
-    <td>32.68</td>
+    <td>21.83</td>
+    <td>2.35</td>
+    <td>24.19</td>
+  </tr>
+  <tr>
+    <td>L1</td>
+    <td>19.69</td>
+    <td>3.78</td>
+    <td>23.46</td>
+  </tr>
+  <tr>
+    <td>NLR-CS</td>
+    <td>20.35</td>
+    <td>1.69</td>
+    <td>22.04</td>
   </tr>
   <tr>
     <td>CSGM</td>
-    <td>41.23</td>
-    <td>2.28</td>
-    <td>23.92</td>
+    <td>13.27</td>
+    <td>4.75</td>
+    <td>18.02</td>
   </tr>
 </tbody>
 </table>
@@ -112,12 +114,12 @@ Note that MATLAB is not included in the Docker image due to it being licensed so
 #### Data-driven using Python
 To run the methods in Python, you may either modify the `main.py` file in each method's folder and run `python main.py`, or call it from another file and pass in custom arguments. Details about the specifics parameter may be found in each method's folder, and will require modification to properly work with different file structures. Note that the correct conda environment must be active for it to function properly.
 
-Pre-trained models for each data-driven method may be downloaded from [this link](https://google.com). <!--ADD IN GOOGLE DRIVE LINK TO PRETRAINED MODELS-->
+Pre-trained models for each data-driven method may be downloaded from [this link](https://drive.google.com/drive/folders/15ibWTYwSrTiQwE0glrz0EBzXuiK7JS5s?usp=sharing). <!--ADD IN GOOGLE DRIVE LINK TO PRETRAINED MODELS-->
 
 #### Model-based using Matlab
 To run the methods in Matlab, you may either modify the `demo.m` file in the framework root directory and run it in Matlab, or call the `main.m` function from another file and pass in custom arguments. Details about the specifics parameter may be found in each method's folder. Note that `set_up.m` must be ran in each new session for it to function properly.
 
-The data used for benchmarking every method may be downloaded from [this link](https://google.com). <!--ADD IN GOOGLE DRIVE LINK TO DATA-->
+The data used for benchmarking every method may be downloaded from [this link](https://drive.google.com/drive/folders/15ibWTYwSrTiQwE0glrz0EBzXuiK7JS5s?usp=sharing). <!--ADD IN GOOGLE DRIVE LINK TO DATA-->
 
 # Section 2: Parameters
 

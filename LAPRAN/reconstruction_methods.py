@@ -1,6 +1,6 @@
 import torch
 import torchvision
-import lapgan_adaptiveCS_resnet as lapgan
+import LAPRAN.lapgan_adaptiveCS_resnet as lapgan
 import numpy as np
 import torch.nn as nn
 from torch.nn import init
@@ -10,7 +10,7 @@ import skimage
 from numpy.random import randn
 import torchvision.utils as vutils
 import torch.optim as optim
-import utils
+import LAPRAN.utils
 import math
 import time
 def reconstruction_method(reconstruction,input_channel, input_width, input_height, m, n, specifics):

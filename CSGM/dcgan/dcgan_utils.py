@@ -6,14 +6,10 @@ It comes with the following license: https://github.com/carpedm20/DCGAN-tensorfl
 
 
 import math
-import json
 import random
-import pprint
 import scipy.misc
 import numpy as np
 from time import gmtime, strftime
-
-pp = pprint.PrettyPrinter()
 
 get_stddev = lambda x, k_h, k_w: 1/math.sqrt(k_w*k_h*x.get_shape()[-1])
 

@@ -1,6 +1,6 @@
-import reconstruction_methods as rms
-import utils
-import sensing_method as sms
+import ReconNet.reconstruction_methods as rms
+import ReconNet.utils
+import ReconNet.sensing_method as sms
 
 custom_specifics = {
     'test-root': '/storage-t1/database/cs-framework-database/mnist/test',

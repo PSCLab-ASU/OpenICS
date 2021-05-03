@@ -1,8 +1,7 @@
 # L1-Magic Toolbox
-The L1-Magic toolbox implementation within the framework utilizes both the L1 and TV (Total Variation) methods from the [original code](https://statweb.stanford.edu/~candes/software/l1magic/).
+The L1-Magic toolbox implementation within the framework utilizes both the L1 and TV (Total Variation) methods from the [original code](https://statweb.stanford.edu/~candes/software/l1magic/). Unused files such as the examples, the notes folder, and the data folder have been removed from the source code.<br>
 Note that the L1 methods are generally ill-suited for image reconstruction, so the TV methods will likely perform better. However, TV methods only work with square images.
-Also, the sensing method *sensing_linemasked_uhp_fourier* generates a radial line mask, so *m* in this context should not be the measurement size of the vector, but the number of radial lines to draw. The actual size of the measurements is somewhat unpredictable.
-Unused files such as the examples, the notes folder, and the data folder have been removed from the source code.
+Additionally, the sensing method *sensing_linemasked_uhp_fourier* generates a radial line mask, so *m* in this context should not be the measurement size of the vector, but the number of radial lines to draw. The actual size of the measurements is somewhat unpredictable.
 
 # L1 Methods
 The L1 methods have four different implementations which it can run, which are specified under the 'constraint' parameter. These include:

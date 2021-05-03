@@ -13,6 +13,7 @@ import string
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.linalg import orth
 
 def generate_dataset(dataset,input_channel,input_width,input_height,stage,specifics):
     print("Creating dataset...")
@@ -120,6 +121,8 @@ class random_sensing(nn.Module):
         self.width=width
         self.height=height
         self.s = nn.Linear(width * height, self.m, bias=False)
+        # orthogonalized gaussian matrix initialization
+        self.s.weight.data = torch.from_numpy(orth(np.random.normal(size=(width * height, width * height)).astype(np.float32))[:m])
             
     def forward(self,x):
         ms = []

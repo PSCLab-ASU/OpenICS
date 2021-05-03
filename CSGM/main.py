@@ -1,13 +1,13 @@
-import reconstruction_methods as rms
-import utils
-import sensing_methods as sms
+import CSGM.reconstruction_methods as rms
+import CSGM.utils
+import CSGM.sensing_methods as sms
 import numpy as np
-import presets
+import CSGM.presets
 def main(reconstruction,sensing,stage,default,dataset,input_channel,input_width,input_height,m,n,specifics):
     if default=="True":
         sensing = "gaussian"
         reconstruction = "csgm"
-        stage = "training
+        stage = "training"
         dataset = dataset
         dataset = "mnist"
 

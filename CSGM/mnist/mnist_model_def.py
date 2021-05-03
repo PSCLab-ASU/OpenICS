@@ -6,8 +6,8 @@ import sys
 import tensorflow.compat.v1 as tf
 
 #sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from vae import model_def as mnist_vae_model_def
-from e2e.model_def import end_to_end
+from CSGM.vae import model_def as mnist_vae_model_def
+from CSGM.e2e.model_def import end_to_end
 
 
 def construct_gen(hparams, model_def):

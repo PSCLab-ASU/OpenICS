@@ -1,6 +1,6 @@
-import reconstruction_methods as rms
-import utils
-import sensing_methods as sms
+import LAPRAN.reconstruction_methods as rms
+import LAPRAN.utils
+import LAPRAN.sensing_methods as sms
 import argparse
 testSpecifics = {
             "model": 'adaptiveCS_resnet_wy_ifusion_ufirst', #The model to use. Currently only "adaptiveCS_resnet_wy_ifusion_ufirst" is supported
