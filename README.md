@@ -80,7 +80,7 @@ More details about how scores are calculated and the benchmarking results may be
 
 # Section 1: Setting up environments
 
-### Data-driven using conda:
+### Data-driven using Docker/conda:
 There are two ways to set up the environment for the framework, one using Docker, and one using your local machine.<br>
 
 #### Using Docker
