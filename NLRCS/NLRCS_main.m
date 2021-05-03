@@ -73,7 +73,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
     [~,data_name,extension_name] = fileparts(img_path);
     [A,At] = get_sensing_handles(sensing,input_channel,input_width,input_height,m,specifics);
     
-    if isfolder(img_path)
+    if isdir(img_path)
         folder = dir(img_path);
         % Remove any files that start with '.', usually invisible files
         dot_files = regexp({folder.name},'^\.');
@@ -100,7 +100,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         psnr = zeros(folder_size+1,1);
         ssim = zeros(folder_size+1,1);
         runtime = zeros(folder_size+1,1);
-        meta = strings(folder_size+1,1);
+        meta = repmat({''},folder_size+1,1);
         specifics_history = cell(folder_size,1);
         
         % Set number of workers to 0 (sequential) if unspecified
@@ -109,9 +109,9 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         end
         
         % Loop through directory
-        parfor (i = 1:folder_size, specifics.workers)
+        for i = 1:folder_size
             file = folder(i);
-            file_path = fullfile(file.folder, file.name);
+            file_path = fullfile(img_path, file.name);
             
             try
                 file_x=im2double(imread(file_path));
@@ -134,7 +134,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
             
             fprintf('Reconstructing %s\n', file.name);
             
-            if ~all(size(file_x,[1,2,3]) == [input_height,input_width,input_channel])
+            if size(file_x,1) ~= input_height || size(file_x,2) ~= input_width || size(file_x,3) ~= input_channel
                 error('ERROR: Image dimensions do not match input size!');
             end
             
@@ -142,7 +142,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
             psnr(i) = file_metrics.psnr;
             ssim(i) = file_metrics.ssim;
             runtime(i) = file_metrics.runtime;
-            meta(i) = file.name;
+            meta(i) = {file.name};
             
             if picks_saved(i) > 0
                 % save into array
@@ -162,7 +162,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         psnr(end) = sum(psnr(avg_entries)) / (nnz(avg_entries) - 1);
         ssim(end) = sum(ssim(avg_entries)) / (nnz(avg_entries) - 1);
         runtime(end) = sum(runtime(avg_entries)) / (nnz(avg_entries) - 1);
-        meta(end) = 'Average';
+        meta(end) = {'Average'};
         
         % Save to log file
         keyword = random_string(16);
@@ -171,7 +171,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         
         % Log all results in a loop
         for i = 1:folder_size+1
-            fprintf(log_file, '%s: PSNR: %.3f, SSIM: %.3f, Runtime: %.3f\n', meta(i), psnr(i), ssim(i), runtime(i));
+            fprintf(log_file, '%s: PSNR: %.3f, SSIM: %.3f, Runtime: %.3f\n', char(meta(i)), psnr(i), ssim(i), runtime(i));
         end
         
         metrics.psnr = psnr;
@@ -181,12 +181,12 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
     else
         x=im2double(imread(img_path)); % read image
         
-        if ~all(size(x,[1,2,3]) == [input_height,input_width,input_channel])
+        if size(x,1) ~= input_height || size(x,2) ~= input_width || size(x,3) ~= input_channel
             error('ERROR: Image dimensions do not match input size!');
         end
         
         [x_hat,metrics,specifics] = reconstruct(reconstruction,A,At,x,input_channel,input_width,input_height,specifics);
-        metrics.meta = string([data_name, extension_name]);
+        metrics.meta = strcat(data_name, extension_name);
         
         % Save to log file
         keyword = data_name;
@@ -208,7 +208,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
     fprintf(log_file, 'Specifics:\n');
     
     for i = 1:length(f)
-        fprintf(log_file, '\t%s: %s\n', f{i}, string(specifics.(f{i})));
+        fprintf(log_file, '\t%s: %s\n', f{i}, num2str(specifics.(f{i})));
     end
         
     fprintf(log_file, '\nTotal time elapsed: %.3f\n', etime(clock, total_time0));
@@ -342,7 +342,7 @@ function [x_hat,metrics,specifics] = reconstruct_tensor(reconstruction_method,A,
         [x_hat,specifics,runtime]=reconstruction_method(x, y, img_size, A, At, specifics); % apply reconstruction method
         metrics.runtime = runtime;
     else
-        disp("Slicing");
+        disp('Slicing');
         metrics.runtime = 0;
         img_size=[channel,specifics.slice_size]; % size vector ordered [c,w,h]
         x_sliced=imslice(x, channel, width, height, specifics.slice_size); % slice image into cell array
@@ -350,7 +350,7 @@ function [x_hat,metrics,specifics] = reconstruct_tensor(reconstruction_method,A,
         
         % iterate over each slice in cell array
         for i = 1:numel(x_sliced)
-            disp("On slice " + i);
+            disp('On slice ' + i);
             temp_x=x_sliced{i}; % turn slice from x into matrix
             y=A(temp_x(:)); % apply sensing to temp_x
             [temp_x_hat,specifics,runtime]=reconstruction_method(temp_x, y, img_size, A, At, specifics); % apply reconstruction method
@@ -424,7 +424,7 @@ function [log_file, bmp_file] = generate_results(method_name, data_name, keyword
 %
     result_dir = strcat('./results/', method_name, '/', data_name, '/');
     
-    if ~isfolder(result_dir)
+    if ~isdir(result_dir)
         mkdir(result_dir);
     end
     
