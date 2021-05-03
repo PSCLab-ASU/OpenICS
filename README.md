@@ -76,35 +76,37 @@ More details about how scores are calculated and the benchmarking results may be
 
 <br>
 
-# Section 1: Setting up environment
+# Section 1: Setting up environments
 
-### Data-driven using conda (PyTorch):
-`conda create -n CS_methods_environement python=3.7.9` </br>
-`conda activate CS_methods_environement`</br>
-</br>
-`conda install pytorch==1.6.0 torchvision cudatoolkit=10.1 -c pytorch`</br>
-`conda install opencv==3.4.2`</br>
-`conda install scikit-image==0.17.2`</br>
-`conda install pandas`</br>
- 
- ### Data-driven using conda (Tensorflow):
-`conda create -n CS_methods_environement python=3.7.9` </br>
-`conda activate CS_methods_environement`</br>
-</br>
-`conda install tensorflow-gpu=1.15 cudatoolkit=10.0`</br>
-`conda install opencv==3.4.2`</br>
-`conda install scikit-image==0.17.2`</br>
-`pip install pypng`</br>
-`pip install PyWavelets`</br>
-`pip install scipy==1.1.0`</br>
-`pip install matplotlib`</br>
-`pip install scikit-learn`</br>
-`pip install cvxopt`</br>
-`pip install Pillow`</br>
+### Data-driven using conda:
+There are two ways to set up the environment for the framework, one using Docker, and one using your local machine.<br>
+
+#### Using Docker
+Ensure that Docker is installed. Then, follow these steps:
+1. Run `docker build . -t OpenICS` to build the Docker image
+2. Run `docker run -it --gpus all --name OpenICS OpenICS` to start a Docker container with the previous image. The `--gpus all` tag may be replaced with whichever gpus you would like the container to have access to, or removed entirely to run only on the CPU.
+After following the above steps, you should have an interactive prompt where you can execute or edit code.<br>
+To copy data or models to the container, run the following command:<br>
+`docker cp {SOURCE PATH} OpenICS:{DESTINATION PATH}` where `{SOURCE PATH}` is the path to the data or models on your machine, and `{DESTINATION PATH}` is the desired path in the container. This command can also be used to copy data out of the container by reversing the arguments.<br>
+The `nano` editor comes installed with the container, so files may be modified using the `nano` command.<br>
+
+#### Using Local Machine
+Ensure that conda is installed. Then, navigate to the `environment` directory and run the following two commands:<br>
+`conda env create -f CS_Framework_pytorch.yml`<br>
+`conda env create -f CS_Framework_tensorflow.yml`<br>
+
+#### Further Considerations
+Both these approaches will create conda environments `CS_Framework_Pytorch` for Pytorch methods, and `CS_Framework_Tensorflow` for Tensorflow methods.
+To active either, run `conda activate {ENV NAME}` where `{ENV NAME}` is the name of the conda environment.
+Pytorch methods include: ReconNet, LAPRAN, ISTANet, and CSGAN.
+Tensorflow methods include: LDAMP and CSGM.
+The corresponding environment must be activated for these methods to run.
 
 ### Model-based using Matlab:
+Launch MATLAB and use the command window to run the following commands:<br>
 `cd \<path to CS-Framework directory\>`<br>
 `run set_up.m`<br>
+Note that MATLAB is not included in the Docker image due to it being licensed software. You will need to install it separately.
 
 ### Using the framework:
 #### Data-driven using Python

@@ -1,0 +1,6 @@
+#!/bin/bash
+set -ex
+
+# create conda envs
+conda env create -f CS_Framework_pytorch.yml
+conda env create -f CS_Framework_tensorflow.yml

@@ -1,0 +1,13 @@
+# MATLAB methods
++DAMP
++L1_magic
++NLRCS
++TVAL3
+main.m
+demo.m
+set_up.m
+
+# Metadata
+chart.svg
+Details.md
+README.md
