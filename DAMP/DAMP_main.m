@@ -234,7 +234,7 @@ function [A, At] = get_sensing_handles(sensing,channel,width,height,m,specifics)
 % specifics - Specific parameters for reconstruction
 %
     slicing = isfield(specifics, 'slice_size');
-    sensing = str2func(sensing);
+    sensing = str2func(char(sensing));
 
     if isfield(specifics, 'colored_reconstruction_mode') && strcmp(specifics.colored_reconstruction_mode,'channelwise')
         m = round(m / channel);
@@ -279,7 +279,7 @@ function [x_hat,metrics,specifics] = reconstruct(reconstruction,A,At,x,channel,w
 %
 % specifics - Any specific parameters for reconstruction.
 %
-    reconstruction_method = str2func(reconstruction);
+    reconstruction_method = str2func(char(reconstruction));
 
     % Reconstruction modes
     %   Regular - For DAMP reconstruction or single-channel images,
@@ -442,18 +442,18 @@ function sensing = default_sensing(reconstruction_method)
 %
 
     switch reconstruction_method
-        case 'TVAL3.reconstruction_tval3'
-            sensing = 'TVAL3.sensing_walsh_hadamard';
-        case 'NLRCS.reconstruction_nlr_cs'
-            sensing = 'NLRCS.sensing_scrambled_fourier';
-        case 'L1_magic.reconstruction_tv'
-            sensing = 'L1_magic.sensing_scrambled_fourier';
-        case 'L1_magic.reconstruction_l1'
-            sensing = 'L1_magic.sensing_uhp_fourier';
-        case 'DAMP.reconstruction_damp'
-            sensing = 'DAMP.sensing_gaussian_random_columnwise';
+        case 'TVAL3_reconstruction_tval3'
+            sensing = 'TVAL3_sensing_walsh_hadamard';
+        case 'NLRCS_reconstruction_nlr_cs'
+            sensing = 'NLRCS_sensing_scrambled_fourier';
+        case 'L1magic_reconstruction_tv'
+            sensing = 'L1magic_sensing_scrambled_fourier';
+        case 'L1magic_reconstruction_l1'
+            sensing = 'L1magic_sensing_uhp_fourier';
+        case 'DAMP_reconstruction_damp'
+            sensing = 'DAMP_sensing_gaussian_random_columnwise';
         otherwise
-            sensing = 'L1_magic.sensing_gaussian_random';
+            sensing = 'L1magic_sensing_gaussian_random';
     end
 
 end
