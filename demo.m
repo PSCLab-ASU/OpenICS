@@ -5,7 +5,7 @@
 %
 
 % Run setup
-run set_up.m;
+%run set_up.m;
 
 % To modify which methods are used for reconstruction/sensing, edit the two
 % variables below. The name of the method must match its file within the
@@ -29,10 +29,10 @@ specifics.colored_reconstruction_mode = 'channelwise';
 % The size of the images within the directory should all be the same.
 % Change input_channel, input_width, and input_height to the dimensions of
 % the images to reconstruct.
-img_path = fullfile(matlabroot, '/toolbox/images/imdata/cameraman.tif');
+img_path = '~/Downloads/imgs';
 input_channel = 1;
-input_width = 256;
-input_height = 256;
+input_width = 64;
+input_height = 64;
 
 % Sensing parameters
 % To modify the compression ratio, change ratio to the desired compression

@@ -100,7 +100,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         psnr = zeros(folder_size+1,1);
         ssim = zeros(folder_size+1,1);
         runtime = zeros(folder_size+1,1);
-        meta = strings(folder_size+1,1);
+        meta = repmat({''},folder_size+1,1);
         specifics_history = cell(folder_size,1);
         
         % Set number of workers to 0 (sequential) if unspecified
@@ -109,9 +109,9 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         end
         
         % Loop through directory
-        parfor (i = 1:folder_size, specifics.workers)
+        for i = 1:folder_size
             file = folder(i);
-            file_path = fullfile(file.folder, file.name);
+            file_path = fullfile(img_path, file.name);
             
             try
                 file_x=im2double(imread(file_path));
@@ -142,7 +142,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
             psnr(i) = file_metrics.psnr;
             ssim(i) = file_metrics.ssim;
             runtime(i) = file_metrics.runtime;
-            meta(i) = file.name;
+            meta(i) = {file.name};
             
             if picks_saved(i) > 0
                 % save into array
@@ -162,7 +162,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         psnr(end) = sum(psnr(avg_entries)) / (nnz(avg_entries) - 1);
         ssim(end) = sum(ssim(avg_entries)) / (nnz(avg_entries) - 1);
         runtime(end) = sum(runtime(avg_entries)) / (nnz(avg_entries) - 1);
-        meta(end) = 'Average';
+        meta(end) = {'Average'};
         
         % Save to log file
         keyword = random_string(16);
@@ -171,7 +171,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
         
         % Log all results in a loop
         for i = 1:folder_size+1
-            fprintf(log_file, '%s: PSNR: %.3f, SSIM: %.3f, Runtime: %.3f\n', meta(i), psnr(i), ssim(i), runtime(i));
+            fprintf(log_file, '%s: PSNR: %.3f, SSIM: %.3f, Runtime: %.3f\n', char(meta(i)), psnr(i), ssim(i), runtime(i));
         end
         
         metrics.psnr = psnr;
@@ -208,7 +208,7 @@ function [x,x_hat,metrics] = main(sensing,reconstruction,default,img_path,input_
     fprintf(log_file, 'Specifics:\n');
     
     for i = 1:length(f)
-        fprintf(log_file, '\t%s: %s\n', f{i}, specifics.(f{i}));
+        fprintf(log_file, '\t%s: %s\n', f{i}, num2str(specifics.(f{i})));
     end
         
     fprintf(log_file, '\nTotal time elapsed: %.3f\n', etime(clock, total_time0));
