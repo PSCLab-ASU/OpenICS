@@ -11,7 +11,7 @@ def computInitMx(Training_labels, specifics):
         save_path = f"{specifics['qinit_dir']}/{specifics['custom_dataset_name']}_{specifics['cs_ratio']}/"
         phi_path = os.path.join(save_path, 'Phi_input.npy')
         qinit_path = os.path.join(save_path, 'Qinit.npy')
-        scratch = specifics['load_qinit_from_dir'] if 'load_qinit_from_dir' in specifics else False
+        scratch = (not specifics['load_qinit_from_dir']) if 'load_qinit_from_dir' in specifics else False
         if not scratch and os.path.exists(save_path) and os.path.exists(phi_path) and os.path.exists(qinit_path):
             return np.load(phi_path), np.load(qinit_path)
         else:
