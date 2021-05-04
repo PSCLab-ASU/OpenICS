@@ -95,6 +95,7 @@ if __name__ == "__main__":
             'data_dir': 'data',
             'result_dir': 'result',
             'matrix_dir': 'sampling_matrix',
+            'qinit_dir': 'qinits',
 
             # Typically keep True
             # (set to False to use original paper's preloaded matrices which only supports imgs 33x33)
