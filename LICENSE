@@ -1,6 +1,5 @@
 OpenICS uses different licenses for different components/files of the framework. In specific, 
 For following files:
-
 /chart.svg
 /demo.m
 /Details.md
@@ -48,10 +47,9 @@ For following files:
 /+TVAL3/reconstruction_tval3.m
 /+TVAL3/sensing_gaussian_random.m
 /+TVAL3/set_up.m
+Creative Commons Zero v1.0 universal license is applied as shown at the end of this file. 
 
-Creative Commons Zero v1.0 universal is applied as shown at the end of this file. 
-
-For other files, the license is described in the "LICNESE" file which resides in the corresponding top level subdirectory. For instance, for file "/+L1_magic/l1magic/Optimization/tvdantzig_logbarrier.m", the license in "/+L1_magic/LICENSE" is applied. 
+For all the rest of the files, the license is described in the "LICNESE" file which resides in the corresponding top level subdirectory. For instance, for file "/+L1_magic/l1magic/Optimization/tvdantzig_logbarrier.m", the license in "/+L1_magic/LICENSE" is applied. 
 
 Creative Commons Legal Code
 
