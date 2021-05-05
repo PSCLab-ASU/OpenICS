@@ -1,53 +1,57 @@
-This license applies to the following files:
-chart.svg
-demo.m
-Details.md
-main.m
-README.md
-set_up.m
-CSGAN/README.md
-CSGAN/__init__.py
-CSGAN/main.py
-CSGAN/reconstruction_methods.py
-CSGAN/utils.py
-CSGM/readme.md
-CSGM/__init__.py
-CSGM/main.py
-CSGM/presets.py
-CSGM/sensing_methods.py
-ISTANet/README.md
-ISTANet/__init__.py
-ISTANet/main.py
-LAPRAN/README.md
-LAPRAN/__init__.py
-LAPRAN/main.py
-LAPRAN/sensing_methods.py
-LDAMP/README.md
-LDAMP/__init__.py
-LDAMP/main.py
-ReconNet/README.md
-ReconNet/__init__.py
-ReconNet/main.py
-ReconNet/reconstruction_methods.py
-ReconNet/sensing_method.py
-+DAMP/main.m
-+DAMP/reconstruction_damp.m
-+DAMP/sensing_gaussian_random.m
-+L1_magic/main.m
-+L1_magic/reconstruction_l1.m
-+L1_magic/reconstruction_tv.m
-+L1_magic/sensing_gaussian_random.m
-+L1_magic/set_up.m
-+NLRCS/main.m
-+NLRCS/reconstruction_nlr_cs.m
-+NLRCS/sensing_gaussian_random.m
-+NLRCS/set_up.m
-+TVAL3/main.m
-+TVAL3/reconstruction_tval3.m
-+TVAL3/sensing_gaussian_random.m
-+TVAL3/set_up.m
+OpenICS uses different licenses for different components/files of the framework. In specific, 
+For following files:
 
-For other files, please refer to the license corresponding to each folder.
+/chart.svg
+/demo.m
+/Details.md
+/main.m
+/README.md
+/set_up.m
+/CSGAN/README.md
+/CSGAN/__init__.py
+/CSGAN/main.py
+/CSGAN/reconstruction_methods.py
+/CSGAN/utils.py
+/CSGM/readme.md
+/CSGM/__init__.py
+/CSGM/main.py
+/CSGM/presets.py
+/CSGM/sensing_methods.py
+/ISTANet/README.md
+/ISTANet/__init__.py
+/ISTANet/main.py
+/LAPRAN/README.md
+/LAPRAN/__init__.py
+/LAPRAN/main.py
+/LAPRAN/sensing_methods.py
+/LDAMP/README.md
+/LDAMP/__init__.py
+/LDAMP/main.py
+/ReconNet/README.md
+/ReconNet/__init__.py
+/ReconNet/main.py
+/ReconNet/reconstruction_methods.py
+/ReconNet/sensing_method.py
+/+DAMP/main.m
+/+DAMP/reconstruction_damp.m
+/+DAMP/sensing_gaussian_random.m
+/+L1_magic/main.m
+/+L1_magic/reconstruction_l1.m
+/+L1_magic/reconstruction_tv.m
+/+L1_magic/sensing_gaussian_random.m
+/+L1_magic/set_up.m
+/+NLRCS/main.m
+/+NLRCS/reconstruction_nlr_cs.m
+/+NLRCS/sensing_gaussian_random.m
+/+NLRCS/set_up.m
+/+TVAL3/main.m
+/+TVAL3/reconstruction_tval3.m
+/+TVAL3/sensing_gaussian_random.m
+/+TVAL3/set_up.m
+
+Creative Commons Zero v1.0 universal is applied as shown at the end of this file. 
+
+For other files, the license is described in the "LICNESE" file which resides in the corresponding top level subdirectory. For instance, for file "/+L1_magic/l1magic/Optimization/tvdantzig_logbarrier.m", the license in "/+L1_magic/LICENSE" is applied. 
 
 Creative Commons Legal Code
 
@@ -170,3 +174,4 @@ express Statement of Purpose.
  d. Affirmer understands and acknowledges that Creative Commons is not a
     party to this document and has no duty or obligation with respect to
     this CC0 or use of the Work.
+ 
