@@ -1,6 +1,6 @@
 # ReconNet
 ### Description
-The ReconNet implementation within the framework is based off the original method described in this [paper](https://arxiv.org/pdf/1601.06892.pdf).
+The ReconNet implementation within the framework is based off the original method described in this [paper](https://arxiv.org/pdf/1601.06892.pdf) and implemented in this [repository](https://github.com/Chinmayrane16/ReconNet-PyTorch/blob/master/model.py).
 
 The method may be directly ran by modifying and calling `main.py`, which contains the specifics at the top of the file and other parameters at the bottom. Otherwise, the method may be ran by calling the main function from another file and passing in custom arguments.
 
