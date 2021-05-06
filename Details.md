@@ -143,187 +143,187 @@ Reconstruction time is in images per second.
     <td rowspan="30">LDAMP<br>Layer-by-Layer</td>
     <td rowspan="5">MNIST</td>
     <td>2</td>
-    <td>48</td>
-    <td>0.9999</td>
+    <td>47.9998</td>
+    <td>0.9997</td>
     <td>27.5482</td>
   </tr>
   <tr>
     <td>4</td>
-    <td>47.2738</td>
-    <td>0.9997</td>
+    <td>47.5808</td>
+    <td>0.9994</td>
     <td>34.6021</td>
   </tr>
   <tr>
     <td>8</td>
-    <td>30.4165</td>
-    <td>0.9704</td>
+    <td>39.8992</td>
+    <td>0.9965</td>
     <td>34.9650</td>
   </tr>
   <tr>
     <td>16</td>
-    <td>24.7801</td>
-    <td>0.9287</td>
+    <td>30.8985</td>
+    <td>0.9751</td>
     <td>34.7222</td>
   </tr>
   <tr>
     <td>32</td>
-    <td>14.0546</td>
-    <td>0.5527</td>
+    <td>16.2898</td>
+    <td>0.5901</td>
     <td>34.3643</td>
   </tr>
   <tr>
     <td rowspan="5">CelebA</td>
     <td>2</td>
-    <td>40.5767</td>
-    <td>0.9986</td>
+    <td>41.1183</td>
+    <td>0.9911</td>
     <td>23.4192</td>
   </tr>
   <tr>
     <td>4</td>
-    <td>32.1129</td>
-    <td>0.9911</td>
+    <td>32.0614</td>
+    <td>0.9459</td>
     <td>27.5482</td>
   </tr>
   <tr>
     <td>8</td>
-    <td>27.5632</td>
-    <td>0.9759</td>
+    <td>27.5465</td>
+    <td>0.8723</td>
     <td>30.9598</td>
   </tr>
   <tr>
     <td>16</td>
-    <td>23.7575</td>
-    <td>0.9409</td>
+    <td>23.592</td>
+    <td>0.7415</td>
     <td>33.5570</td>
   </tr>
   <tr>
     <td>32</td>
-    <td>17.6439</td>
-    <td>0.7866</td>
+    <td>17.5607</td>
+    <td>0.3732</td>
     <td>32.5733</td>
   </tr>
   <tr>
     <td rowspan="5">CIFAR10</td>
     <td>2</td>
-    <td>35.1305</td>
-    <td>0.995</td>
+    <td>35.1695</td>
+    <td>0.9748</td>
     <td>35.2113</td>
   </tr>
   <tr>
     <td>4</td>
-    <td>28.6455</td>
-    <td>0.9793</td>
+    <td>28.5017</td>
+    <td>0.9052</td>
     <td>35.4610</td>
   </tr>
   <tr>
     <td>8</td>
-    <td>22.7897</td>
-    <td>0.9323</td>
+    <td>22.7743</td>
+    <td>0.7285</td>
     <td>33.5570</td>
   </tr>
   <tr>
     <td>16</td>
-    <td>18.395</td>
-    <td>0.823</td>
+    <td>18.8613</td>
+    <td>0.498</td>
     <td>34.6021</td>
   </tr>
   <tr>
     <td>32</td>
-    <td>13.7681</td>
-    <td>0.4758</td>
+    <td>13.7782</td>
+    <td>0.1406</td>
     <td>34.1297</td>
   </tr>
   <tr>
     <td rowspan="5">CIFAR10 Gray</td>
     <td>2</td>
-    <td>34.5538</td>
-    <td>0.9945</td>
+    <td>34.3648</td>
+    <td>0.9713</td>
     <td>32.5733</td>
   </tr>
   <tr>
     <td>4</td>
-    <td>28.1537</td>
-    <td>0.9775</td>
+    <td>27.8835</td>
+    <td>0.8945</td>
     <td>33.0033</td>
   </tr>
   <tr>
     <td>8</td>
-    <td>23.3344</td>
-    <td>0.938</td>
+    <td>23.2726</td>
+    <td>0.7499</td>
     <td>34.4828</td>
   </tr>
   <tr>
     <td>16</td>
-    <td>17.2754</td>
-    <td>0.7614</td>
+    <td>16.6404</td>
+    <td>0.3471</td>
     <td>35.2113</td>
   </tr>
   <tr>
     <td>32</td>
-    <td>13.7009</td>
-    <td>0.4419</td>
+    <td>12.2314</td>
+    <td>0.0701</td>
     <td>35.0877</td>
   </tr>
   <tr>
     <td rowspan="5">Bigset</td>
     <td>2</td>
-    <td>37.2695</td>
-    <td>0.9951</td>
+    <td>38.4191</td>
+    <td>0.9432</td>
     <td>23.9234</td>
   </tr>
   <tr>
     <td>4</td>
-    <td>33.8795</td>
-    <td>0.9879</td>
+    <td>34.3927</td>
+    <td>0.8936</td>
     <td>29.1545</td>
   </tr>
   <tr>
     <td>8</td>
-    <td>31.0234</td>
-    <td>0.9742</td>
+    <td>30.9195</td>
+    <td>0.8096</td>
     <td>29.2398</td>
   </tr>
   <tr>
     <td>16</td>
-    <td>28.01</td>
-    <td>0.9524</td>
+    <td>27.608</td>
+    <td>0.7055</td>
     <td>34.3643</td>
   </tr>
   <tr>
     <td>32</td>
-    <td>17.51</td>
-    <td>0.7634</td>
+    <td>17.3593</td>
+    <td>0.1853</td>
     <td>33.2226</td>
   </tr>
   <tr>
     <td rowspan="5">Bigset Gray</td>
     <td>2</td>
-    <td>40.4972</td>
-    <td>0.9954</td>
+    <td>38.5702</td>
+    <td>0.9508</td>
     <td>22.8311</td>
   </tr>
   <tr>
     <td>4</td>
-    <td>37.3146</td>
-    <td>0.9881</td>
+    <td>34.5885</td>
+    <td>0.8956</td>
     <td>27.3224</td>
   </tr>
   <tr>
     <td>8</td>
-    <td>34.1416</td>
-    <td>0.975</td>
+    <td>31.0164</td>
+    <td>0.808</td>
     <td>30.1205</td>
   </tr>
   <tr>
     <td>16</td>
-    <td>32.9576</td>
-    <td>0.9651</td>
+    <td>28.3581</td>
+    <td>0.7207</td>
     <td>33.4448</td>
   </tr>
   <tr>
     <td>32</td>
-    <td>13.5395</td>
-    <td>0.5392</td>
+    <td>17.283</td>
+    <td>0.178</td>
     <td>35.5872</td>
   </tr>
 </tbody>
@@ -353,26 +353,26 @@ Reconstruction time is in images per second.
   </tr>
   <tr>
     <td>4</td>
-    <td>44.18</td>
-    <td>0.9987</td>
+    <td>44.27</td>
+    <td>0.9988</td>
     <td>55.2486</td>
   </tr>
   <tr>
     <td>8</td>
-    <td>34.96</td>
-    <td>0.9903</td>
+    <td>35.12</td>
+    <td>0.9907</td>
     <td>75.7576</td>
   </tr>
   <tr>
     <td>16</td>
-    <td>27.32</td>
-    <td>0.9536</td>
+    <td>27.31</td>
+    <td>0.9532</td>
     <td>75.7576</td>
   </tr>
   <tr>
     <td>32</td>
-    <td>19.29</td>
-    <td>0.7411</td>
+    <td>19.76</td>
+    <td>0.7747</td>
     <td>82.6446</td>
   </tr>
   <tr>
@@ -959,32 +959,32 @@ Reconstruction time is in images per second.
     <td rowspan="30">CSGM</td>
     <td rowspan="5">MNIST</td>
     <td>2</td>
-    <td>22.8994</td>
-    <td>0.9097</td>
+    <td>22.6164</td>
+    <td>0.8978</td>
     <td>2.0329</td>
   </tr>
   <tr>
     <td>4</td>
-    <td>22.8034</td>
-    <td>0.9077</td>
+    <td>22.4511</td>
+    <td>0.8923</td>
     <td>2.3868</td>
   </tr>
   <tr>
     <td>8</td>
-    <td>22.6062</td>
-    <td>0.9034</td>
+    <td>21.9578</td>
+    <td>0.8742</td>
     <td>2.6208</td>
   </tr>
   <tr>
     <td>16</td>
-    <td>22.1220</td>
-    <td>0.8914</td>
+    <td>20.6622</td>
+    <td>0.8215</td>
     <td>2.6924</td>
   </tr>
   <tr>
     <td>32</td>
-    <td>20.7113</td>
-    <td>0.8461</td>
+    <td>17.7698</td>
+    <td>0.6985</td>
     <td>2.8841</td>
   </tr>
   <tr>
