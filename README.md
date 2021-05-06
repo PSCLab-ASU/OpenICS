@@ -24,12 +24,6 @@ Technical report of this project: https://arxiv.org/abs/2103.00652
     <td>56.15</td>
   </tr>
   <tr>
-    <td>Learned DAMP</td>
-    <td>24.24</td>
-    <td>30.25</td>
-    <td>54.50</td>
-  </tr>
-  <tr>
     <td>CSGAN</td>
     <td>19.03</td>
     <td>32.58</td>
@@ -37,9 +31,15 @@ Technical report of this project: https://arxiv.org/abs/2103.00652
   </tr>
   <tr>
     <td>ISTA-Net Plus</td>
-    <td>20.40</td>
+    <td>20.69</td>
     <td>30.02</td>
-    <td>50.42</td>
+    <td>50.71</td>
+  </tr>
+  <tr>
+    <td>Learned DAMP</td>
+    <td>17.21</td>
+    <td>30.25</td>
+    <td>47.46</td>
   </tr>
   <tr>
     <td>TVAL3</td>
@@ -67,9 +67,9 @@ Technical report of this project: https://arxiv.org/abs/2103.00652
   </tr>
   <tr>
     <td>CSGM</td>
-    <td>13.27</td>
+    <td>13.07</td>
     <td>4.75</td>
-    <td>18.02</td>
+    <td>17.82</td>
   </tr>
 </tbody>
 </table>
