@@ -224,8 +224,8 @@ class csgm():
                 print('Consider rerunning lazily with a smaller batch size.')
         elif(stage =="training"):
             if (self.datasetname =="mnist"):
-                import CSGM.mnist_vae.src.main as vae
-                import CSGM.mnist_vae.src.model_def as vae_model_def
+                import CSGM.mnist_vae.main as vae
+                import CSGM.mnist_vae.model_def as vae_model_def
                 HPARAMS = vae_model_def.Hparams()
 
                 HPARAMS.num_samples = self.specifics["num-samples"]
