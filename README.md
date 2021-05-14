@@ -1,4 +1,4 @@
-The [Paper](https://www.sciencedirect.com/science/article/pii/S2665963821000282#!) and [technical report](https://arxiv.org/abs/2103.00652) of our work. 
+The [paper](https://www.sciencedirect.com/science/article/pii/S2665963821000282#!) and [technical report](https://arxiv.org/abs/2103.00652) of our work. 
 # Section 0: Benchmarking Scores
 ![Benchmark scores](chart.svg)
 <table>
