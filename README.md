@@ -192,7 +192,7 @@ All implementations of each method in this framework can reproduce the results i
 # Section 4: License
 The license of this toolbox is [here](LICENSE).
 
-Please cite our paper published on Software Impact as well as our technical report if you use OpenICS in your work
+Please cite our paper published on Software Impacts as well as our technical report if you use OpenICS in your work
 
 ```
 @article{ZHAO2021100081,
