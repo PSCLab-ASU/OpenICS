@@ -189,3 +189,29 @@ specifics: Specific parameter settings of chosen reconstruction method</br>
 * To reproduce the results in the original paper, test the network with the same batch size that was used to train the network. Using different batch sizes affects the network's performance during testing because of the batch normalization layers in the generator.
 
 All implementations of each method in this framework can reproduce the results in their original papers.
+
+Please cite our paper published on Software Impact as well as our technical report if you use OpenICS in your work
+
+```
+@article{ZHAO2021100081,
+title = {OpenICS: Open image compressive sensing toolbox and benchmark},
+journal = {Software Impacts},
+pages = {100081},
+year = {2021},
+issn = {2665-9638},
+doi = {https://doi.org/10.1016/j.simpa.2021.100081},
+url = {https://www.sciencedirect.com/science/article/pii/S2665963821000282},
+author = {Jonathan Zhao and Márk Lakatos-Tóth and Matthew Westerham and Zhikang Zhang and Avi Moskoff and Fengbo Ren},
+keywords = {Compressive sensing, Computer vision, Machine learning, Signal processing, Image processing},
+abstract = {The real-world application of image compressive sensing is largely limited by the lack of standardization in implementation and evaluation. To address this limitation, we present OpenICS, an image compressive sensing toolbox that implements multiple popular image compressive sensing algorithms into a unified framework with a standardized user interface. Furthermore, a corresponding benchmark is also proposed to provide a fair and complete evaluation of the implemented algorithms. We hope this work can serve the growing research community of compressive sensing and the industry to facilitate the development and application of image compressive sensing.}
+}
+```
+
+```
+@article{zhao2021openics,
+  title={OpenICS: Open Image Compressive Sensing Toolbox and Benchmark},
+  author={Zhao, Jonathan and Westerham, Matthew and Lakatos-Toth, Mark and Zhang, Zhikang and Moskoff, Avi and Ren, Fengbo},
+  journal={arXiv preprint arXiv:2103.00652},
+  year={2021}
+}
+```
