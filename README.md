@@ -189,6 +189,8 @@ specifics: Specific parameter settings of chosen reconstruction method</br>
 * To reproduce the results in the original paper, test the network with the same batch size that was used to train the network. Using different batch sizes affects the network's performance during testing because of the batch normalization layers in the generator.
 
 All implementations of each method in this framework can reproduce the results in their original papers.
+# Section 4: License
+The license of this toolbox is in 'LICENSE'.
 
 Please cite our paper published on Software Impact as well as our technical report if you use OpenICS in your work
 
