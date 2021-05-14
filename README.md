@@ -74,7 +74,7 @@ Technical report of this project: https://arxiv.org/abs/2103.00652
 </tbody>
 </table>
 
-More details about how scores are calculated and the benchmarking results may be found in `Details.md`.
+More details about how scores are calculated and the benchmarking results may be found in [details](Details.md).
 
 <br>
 
@@ -190,7 +190,7 @@ specifics: Specific parameter settings of chosen reconstruction method</br>
 
 All implementations of each method in this framework can reproduce the results in their original papers.
 # Section 4: License
-The license of this toolbox is in 'LICENSE'.
+The license of this toolbox is [here](LICENSE).
 
 Please cite our paper published on Software Impact as well as our technical report if you use OpenICS in your work
 
